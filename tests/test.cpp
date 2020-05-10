@@ -32,6 +32,7 @@ void handler(int s)
 BOOL WINAPI handler(DWORD fdwCtrlType)
 #endif
 {
+    LGP_UNUSED(s);
     run_flag = false;
 #ifdef LGP_WINDOWS
     return TRUE;
