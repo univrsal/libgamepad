@@ -23,6 +23,10 @@
 #define LGP_WINDOWS 1
 #elif __linux__
 #define LGP_LINUX 1
+#define LGP_UNIX 1
 #elif __APPLE__
 #define LGP_MACOS 1
+#define LGP_UNIX 1
+#else
+#define LGP_UNIX 1
 #endif
