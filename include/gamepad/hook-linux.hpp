@@ -24,12 +24,10 @@
 namespace gamepad {
     class hook_linux : public hook {
     public:
-        void close_devices() override;
         void query_devices() override;
         bool start() override;
         void make_xbox_config(const std::shared_ptr<gamepad::device> &dv,
                               json &out) override;
-
     };
 }
 #endif

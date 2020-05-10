@@ -44,6 +44,10 @@ namespace gamepad {
         volatile bool m_running = false;
         uint16_t m_thread_sleep = 50;
     public:
+        ~hook()
+        {
+            stop();
+        }
 
         std::mutex *get_mutex() { return &m_mutex; }
         uint16_t get_sleep_time() const { return m_thread_sleep; }
@@ -55,7 +59,8 @@ namespace gamepad {
             m_mutex.unlock();
         }
 
-        virtual void close_devices() = 0;
+        virtual void close_devices();
+        virtual void close_bindings();
         virtual void query_devices() = 0;
         virtual bool start() = 0;
         virtual void stop();

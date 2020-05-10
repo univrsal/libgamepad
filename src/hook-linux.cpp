@@ -47,19 +47,6 @@ namespace gamepad {
         }
     }
 
-    void hook_linux::close_devices()
-    {
-        m_mutex.lock();
-        for (size_t i = 0; i < m_devices.size(); i++) {
-            if (m_devices[i].use_count() > 1) {
-                gerr("Gamepad device %s is still in use! (Ref count %li)",
-                     m_devices[i]->get_id().c_str(), m_devices[i].use_count());
-            }
-        }
-        m_devices.clear();
-        m_mutex.unlock();
-    }
-
     void hook_linux::query_devices()
     {
         close_devices();
@@ -85,6 +72,7 @@ namespace gamepad {
                             dev->set_binding(move(b));
                         } else {
                             auto b = make_shared<cfg::binding_linux>(cfg::linux_default_binding);
+                            m_bindings[dev->get_id()] = b;
                             dev->set_binding(dynamic_pointer_cast<cfg::binding>(b));
                         }
                     } else {

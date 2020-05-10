@@ -10,7 +10,7 @@ target_include_directories(gamepad
 )
 
 
-target_sources(libgamepad PRIVATE
+target_sources(gamepad PRIVATE
     hook.cpp
     log.cpp
     device-linux.hpp
@@ -20,21 +20,21 @@ target_sources(libgamepad PRIVATE
 
 if (UNIX)
     find_package(Threads)
-    target_link_libraries (libgamepad ${CMAKE_THREAD_LIBS_INIT})
+    target_link_libraries (gamepad ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
 if (UNIX AND NOT APPLE)
-    target_sources(libgamepad PRIVATE
+    target_sources(gamepad PRIVATE
         hook-linux.cpp
         device-linux.cpp
         binding-linux.cpp
         )
 elseif (APPLE)
-    target_sources(libgamepad PRIVATE
+    target_sources(gamepad PRIVATE
         hook-darwin.cpp
         )
 elseif(WIN32)
-    target_sources(libgamepad PRIVATE
+    target_sources(gamepad PRIVATE
         hook-xinput.cpp
         hook-dinput.cpp
         )

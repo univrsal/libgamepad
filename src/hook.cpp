@@ -43,9 +43,36 @@ namespace gamepad {
 #endif
     }
 
+    void hook::close_devices()
+    {
+        m_mutex.lock();
+        for (size_t i = 0; i < m_devices.size(); i++) {
+            if (m_devices[i].use_count() > 1) {
+                gerr("Gamepad device %s is still in use! (Ref count %li)",
+                     m_devices[i]->get_id().c_str(), m_devices[i].use_count());
+            }
+        }
+        m_devices.clear();
+        m_mutex.unlock();
+    }
+
+    void hook::close_bindings()
+    {
+        m_mutex.lock();
+        for (const auto &bind : m_bindings) {
+            if (bind.second.use_count() > 2) { /* The for loop also takes a reference */
+                gerr("Gamepad binding %s is still in use! (Ref count %li)",
+                     bind.first.c_str(), bind.second.use_count());
+            }
+        }
+        m_bindings.clear();
+        m_mutex.unlock();
+    }
+
     void hook::stop()
     {
         close_devices();
+        close_bindings();
         if (m_running) {
             m_running = false;
             m_hook_thread.join();

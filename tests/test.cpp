@@ -30,6 +30,12 @@ int main()
 
     auto devs = h->get_devices();
 
+    /* Print out devices */
+    for (const auto &dev : devs) {
+        ginfo("Device ID: %s \t\t\tDevice Name: %s", dev->get_id().c_str(),
+              dev->get_name().c_str());
+    }
+
     if (devs.size() > 0 && !devs[0]->has_binding()) {
         ginfo("Found device, running config wizard");
         auto dev = devs[0];
@@ -37,6 +43,6 @@ int main()
         h->make_xbox_config(dev, cfg);
         ginfo("Result config: %s", cfg.dump(4).c_str());
     } else {
-        ginfo("First device already has bindings");
+        ginfo("First device already has default bindings");
     }
 }
