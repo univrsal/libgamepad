@@ -48,7 +48,7 @@ namespace gamepad {
     struct input_event
     {
         uint16_t id;
-        uint16_t value;
+        int16_t value;
         uint64_t time;
     };
 
