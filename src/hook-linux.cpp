@@ -97,6 +97,20 @@ namespace gamepad {
         return result;
     }
 
+    bool hook_linux::load_bindings(const json &j)
+    {
+        for (const auto &bind : j) {
+            json obj = bind["binds"];
+            std::string device = bind["device"];
+            auto loaded_binding = make_shared<cfg::binding_linux>(obj);
+            if (m_bindings[device]) {
+                m_bindings[device].reset();
+            }
+            m_bindings[device] = loaded_binding;
+        }
+        return true;
+    }
+
     void hook_linux::make_xbox_config(const shared_ptr<gamepad::device>
                                        &dv, json &out)
     {

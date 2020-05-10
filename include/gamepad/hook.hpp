@@ -52,6 +52,11 @@ namespace gamepad {
         std::mutex *get_mutex() { return &m_mutex; }
         uint16_t get_sleep_time() const { return m_thread_sleep; }
         bool running() const { return m_running; }
+        bool save_bindings(const std::string &path);
+        bool save_bindings(json &j);
+        bool load_bindings(const std::string &path);
+        virtual bool load_bindings(const json &j) = 0;
+
         void set_sleep_time(uint16_t ms)
         {
             m_mutex.lock();

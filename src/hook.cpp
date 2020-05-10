@@ -21,6 +21,8 @@
 #include <gamepad/hook-dinput.hpp>
 #include <gamepad/hook-xinput.hpp>
 #include <gamepad/hook-linux.hpp>
+#include <fstream>
+#include <iomanip>
 
 namespace gamepad {
 
@@ -79,4 +81,49 @@ namespace gamepad {
         }
         gdebug("Hook stopped");
     }
+
+    bool hook::save_bindings(const std::string &path)
+    {
+        json j;
+        if (save_bindings(j)) {
+            std::ofstream out(path);
+            if (out.good()) {
+                out << std::setw(4) << j << std::endl;
+                out.close();
+                return true;
+            }
+            gerr("Can't write gamepad bindings to %s", path.c_str());
+        }
+        return false;
+    }
+
+    bool hook::save_bindings(json &j)
+    {
+        for (const auto &bind : m_bindings) {
+            json obj, binds;
+            bind.second->save(binds);
+            obj["device"] = bind.first;
+            obj["binds"] = binds;
+            j.emplace_back(obj);
+        }
+        /* TODO: error checking? */
+        return true;
+    }
+
+    bool hook::load_bindings(const std::string &path)
+    {
+        std::ifstream in(path);
+        json j;
+        if (in.good()) {
+            in >> j;
+            if (load_bindings(j)) {
+                return true;
+            }
+            gerr("Couldn't parse json when loading bindings from %s",
+                 path.c_str());
+        }
+        gerr("Couldn't read bindings from %s", path.c_str());
+        return false;
+    }
+
 }

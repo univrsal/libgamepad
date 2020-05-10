@@ -26,6 +26,7 @@ namespace gamepad {
     public:
         void query_devices() override;
         bool start() override;
+        bool load_bindings(const json &j) override;
         void make_xbox_config(const std::shared_ptr<gamepad::device> &dv,
                               json &out) override;
     };
