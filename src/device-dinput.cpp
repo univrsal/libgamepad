@@ -46,7 +46,7 @@ namespace gamepad
 
         DIPROPRANGE axis_range;
         axis_range.lMax = 100;
-        axis_range.lMin = 100;
+        axis_range.lMin = -100;
         axis_range.diph.dwSize = sizeof(DIPROPRANGE);
         axis_range.diph.dwHeaderSize = sizeof(DIPROPHEADER);
         axis_range.diph.dwHow = DIPH_BYID;
@@ -88,6 +88,14 @@ namespace gamepad
     void device_dinput::init()
     {
         deinit();
+        m_axis_new = { &m_new_state.lRx, &m_new_state.lRy, &m_new_state.lRz,
+        &m_new_state.lX, &m_new_state.lY, &m_new_state.lY,
+        &m_new_state.rglSlider[0], &m_new_state.rglSlider[1]};
+
+        m_axis_old = { &m_old_state.lRx, &m_old_state.lRy, &m_old_state.lRz,
+     &m_old_state.lX, &m_old_state.lY, &m_old_state.lY,
+     &m_old_state.rglSlider[0], &m_old_state.rglSlider[1] };
+
         m_product_name = util::wchar_to_utf8(m_device_instance->tszProductName);
         m_instance_name = util::wchar_to_utf8(m_device_instance->tszInstanceName);
 
@@ -170,7 +178,7 @@ namespace gamepad
     {
         if (m_valid)
         {
-            m_previous_state = m_new_state;
+            m_old_state = m_new_state;
             ZeroMemory(&m_new_state, sizeof(DIJOYSTATE));
 
             auto result = m_device->Poll();
@@ -213,7 +221,7 @@ namespace gamepad
                 
                 /* Check all buttons */
                 uint16_t last_button = 0x0;
-                for (int i = 0; i < m_capabilities.dwButtons; i++)
+                for (auto i = 0ul; i < m_capabilities.dwButtons; i++)
                 {
                     bool pressed = m_new_state.rgbButtons[i] & 0x80;
                     if (m_native_binding)
@@ -228,7 +236,7 @@ namespace gamepad
                      * only the one with the highest ID will be reported, but since
                      * this is only used for creating binds it's not an issue.
                      */
-                    if (pressed && !(m_previous_state.rgbButtons[i] & 0x80))
+                    if (pressed && !(m_old_state.rgbButtons[i] & 0x80))
                     {
                         auto n = system_clock::now();
                         m_last_button_event.value = 1;
@@ -238,7 +246,26 @@ namespace gamepad
                 }
 
                 /* Check all axis */
+                for (auto i = 0ul; i < m_capabilities.dwAxes; i++)
+                {
+                    /* Range is -100 to 100 so 10 should be a good threshold */
+                    bool moved = *(m_axis_new[i]) > 10 || *(m_axis_new[i]) < -10;
 
+                    if (m_native_binding)
+                    {
+                        auto new_code = m_native_binding->m_axis_mappings[i];
+                        m_axis[new_code] = *(m_axis_new[i]) / 100;
+                    }
+
+                    /* If the position changed */
+                    if (moved && abs((*(m_axis_old)[i]) - (*m_axis_new[i])) > 10)
+                    {
+                        auto n = system_clock::now();
+                        m_last_axis_event.value = *m_axis_new[i];
+                        m_last_button_event.time = duration_cast<milliseconds>(n.time_since_epoch()).count();
+                        m_last_button_event.id = i;
+                    }
+                }
             }
         }
     }

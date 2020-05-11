@@ -35,6 +35,8 @@ namespace gamepad {
         DIRECT_INPUT,
     };
 
+    extern void default_hook_thread(class hook *h);
+
     class hook {
     protected:
         device_list m_devices;
@@ -43,7 +45,9 @@ namespace gamepad {
         std::mutex m_mutex;
         volatile bool m_running = false;
         uint16_t m_thread_sleep = 50;
+        
     public:
+
         ~hook()
         {
             stop();
@@ -71,7 +75,7 @@ namespace gamepad {
         virtual void stop();
 
         virtual void make_xbox_config(const std::shared_ptr<gamepad::device>
-                                       &dv, json &out) = 0;
+                                       &dv, json &out);
 
         const device_list &get_devices() const { return m_devices; }
 
