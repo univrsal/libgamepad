@@ -30,15 +30,14 @@ namespace gamepad {
     	
     }
 	
-	BOOL enum_callback(LPCDIDEVICEINSTANCE dev,
-        LPVOID data)
+    static BOOL CALLBACK enum_callback(LPCDIDEVICEINSTANCE dev, LPVOID data)
 	{
         auto h = static_cast<hook_dinput*>(data);
 
-        auto new_device = make_shared<device_dinput>(dev);
+        auto new_device = make_shared<device_dinput>(dev, h->m_dinput, h->m_hook_window);
 
 		if (new_device->is_valid()) {
-            h->m_devices.emplace_back(dev);
+            h->m_devices.emplace_back(dynamic_pointer_cast<device>(new_device));
             auto b = h->get_binding_for_device(new_device->get_id());
             
             if (b) {
@@ -53,29 +52,78 @@ namespace gamepad {
 		
         return DIENUM_CONTINUE;
 	}
+
+    LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+    {
+        switch (uMsg)
+        {
+        case WM_CLOSE:
+            DestroyWindow(hwnd);
+            break;
+        case WM_DESTROY:
+            PostQuitMessage(0);
+            break;
+        default:
+            return DefWindowProc(hwnd, uMsg, wParam, lParam);
+        }
+        return 0;
+    }
+
+    static void window_message_thread(hook_dinput *h)
+    {
+        MSG msg;
+        while (h->running() && GetMessage(&msg, NULL, 0, 0) > 0)
+        {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
+    }
 	
     void hook_dinput::query_devices()
     {
-		
-        auto result = m_dinput->EnumDevices(DI8DEVCLASS_GAMECTRL, &enum_callback,
+        m_mutex.lock();
+        m_devices.clear();
+        auto result = m_dinput->EnumDevices(DI8DEVCLASS_GAMECTRL, enum_callback,
             this, DIEDFL_ATTACHEDONLY);
 
 		if (FAILED(result))
 		{
             gerr("Enumeration of Direct Input devices failed");
 		}
+
+        m_mutex.unlock();
     }
 	
     bool hook_dinput::start()
     {
         auto result = DirectInput8Create(GetModuleHandle(nullptr),
-            DIRECTINPUT_VERSION, IID_IDirectInput8W, (void**)&m_dinput, 
+            DIRECTINPUT_VERSION, IID_IDirectInput8W, reinterpret_cast<void**>(&m_dinput), 
             nullptr);
 		if (FAILED(result)) {
             gerr("Couldn't create DirectInput interface");
             return false;
 		}
-		
+
+        /* Create window */ 
+        WNDCLASS wc = {};
+        
+        wc.lpfnWndProc = WindowProc;
+        wc.hInstance = GetModuleHandle(nullptr);
+        wc.lpszClassName = L"libgamepad_window_class";
+        
+        if (RegisterClass(&wc))
+        {
+            m_hook_window = CreateWindowEx(WS_EX_CLIENTEDGE, L"libgamepad_window_class", 
+                L"libgampead_window", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
+                240, 120, nullptr, nullptr, wc.hInstance, nullptr);
+        }
+        
+        if (m_hook_window == nullptr)
+        {
+            gerr("Couldn't create hook window");
+            return false;
+        }
+
         query_devices();
 
 		if (m_devices.size() > 0)
@@ -83,12 +131,13 @@ namespace gamepad {
             m_hook_thread = thread(thread_method, this);
             result = true;
 		}
+        m_running = result;
         return result;
     }
 	
     bool hook_dinput::load_bindings(const json& j)
     {
-	    
+        return false;
     }
 	
     void hook_dinput::make_xbox_config(const std::shared_ptr<gamepad::device>& dv,

@@ -45,6 +45,9 @@ elseif(WIN32)
 	device-xinput.hpp
         )
     add_compile_definitions(UNICODE _UNICODE)
+    target_link_libraries(gamepad
+	dinput8
+	dxguid)
 endif()
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DDEBUG")

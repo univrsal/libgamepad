@@ -16,15 +16,18 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#pragma once
-
-#include <gamepad/binding.hpp>
+#include <gamepad/binding-dinput.hpp>
 
 namespace gamepad::cfg
 {
-	class binding_dinput : public binding
-	{
-	public:
-		
-	};
+    void binding_dinput::load(const json& j)
+    {
+        
+    }
+
+    void binding_dinput::save(json& j)
+    {
+        
+    }
+
 }

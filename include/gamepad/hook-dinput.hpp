@@ -21,6 +21,7 @@
 #include <gamepad/hook.hpp>
 
 #ifdef LGP_WINDOWS
+#define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 
 #include <string>
@@ -52,7 +53,9 @@ namespace gamepad::util
 namespace gamepad {
 
     class hook_dinput : public hook {
-        IDirectInput8* m_dinput;
+        IDirectInput8* m_dinput = nullptr;
+        HWND m_hook_window = nullptr; /* Invisible window needed to initialize devices */
+        std::thread m_window_message_thread;
     public:
         void query_devices() override;
         bool start() override;
@@ -60,7 +63,7 @@ namespace gamepad {
         void make_xbox_config(const std::shared_ptr<gamepad::device>& dv,
             json& out) override;
 
-        friend BOOL enum_callback(LPCDIDEVICEINSTANCE dev,
+        friend BOOL CALLBACK enum_callback(LPCDIDEVICEINSTANCE dev,
             LPVOID data);
     };
 }

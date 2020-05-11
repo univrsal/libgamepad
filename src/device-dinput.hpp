@@ -18,6 +18,7 @@
 
 #pragma once
 
+#define DIRECTINPUT_VERSION 0x0800
 #include <gamepad/device.hpp>
 #include <dinput.h>
 
@@ -32,9 +33,11 @@ namespace gamepad
         LPCDIDEVICEINSTANCE m_device_instance;
         IDirectInputDevice8 *m_device;
         GUID m_device_id;
+        HWND m_hook_window;
+        DIDEVCAPS m_capabilities;
         //cfg::binding_linux* m_native_binding = nullptr;
     public:
-        device_dinput(LPCDIDEVICEINSTANCE dev, IDirectInput8* dinput);
+        device_dinput(LPCDIDEVICEINSTANCE dev, IDirectInput8* dinput, HWND hook_window);
         virtual ~device_dinput();
 
         const std::string& get_id() const override;
@@ -42,5 +45,9 @@ namespace gamepad
         void deinit() override;
         void update() override;
         void set_binding(std::shared_ptr<cfg::binding>&& b) override;
+
+        friend BOOL CALLBACK enum_device_objects_callback(
+            LPCDIDEVICEOBJECTINSTANCE obj,
+            LPVOID data);
 	};
 }

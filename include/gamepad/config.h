@@ -22,7 +22,9 @@
 #ifdef WIN32
 #define LGP_WINDOWS 1
 #ifdef _DEBUG
+#ifndef DEBUG
 #define DEBUG
+#endif
 #endif
 #elif __linux__
 #define LGP_LINUX 1

@@ -22,8 +22,36 @@
 
 namespace gamepad
 {
-    device_dinput::device_dinput(LPCDIDEVICEINSTANCE dev, IDirectInput8* dinput)
-		: m_device_instance(dev), m_dinput(dinput)
+    static BOOL CALLBACK enum_device_objects_callback(
+        LPCDIDEVICEOBJECTINSTANCE obj,
+        LPVOID data)
+    {
+        auto d = static_cast<device_dinput*>(data);
+
+        if (obj->dwFlags & DIDFT_AXIS)
+        {
+            DIPROPRANGE axis_range;
+            axis_range.lMax = 100;
+            axis_range.lMin = 100;
+            axis_range.diph.dwSize = sizeof(DIPROPRANGE);
+            axis_range.diph.dwHeaderSize = sizeof(DIPROPHEADER);
+            axis_range.diph.dwHow = DIPH_BYID;
+            axis_range.diph.dwObj = obj->dwType;
+            if (FAILED(d->m_device->SetProperty(DIPROP_RANGE, &axis_range.diph)))
+            {
+                gerr("Couldn't set axis ranges for %s", util::wchar_to_utf8(obj->tszName).c_str());
+                return DIENUM_STOP;
+            }
+        }
+        else if (obj->dwFlags & DIDFT_BUTTON)
+        {
+            
+        }
+        return DIENUM_CONTINUE;
+    }
+
+    device_dinput::device_dinput(LPCDIDEVICEINSTANCE dev, IDirectInput8* dinput, HWND hook_window)
+		: m_device_instance(dev), m_dinput(dinput), m_hook_window(hook_window)
 	{
 		device_dinput::init();
 	}
@@ -53,7 +81,37 @@ namespace gamepad
             m_id = util::wchar_to_utf8(buf) + " " + m_product_name;
 
 		if (m_valid)
+		{
             gdebug("Initalized gamepad %s", m_product_name.c_str());
+            if (FAILED(m_device->SetCooperativeLevel(m_hook_window,
+                DISCL_BACKGROUND | DISCL_NONEXCLUSIVE)))
+            {
+                gerr("Failed to set device cooperative level");
+                m_valid = false;
+            } else
+            {
+                auto result = m_device->EnumObjects(enum_device_objects_callback, this, DIDFT_ALL);
+                if (FAILED(result))
+                {
+                    gerr("Device object enumeration failed:");
+                    if (result == DIERR_NOTINITIALIZED)
+                        gerr("libgamepad lost access to device");
+                    else if (result == DIERR_INVALIDPARAM)
+                        gerr("Invalid parameter");
+                    else
+                        gerr("Unknown error");
+                    m_valid = false;
+                } else
+                {
+                    m_capabilities.dwSize = sizeof(DIDEVCAPS);
+                    if (FAILED(m_device->GetCapabilities(&m_capabilities)))
+                    {
+                        gerr("Couldn't get device capabilities");
+                        m_valid = false;
+                    }
+                }
+            }
+		}
     }
 	
     void device_dinput::deinit()
