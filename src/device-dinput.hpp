@@ -36,7 +36,7 @@ namespace gamepad
         GUID m_device_id;
         HWND m_hook_window;
         DIDEVCAPS m_capabilities;
-        DIJOYSTATE m_new_state{}, m_old_state{};
+        DIJOYSTATE2 m_new_state{}, m_old_state{};
         std::array<LONG*, 8> m_axis_new, m_axis_old;
         cfg::binding_dinput* m_native_binding = nullptr;
     public:

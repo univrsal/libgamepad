@@ -141,7 +141,8 @@ namespace gamepad
                         gerr("Couldn't get device capabilities");
                         m_valid = false;
                     }
-                    else if (m_valid && FAILED(m_device->SetDataFormat(&c_dfDIJoystick)))
+                    /* The second joystick format seems to be better*/
+                    else if (m_valid && FAILED(m_device->SetDataFormat(&c_dfDIJoystick2)))
                     {
                         gerr("Couldn't set data format for device '%s'", m_name.c_str());
                     }
@@ -211,7 +212,7 @@ namespace gamepad
                 }
             }
 
-            if (FAILED(m_device->GetDeviceState(sizeof(DIJOYSTATE), &m_new_state)))
+            if (FAILED(m_device->GetDeviceState(sizeof(DIJOYSTATE2), &m_new_state)))
             {
                 gerr("Couldn't get device state for '%s'", m_name.c_str());
                 m_valid = false;
