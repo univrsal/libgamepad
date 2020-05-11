@@ -29,7 +29,7 @@ static volatile bool run_flag = true;
 #ifdef LGP_UNIX
 void handler(int s)
 #else
-BOOL WINAPI handler(DWORD fdwCtrlType)
+BOOL WINAPI handler(DWORD s)
 #endif
 {
     LGP_UNUSED(s);

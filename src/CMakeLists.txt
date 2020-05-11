@@ -13,7 +13,6 @@ target_include_directories(gamepad
 target_sources(gamepad PRIVATE
     hook.cpp
     log.cpp
-    device-linux.hpp
     binding-default.hpp
     binding-default.cpp
     )
@@ -27,6 +26,7 @@ if (UNIX AND NOT APPLE)
     target_sources(gamepad PRIVATE
         hook-linux.cpp
         device-linux.cpp
+	device-linux.hpp
         binding-linux.cpp
         )
 elseif (APPLE)
@@ -37,7 +37,14 @@ elseif(WIN32)
     target_sources(gamepad PRIVATE
         hook-xinput.cpp
         hook-dinput.cpp
+        binding-dinput.cpp
+        binding-xinput.cpp
+	device-dinput.cpp
+	device-dinput.hpp
+	device-xinput.cpp
+	device-xinput.hpp
         )
+    add_compile_definitions(UNICODE _UNICODE)
 endif()
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DDEBUG")

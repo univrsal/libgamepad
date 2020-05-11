@@ -15,21 +15,3 @@
  ** You should have received a copy of the GNU Lesser General Public License
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
-
-#pragma once
-
-#define LGP_UNUSED(a) ((void)a)
-#ifdef WIN32
-#define LGP_WINDOWS 1
-#ifdef _DEBUG
-#define DEBUG
-#endif
-#elif __linux__
-#define LGP_LINUX 1
-#define LGP_UNIX 1
-#elif __APPLE__
-#define LGP_MACOS 1
-#define LGP_UNIX 1
-#else
-#define LGP_UNIX 1
-#endif

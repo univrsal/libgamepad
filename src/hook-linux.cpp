@@ -63,6 +63,8 @@ namespace gamepad {
                     path.find("event") == string::npos)
                 {
                     gdebug("Found potential gamepad at '%s'", path.c_str());
+                    /* TODO: use make_shared and just let the pointer free
+                     * by leaving the scope */
                     device_linux *dev = new device_linux(path);
                     if (dev->is_valid()) {
                         m_devices.emplace_back(dev);

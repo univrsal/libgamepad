@@ -28,3 +28,4 @@
 #include <gamepad/binding-dinput.hpp>
 #include <gamepad/binding-xinput.hpp>
 #include <gamepad/log.hpp>
+#include <gamepad/config.h>

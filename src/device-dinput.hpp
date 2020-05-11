@@ -18,18 +18,29 @@
 
 #pragma once
 
-#define LGP_UNUSED(a) ((void)a)
-#ifdef WIN32
-#define LGP_WINDOWS 1
-#ifdef _DEBUG
-#define DEBUG
-#endif
-#elif __linux__
-#define LGP_LINUX 1
-#define LGP_UNIX 1
-#elif __APPLE__
-#define LGP_MACOS 1
-#define LGP_UNIX 1
-#else
-#define LGP_UNIX 1
-#endif
+#include <gamepad/device.hpp>
+#include <dinput.h>
+
+namespace gamepad
+{
+	class device_dinput : public device
+	{
+        std::string m_product_name;
+        std::string m_instance_name;
+        std::string m_id;
+        IDirectInput8 *m_dinput;
+        LPCDIDEVICEINSTANCE m_device_instance;
+        IDirectInputDevice8 *m_device;
+        GUID m_device_id;
+        //cfg::binding_linux* m_native_binding = nullptr;
+    public:
+        device_dinput(LPCDIDEVICEINSTANCE dev, IDirectInput8* dinput);
+        virtual ~device_dinput();
+
+        const std::string& get_id() const override;
+        void init() override;
+        void deinit() override;
+        void update() override;
+        void set_binding(std::shared_ptr<cfg::binding>&& b) override;
+	};
+}
