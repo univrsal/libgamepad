@@ -20,6 +20,7 @@
 
 #define DIRECTINPUT_VERSION 0x0800
 #include <gamepad/device.hpp>
+#include <gamepad/binding-dinput.hpp>
 #include <dinput.h>
 
 namespace gamepad
@@ -29,13 +30,14 @@ namespace gamepad
         std::string m_product_name;
         std::string m_instance_name;
         std::string m_id;
-        IDirectInput8 *m_dinput;
-        LPCDIDEVICEINSTANCE m_device_instance;
-        IDirectInputDevice8 *m_device;
+        IDirectInput8 *m_dinput = nullptr;
+        LPCDIDEVICEINSTANCE m_device_instance = nullptr;
+        IDirectInputDevice8 *m_device = nullptr;
         GUID m_device_id;
         HWND m_hook_window;
         DIDEVCAPS m_capabilities;
-        //cfg::binding_linux* m_native_binding = nullptr;
+        DIJOYSTATE m_new_state{}, m_previous_state{};
+        cfg::binding_dinput* m_native_binding = nullptr;
     public:
         device_dinput(LPCDIDEVICEINSTANCE dev, IDirectInput8* dinput, HWND hook_window);
         virtual ~device_dinput();

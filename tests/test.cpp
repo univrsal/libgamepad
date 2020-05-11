@@ -49,10 +49,9 @@ int main()
 
     auto h = gamepad::hook::make(gamepad::hook_type::DIRECT_INPUT);
 
-    if (h->start()) {
-        ginfo("Started hook");
-    } else {
+    if (!h->start()) {
         gerr("Couldn't start hook");
+        return 0;
     }
 
     auto devs = h->get_devices();

@@ -19,10 +19,19 @@
 #pragma once
 #include <gamepad/binding.hpp>
 
+namespace gamepad
+{
+    class device_dinput;
+}
+
 namespace gamepad::cfg
 {
     class binding_dinput : public binding
     {
+        std::map<uint8_t, uint16_t> m_buttons_mappings;
+        std::map<uint8_t, uint16_t> m_axis_mappings;
+        friend class gamepad::device_dinput;
+    public:
         void load(const json &j) override;
         void save(json &j) override;
     };

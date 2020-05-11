@@ -33,7 +33,7 @@ namespace gamepad {
 
     static void thread_method(hook_linux *h)
     {
-        gdebug("Linux hook thread started");
+        ginfo("Started Linux hook");
         uint16_t sleep_time = h->get_sleep_time();
 
         while (h->running()) {

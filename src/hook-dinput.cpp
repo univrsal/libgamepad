@@ -27,7 +27,7 @@ namespace gamepad {
 
     static void thread_method(hook_dinput* h)
     {
-    	
+        ginfo("Started DInput hook");
     }
 	
     static BOOL CALLBACK enum_callback(LPCDIDEVICEINSTANCE dev, LPVOID data)
@@ -132,6 +132,7 @@ namespace gamepad {
             result = true;
 		}
         m_running = result;
+        
         return result;
     }
 	
@@ -143,6 +144,71 @@ namespace gamepad {
     void hook_dinput::make_xbox_config(const std::shared_ptr<gamepad::device>& dv,
         json& out)
     {
-	    
+        if (!m_running)
+            return;
+        vector<tuple<string, uint16_t>> button_prompts = {
+            { "A", 		button::A },
+            { "B", 		button::B },
+            { "X", 		button::X },
+            { "Y",		button::Y },
+            { "Back", 	button::BACK },
+            { "Start", 	button::START },
+            { "Guide (Big circle in the middle)", button::GUIDE },
+            { "left analog stick", button::L_THUMB },
+            { "right analog stick", button::R_THUMB },
+            { "dpad left", button::DPAD_LEFT },
+            { "dpad right", button::DPAD_RIGHT },
+            { "dpad up", button::DPAD_UP },
+            { "dpad down", button::DPAD_DOWN },
+            { "LB", button::LB },
+            { "RB", button::RB }
+        };
+
+        vector<tuple<string, uint16_t>> axis_prompts = {
+            { "left analog stick horizontally", axis::LEFT_STICK_X },
+            { "left analog stick vertically", axis::LEFT_STICK_Y },
+            { "left trigger", axis::LEFT_TRIGGER },
+            { "right analog stick horizontally", axis::RIGHT_STICK_X },
+            {"right analog vertically", axis::RIGHT_STICK_Y },
+            { "right trigger", axis::RIGHT_TRIGGER }
+        };
+
+        ginfo("Starting config creation wizard");
+        uint16_t sleep_time = get_sleep_time();
+
+        auto binder = [&](const char *prompt, bool axis,
+            const input_event *e, uint16_t *last,
+            const vector<tuple<string, uint16_t>> &prompts) {
+            for (const auto &p : prompts) {
+                ginfo("Please %s %s on your gamepad.", prompt, get<0>(p).c_str());
+                for (;;) {
+                    m_mutex.lock();
+                    if (e->id != *last) {
+                        *last = e->id;
+                        m_mutex.unlock();
+                        break;
+                    }
+                    m_mutex.unlock();
+                    this_thread::sleep_for(chrono::milliseconds(sleep_time));
+                }
+
+                ginfo("Received input with id %i", *last);
+                json bind;
+                bind["is_axis"] = axis;
+                bind["from"] = *last;
+                bind["to"] = get<1>(p);
+                out.emplace_back(bind);
+            }
+        };
+
+        uint16_t last_button = dv->last_button_event()->id,
+            last_axis = dv->last_axis_event()->id;
+
+        /* Button bindings */
+        binder("press", false, dv->last_button_event(), &last_button,
+            button_prompts);
+
+        ///* Axis bindings */
+        //binder("move", true, dv->last_axis_event(), &last_axis, axis_prompts);
     }
 }

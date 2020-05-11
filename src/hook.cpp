@@ -50,7 +50,7 @@ namespace gamepad {
         m_mutex.lock();
         for (size_t i = 0; i < m_devices.size(); i++) {
             if (m_devices[i].use_count() > 1) {
-                gerr("Gamepad device %s is still in use! (Ref count %li)",
+                gerr("Gamepad device '%s' is still in use! (Ref count %li)",
                      m_devices[i]->get_id().c_str(), m_devices[i].use_count());
             }
         }
@@ -63,7 +63,7 @@ namespace gamepad {
         m_mutex.lock();
         for (const auto &bind : m_bindings) {
             if (bind.second.use_count() > 2) { /* The for loop also takes a reference */
-                gerr("Gamepad binding %s is still in use! (Ref count %li)",
+                gerr("Gamepad binding for '%s' is still in use! (Ref count %li)",
                      bind.first.c_str(), bind.second.use_count());
             }
         }
@@ -92,7 +92,7 @@ namespace gamepad {
                 out.close();
                 return true;
             }
-            gerr("Can't write gamepad bindings to %s", path.c_str());
+            gerr("Can't write gamepad bindings to '%s'", path.c_str());
         }
         return false;
     }
@@ -119,10 +119,10 @@ namespace gamepad {
             if (load_bindings(j)) {
                 return true;
             }
-            gerr("Couldn't parse json when loading bindings from %s",
+            gerr("Couldn't parse json when loading bindings from '%s'",
                  path.c_str());
         }
-        gerr("Couldn't read bindings from %s", path.c_str());
+        gerr("Couldn't read bindings from '%s'", path.c_str());
         return false;
     }
 
