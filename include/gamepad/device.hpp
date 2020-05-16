@@ -70,9 +70,21 @@ namespace gamepad {
         std::map<uint16_t, float> m_axis;
 
         /* Misc */
+
+        /* These contain the last native input event received for this device*/
         input_event m_last_button_event = { 0xffff, 0, 0};
         input_event m_last_axis_event = { 0xffff, 0, 0 };
+
+        /* Device name, will be used for identifying if no other
+         * IDs where found. Bindings will be mapped using this or
+         * the ID returned from gamepad::device::get_id()
+         */
         std::string m_name;
+
+        /* Instance of the bindings used for this device
+         * This uses bindings matched for the hook that is
+         * used for this device
+         */
         std::shared_ptr<cfg::binding> m_binding;
         bool m_valid = false;
     public:

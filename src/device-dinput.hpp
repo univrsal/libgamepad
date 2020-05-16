@@ -37,8 +37,20 @@ namespace gamepad
         HWND m_hook_window;
         DIDEVCAPS m_capabilities;
         DIJOYSTATE2 m_new_state{}, m_old_state{};
-        std::array<LONG*, 8> m_axis_new, m_axis_old;
+        std::array<LONG*, 32> m_axis_new, m_axis_old;
         cfg::binding_dinput* m_native_binding = nullptr;
+        bool m_analog = false;
+
+        void button_event(uint16_t id, uint16_t value);
+        void axis_event(uint16_t id, uint16_t value);
+
+        enum
+        {
+            DPAD_UP = 128, /* 0 - 127 is used for other gamepad buttons in DIJOYSTATE2 */
+            DPAD_LEFT,
+            DPAD_DOWN,
+            DPAD_RIGHT
+        };
     public:
         device_dinput(LPCDIDEVICEINSTANCE dev, IDirectInput8* dinput, HWND hook_window);
         virtual ~device_dinput();
