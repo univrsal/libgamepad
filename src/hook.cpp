@@ -43,6 +43,12 @@ namespace gamepad {
         }
     }
 
+    uint64_t hook::ms_ticks()
+    {
+        auto now = chrono::system_clock::now();
+        return chrono::duration_cast<chrono::milliseconds>(now.time_since_epoch()).count();
+    }
+
     std::shared_ptr<cfg::binding> hook::get_binding_for_device(const std::string &id)
     {
         return m_bindings[id];
@@ -177,22 +183,49 @@ namespace gamepad {
 
         ginfo("Starting config creation wizard");
         uint16_t sleep_time = get_sleep_time();
+        uint64_t last_key_input = 0;
+        bool running = true;
+        mutex key_thread_mutex;
+
+        auto key_thread_method = [&]() {
+            while (running) {
+                getchar();
+                key_thread_mutex.lock();
+                last_key_input = ms_ticks();
+                key_thread_mutex.unlock();
+            }
+        };
+
+        thread key_thread(key_thread_method);
 
         auto binder = [&](const char *prompt, bool axis,
             const input_event *e, uint16_t *last,
             const vector<tuple<string, uint16_t>> &prompts) {
             for (const auto &p : prompts) {
-                ginfo("Please %s %s on your gamepad.", prompt, get<0>(p).c_str());
+                ginfo("Please %s %s on your gamepad or any key on your keyboard"
+                      "to skip this bind.", prompt, get<0>(p).c_str());
+                bool success = false;
                 for (;;) {
                     m_mutex.lock();
-                    if (e->id != *last) {
-                        *last = e->id;
+                    if (e->id != *last) {                        *last = e->id;
                         m_mutex.unlock();
+                        success = true;
                         break;
                     }
                     m_mutex.unlock();
+
+                    key_thread_mutex.lock();
+                    if (ms_ticks() - last_key_input < 100) {
+                        ginfo("Received key input, skipping bind...");
+                        key_thread_mutex.unlock();
+                        break;
+                    }
+                    key_thread_mutex.unlock();
                     this_thread::sleep_for(chrono::milliseconds(sleep_time));
                 }
+
+                if (!success)
+                    continue;
 
                 ginfo("Received input with id %i", *last);
                 json bind;
@@ -212,6 +245,8 @@ namespace gamepad {
 
         /* Axis bindings */
         binder("move", true, dv->last_axis_event(), &last_axis, axis_prompts);
+        running = false;
+        key_thread.join();
     }
 
 }

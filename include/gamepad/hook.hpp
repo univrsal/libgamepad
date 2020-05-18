@@ -45,7 +45,7 @@ namespace gamepad {
         std::mutex m_mutex;
         volatile bool m_running = false;
         uint16_t m_thread_sleep = 50;
-        
+
     public:
 
         ~hook()
@@ -83,6 +83,7 @@ namespace gamepad {
 
         static std::shared_ptr<hook> make(hook_type type = hook_type::XINPUT);
 
+        static uint64_t ms_ticks();
     };
 
 }
