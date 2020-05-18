@@ -91,7 +91,7 @@ int main()
             }
 
             if (dev->last_button_event()->time != last_button) {
-                ginfo("Received axis event: %i val: %i", dev->last_button_event()->id,
+                ginfo("Received button event: %i val: %i", dev->last_button_event()->id,
                       dev->last_button_event()->value);
                 last_button = dev->last_button_event()->time;
             }

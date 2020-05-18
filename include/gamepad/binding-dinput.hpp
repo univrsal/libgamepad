@@ -26,12 +26,16 @@ namespace gamepad
 
 namespace gamepad::cfg
 {
+    extern json dinput_default_binding;
+
     class binding_dinput : public binding
     {
         std::map<uint8_t, uint16_t> m_buttons_mappings;
         std::map<uint8_t, uint16_t> m_axis_mappings;
+        int m_left_trigger_polarity = 0, m_right_trigger_polarity = 0;
         friend class gamepad::device_dinput;
     public:
+        binding_dinput(const json &j);
         void load(const json &j) override;
         void save(json &j) override;
     };

@@ -19,50 +19,55 @@
 #pragma once
 
 #define DIRECTINPUT_VERSION 0x0800
-#include <gamepad/device.hpp>
-#include <gamepad/binding-dinput.hpp>
 #include <dinput.h>
+#include <gamepad/binding-dinput.hpp>
+#include <gamepad/device.hpp>
 
-namespace gamepad
-{
-	class device_dinput : public device
-	{
-        std::string m_product_name;
-        std::string m_instance_name;
-        std::string m_id;
-        IDirectInput8 *m_dinput = nullptr;
-        LPCDIDEVICEINSTANCE m_device_instance = nullptr;
-        IDirectInputDevice8 *m_device = nullptr;
-        GUID m_device_id;
-        HWND m_hook_window;
-        DIDEVCAPS m_capabilities;
-        DIJOYSTATE2 m_new_state{}, m_old_state{};
-        std::array<LONG*, 32> m_axis_new, m_axis_old;
-        cfg::binding_dinput* m_native_binding = nullptr;
-        bool m_analog = false;
+namespace gamepad {
+class device_dinput : public device {
+    struct dinput_axis {
+        uint16_t id, offset;
+    };
 
-        void button_event(uint16_t id, uint16_t value);
-        void axis_event(uint16_t id, uint16_t value);
+    std::string m_product_name;
+    std::string m_instance_name;
+    std::string m_id;
+    std::vector<dinput_axis> m_axis_inputs;
+    std::array<LONG*, 32> m_axis_new, m_axis_old;
+    cfg::binding_dinput* m_native_binding = nullptr;
+    bool m_analog = false;
+    int m_slider_count = 0;
 
-        enum
-        {
-            DPAD_UP = 128, /* 0 - 127 is used for other gamepad buttons in DIJOYSTATE2 */
-            DPAD_LEFT,
-            DPAD_DOWN,
-            DPAD_RIGHT
-        };
-    public:
-        device_dinput(LPCDIDEVICEINSTANCE dev, IDirectInput8* dinput, HWND hook_window);
-        virtual ~device_dinput();
+    IDirectInput8* m_dinput = nullptr;
+    LPCDIDEVICEINSTANCE m_device_instance = nullptr;
+    IDirectInputDevice8* m_device = nullptr;
+    GUID m_device_id;
+    HWND m_hook_window;
+    DIDEVCAPS m_capabilities;
+    DIJOYSTATE2 m_new_state {}, m_old_state {};
 
-        const std::string& get_id() const override;
-        void init() override;
-        void deinit() override;
-        void update() override;
-        void set_binding(std::shared_ptr<cfg::binding>&& b) override;
+    void button_event(uint16_t id, uint16_t value);
+    void axis_event(uint16_t id, uint16_t value);
 
-        friend BOOL CALLBACK enum_device_objects_callback(
-            LPCDIDEVICEOBJECTINSTANCE obj,
-            LPVOID data);
-	};
+    enum {
+        DPAD_UP = 128, /* 0 - 127 is used for other gamepad buttons in DIJOYSTATE2 */
+        DPAD_LEFT,
+        DPAD_DOWN,
+        DPAD_RIGHT
+    };
+
+public:
+    device_dinput(LPCDIDEVICEINSTANCE dev, IDirectInput8* dinput, HWND hook_window);
+    virtual ~device_dinput();
+
+    const std::string& get_id() const override;
+    void init() override;
+    void deinit() override;
+    void update() override;
+    void set_binding(std::shared_ptr<cfg::binding>&& b) override;
+
+    friend BOOL CALLBACK enum_device_objects_callback(
+        LPCDIDEVICEOBJECTINSTANCE obj,
+        LPVOID data);
+};
 }

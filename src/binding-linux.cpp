@@ -16,47 +16,47 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <gamepad/binding-linux.hpp>
 #include "binding-default.hpp"
+#include <gamepad/binding-linux.hpp>
 
 namespace gamepad::cfg {
-    json linux_default_binding = json::parse(gamepad::defaults::linux_bind_json);
+json linux_default_binding = json::parse(gamepad::defaults::linux_bind_json);
 
-    binding_linux::binding_linux(const json &json)
-    {
-        load(json);
-    }
+binding_linux::binding_linux(const json& json)
+{
+    load(json);
+}
 
-    void binding_linux::load(const json &j)
-    {
-        m_axis_mappings.clear();
-        m_buttons_mappings.clear();
+void binding_linux::load(const json& j)
+{
+    m_axis_mappings.clear();
+    m_buttons_mappings.clear();
 
-        for (const auto &val : j) {
-            if (val["is_axis"]) {
-                m_axis_mappings[val["from"]] = val["to"];
-            } else {
-                m_buttons_mappings[val["from"]] = val["to"];
-            }
+    for (const auto& val : j) {
+        if (val["is_axis"]) {
+            m_axis_mappings[val["from"]] = val["to"];
+        } else {
+            m_buttons_mappings[val["from"]] = val["to"];
         }
     }
+}
 
-    void binding_linux::save(json &j)
-    {
-        for (const auto &val : m_axis_mappings) {
-            json obj;
-            obj["is_axis"] = true;
-            obj["from"] = val.first;
-            obj["to"] = val.second;
-            j.push_back(obj);
-        }
-
-        for (const auto &val : m_buttons_mappings) {
-            json obj;
-            obj["is_axis"] = false;
-            obj["from"] = val.first;
-            obj["to"] = val.second;
-            j.push_back(obj);
-        }
+void binding_linux::save(json& j)
+{
+    for (const auto& val : m_axis_mappings) {
+        json obj;
+        obj["is_axis"] = true;
+        obj["from"] = val.first;
+        obj["to"] = val.second;
+        j.push_back(obj);
     }
+
+    for (const auto& val : m_buttons_mappings) {
+        json obj;
+        obj["is_axis"] = false;
+        obj["from"] = val.first;
+        obj["to"] = val.second;
+        j.push_back(obj);
+    }
+}
 }

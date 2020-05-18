@@ -16,10 +16,10 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
+#include <gamepad/config.h>
+#include <gamepad/log.hpp>
 #include <stdarg.h>
 #include <stdio.h>
-#include <gamepad/log.hpp>
-#include <gamepad/config.h>
 
 #ifdef DEBUG
 static int log_output_level = gamepad::LOG_DEBUG;
@@ -29,64 +29,64 @@ static int log_output_level = gamepad::LOG_INFO;
 
 namespace gamepad {
 
-    static void def_log_handler(int log_level, const char *format, va_list args,
-                                void *parram)
-    {
-        char out[4096];
-        vsnprintf(out, sizeof(out), format, args);
+static void def_log_handler(int log_level, const char* format, va_list args,
+    void* parram)
+{
+    char out[4096];
+    vsnprintf(out, sizeof(out), format, args);
 
-        if (log_level < log_output_level)
-            return;
-        switch (log_level) {
-        case gamepad::LOG_DEBUG:
-            fprintf(stdout, "debug: %s\n", out);
-            fflush(stdout);
-            break;
+    if (log_level < log_output_level)
+        return;
+    switch (log_level) {
+    case gamepad::LOG_DEBUG:
+        fprintf(stdout, "debug: %s\n", out);
+        fflush(stdout);
+        break;
 
-        case gamepad::LOG_INFO:
-            fprintf(stdout, "info: %s\n", out);
-            fflush(stdout);
-            break;
+    case gamepad::LOG_INFO:
+        fprintf(stdout, "info: %s\n", out);
+        fflush(stdout);
+        break;
 
-        case gamepad::LOG_WARNING:
-            fprintf(stdout, "warning: %s\n", out);
-            fflush(stdout);
-            break;
+    case gamepad::LOG_WARNING:
+        fprintf(stdout, "warning: %s\n", out);
+        fflush(stdout);
+        break;
 
-        case gamepad::LOG_ERROR:
-            fprintf(stderr, "error: %s\n", out);
-            fflush(stderr);
-        }
-
-        LGP_UNUSED(args);
+    case gamepad::LOG_ERROR:
+        fprintf(stderr, "error: %s\n", out);
+        fflush(stderr);
     }
 
-    static log_handler logger = def_log_handler;
-    static void *log_param = NULL;
+    LGP_UNUSED(args);
+}
 
-    void set_logger(log_handler handler, void *param)
-    {
-        logger = handler;
-        log_param = param;
-    }
+static log_handler logger = def_log_handler;
+static void* log_param = NULL;
 
-    void get_logger(log_handler *handler, void **param)
-    {
-        *handler = logger;
-        *param = log_param;
-    }
+void set_logger(log_handler handler, void* param)
+{
+    logger = handler;
+    log_param = param;
+}
 
-    void logva(int log_level, const char *format, va_list args)
-    {
-        logger(log_level, format, args, log_param);
-    }
+void get_logger(log_handler* handler, void** param)
+{
+    *handler = logger;
+    *param = log_param;
+}
 
-    void log(int log_level, const char *format, ...)
-    {
-        va_list args;
+void logva(int log_level, const char* format, va_list args)
+{
+    logger(log_level, format, args, log_param);
+}
 
-        va_start(args, format);
-        logva(log_level, format, args);
-        va_end(args);
-    }
+void log(int log_level, const char* format, ...)
+{
+    va_list args;
+
+    va_start(args, format);
+    logva(log_level, format, args);
+    va_end(args);
+}
 }

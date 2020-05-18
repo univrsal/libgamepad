@@ -36,6 +36,8 @@ namespace gamepad {
     };
 
     extern void default_hook_thread(class hook *h);
+    extern std::vector<std::tuple<std::string, uint16_t>> button_prompts;
+    extern std::vector<std::tuple<std::string, uint16_t>> axis_prompts;
 
     class hook {
     protected:

@@ -18,27 +18,28 @@
 
 #pragma once
 
-#include <gamepad/device.hpp>
 #include <gamepad/binding-linux.hpp>
-#include <string>
+#include <gamepad/device.hpp>
 #include <linux/joystick.h>
+#include <string>
 
 namespace gamepad {
 
-    class device_linux : public device {
-        std::string m_device_path;
-        std::string m_device_id;
-        int m_fd;
-        struct js_event m_event;
-        cfg::binding_linux *m_native_binding = nullptr;
-    public:
-        device_linux(std::string path);
-        virtual ~device_linux();
+class device_linux : public device {
+    std::string m_device_path;
+    std::string m_device_id;
+    int m_fd;
+    struct js_event m_event;
+    cfg::binding_linux* m_native_binding = nullptr;
 
-        const std::string &get_id() const override;
-        void init() override;
-        void deinit() override;
-        void update() override;
-        void set_binding(std::shared_ptr<cfg::binding> &&b) override;
-    };
+public:
+    device_linux(std::string path);
+    virtual ~device_linux();
+
+    const std::string& get_id() const override;
+    void init() override;
+    void deinit() override;
+    void update() override;
+    void set_binding(std::shared_ptr<cfg::binding>&& b) override;
+};
 }

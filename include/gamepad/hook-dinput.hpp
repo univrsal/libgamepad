@@ -60,6 +60,8 @@ namespace gamepad {
         void query_devices() override;
         bool start() override;
         bool load_bindings(const json& j) override;
+        virtual void make_xbox_config(const std::shared_ptr<gamepad::device>
+            &dv, json &out) override;
 
         friend BOOL CALLBACK enum_callback(LPCDIDEVICEINSTANCE dev,
             LPVOID data);

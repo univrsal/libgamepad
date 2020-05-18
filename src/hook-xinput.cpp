@@ -18,26 +18,23 @@
 
 #include <gamepad/hook-xinput.hpp>
 
-namespace gamepad
+namespace gamepad {
+void hook_xinput::query_devices()
 {
-    void hook_xinput::query_devices()
-    {
-        
-    }
+}
 
-    bool hook_xinput::load_bindings(const json& j)
-    {
-        return false;
-    }
+bool hook_xinput::load_bindings(const json& j)
+{
+    return false;
+}
 
-    bool hook_xinput::start()
-    {
-        return false;
-    }
+bool hook_xinput::start()
+{
+    return false;
+}
 
-    void hook_xinput::make_xbox_config(const std::shared_ptr<gamepad::device>& dv, json& out)
-    {
-        
-    }
+void hook_xinput::make_xbox_config(const std::shared_ptr<gamepad::device>& dv, json& out)
+{
+}
 
 }
