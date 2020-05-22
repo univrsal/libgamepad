@@ -28,17 +28,17 @@
 #define gwarn(format, ...) gamepad::log(gamepad::LOG_WARNING, format, ##__VA_ARGS__)
 #define gerr(format, ...) gamepad::log(gamepad::LOG_ERROR, format, ##__VA_ARGS__)
 namespace gamepad {
-    enum log_level {
-        LOG_DEBUG,
-        LOG_INFO,
-        LOG_WARNING,
-        LOG_ERROR,
-    };
+enum log_level {
+    LOG_DEBUG,
+    LOG_INFO,
+    LOG_WARNING,
+    LOG_ERROR,
+};
 
-    typedef void (*log_handler)(int lvl, const char *msg, va_list args, void *param);
+typedef void (*log_handler)(int lvl, const char* msg, va_list args, void* param);
 
-    void set_logger(log_handler handler, void *param);
-    void get_logger(log_handler *handler, void **param);
+void set_logger(log_handler handler, void* param);
+void get_logger(log_handler* handler, void** param);
 
 #if !defined(_MSC_VER) && !defined(SWIG)
 #define PRINTFATTR(f, a) __attribute__((__format__(__printf__, f, a)))
@@ -46,11 +46,11 @@ namespace gamepad {
 #define PRINTFATTR(f, a)
 #endif
 
-    PRINTFATTR(2, 3)
-    void log(int log_level, const char *format, ...);
+PRINTFATTR(2, 3)
+void log(int log_level, const char* format, ...);
 
-    PRINTFATTR(1, 2)
-    void wcrash(const char *format, ...);
+PRINTFATTR(1, 2)
+void wcrash(const char* format, ...);
 
-    #undef PRINTFATTR
+#undef PRINTFATTR
 }

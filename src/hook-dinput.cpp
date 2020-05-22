@@ -115,12 +115,12 @@ bool hook_dinput::start()
     return result;
 }
 
-bool hook_dinput::load_bindings(const json& j)
+shared_ptr<cfg::binding> hook_dinput::make_native_binding(const json& j)
 {
-    return false;
+    return make_shared<cfg::binding_dinput>(j);
 }
 
-void hook_dinput::make_xbox_config(const std::shared_ptr<gamepad::device>& dv,
+void hook_dinput::make_xbox_config(const shared_ptr<gamepad::device>& dv,
     json& out)
 {
     if (!m_running)

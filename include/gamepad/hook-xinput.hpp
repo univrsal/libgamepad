@@ -21,16 +21,13 @@
 #include <gamepad/hook.hpp>
 
 #ifdef LGP_WINDOWS
-namespace gamepad
-{
-    class hook_xinput : public hook
-    {
-    public:
-        void query_devices() override;
-        bool start() override;
-        bool load_bindings(const json &j) override;
-        void make_xbox_config(const std::shared_ptr<gamepad::device>
-            &dv, json &out) override;
-    };
+namespace gamepad {
+class hook_xinput : public hook {
+public:
+    void query_devices() override;
+    bool start() override;
+    bool load_bindings(const json& j) override;
+    void make_xbox_config(const std::shared_ptr<gamepad::device>& dv, json& out) override;
+};
 }
 #endif

@@ -19,131 +19,157 @@
 #pragma once
 
 #include <array>
-#include <map>
-#include <string>
-#include <memory>
 #include <gamepad/binding.hpp>
+#include <map>
+#include <memory>
+#include <string>
 
 namespace gamepad {
 
-    namespace button {
-        enum {
-            A = 0xEC00, B, X, Y, LB, RB, BACK, START, GUIDE, L_THUMB, R_THUMB,
-            DPAD_LEFT, DPAD_RIGHT, DPAD_UP, DPAD_DOWN, COUNT
-        };
-    }
-
-    namespace axis {
-        enum {
-            LEFT_STICK_X = button::COUNT,
-            LEFT_STICK_Y,
-            LEFT_TRIGGER,
-            RIGHT_STICK_X,
-            RIGHT_STICK_Y,
-            RIGHT_TRIGGER,
-            COUNT
-        };
-    }
-
-    struct input_event
-    {
-        uint16_t id;
-        int16_t value;
-        uint64_t time;
+namespace button {
+    enum {
+        A = 0xEC00,
+        B,
+        X,
+        Y,
+        LB,
+        RB,
+        BACK,
+        START,
+        GUIDE,
+        L_THUMB,
+        R_THUMB,
+        DPAD_LEFT,
+        DPAD_RIGHT,
+        DPAD_UP,
+        DPAD_DOWN,
+        COUNT
     };
+}
 
-    class device {
-    protected:
-        /**
+namespace axis {
+    enum {
+        LEFT_STICK_X = button::COUNT,
+        LEFT_STICK_Y,
+        LEFT_TRIGGER,
+        RIGHT_STICK_X,
+        RIGHT_STICK_Y,
+        RIGHT_TRIGGER,
+        COUNT
+    };
+}
+
+struct input_event {
+    uint16_t id;
+    int16_t value;
+    uint64_t time;
+};
+
+class device {
+protected:
+    /**
          * @brief Maps a button code to its state
          * On Windows this will only contain X-Box gamepad::buttons
          * when using XInput. With DirectInput or on Linux it will
          * contain all button inputs.
          */
-        std::map<uint16_t, bool> m_buttons;
+    std::map<uint16_t, bool> m_buttons;
 
-        /**
+    /**
          * @brief Maps an axis to it's state.
          * The state will range from -1 to 1.
          * For most gamepads the axis mapping in gamepad::axis is used
          */
-        std::map<uint16_t, float> m_axis;
+    std::map<uint16_t, float> m_axis;
 
-        /* Misc */
+    /* Misc */
 
-        /* These contain the last native input event received for this device*/
-        input_event m_last_button_event = { 0xffff, 0, 0};
-        input_event m_last_axis_event = { 0xffff, 0, 0 };
+    /* These contain the last native input event received for this device*/
+    input_event m_last_button_event = { 0xffff, 0, 0 };
+    input_event m_last_axis_event = { 0xffff, 0, 0 };
 
-        /* Device name, will be used for identifying if no other
+    /* Device name, will be used for identifying if no other
          * IDs where found. Bindings will be mapped using this or
          * the ID returned from gamepad::device::get_id()
          */
-        std::string m_name;
+    std::string m_name;
 
-        /* Instance of the bindings used for this device
+    /* Instance of the bindings used for this device
          * This uses bindings matched for the hook that is
          * used for this device
          */
-        std::shared_ptr<cfg::binding> m_binding;
-        bool m_valid = false;
-    public:
+    std::shared_ptr<cfg::binding> m_binding;
+    bool m_valid = false;
 
-        ~device()
-        {
-        }
+public:
+    device() = default;
 
-        const std::string &get_name() const
-        {
-            return m_name;
-        }
+    ~device()
+    {
+    }
 
-        /* Can be overriden to make
+    const std::string& get_name() const
+    {
+        return m_name;
+    }
+
+    /* Can be overriden to make
          * saving of bindings more accurate since
          * they then will be mapped to the device id
          * instead of the device name which can occur
          * multiple times if the same controller type is
          * connected multiple times */
-        virtual const std::string &get_id() const { return m_name; }
+    virtual const std::string& get_id() const { return m_name; }
 
-        bool is_button_pressed(uint16_t code)
-        {
-            return m_buttons[code];
-        }
+    bool is_button_pressed(uint16_t code)
+    {
+        return m_buttons[code];
+    }
 
-        float get_axis(uint16_t axis)
-        {
-            return m_axis[axis];
-        }
+    float get_axis(uint16_t axis)
+    {
+        return m_axis[axis];
+    }
 
-        bool is_valid() const
-        {
-            return m_valid;
-        }
+    bool is_valid() const
+    {
+        return m_valid;
+    }
 
-        bool has_binding() const
-        {
-            return m_binding != nullptr;
-        }
+    bool has_binding() const
+    {
+        return m_binding != nullptr;
+    }
 
-        const input_event *last_button_event() const
-        {
-            return &m_last_button_event;
-        }
+    const input_event* last_button_event() const
+    {
+        return &m_last_button_event;
+    }
 
-        const input_event *last_axis_event() const
-        {
-            return &m_last_axis_event;
-        }
+    const input_event* last_axis_event() const
+    {
+        return &m_last_axis_event;
+    }
 
-        virtual void set_binding(std::shared_ptr<cfg::binding> &&b)
-        {
-            m_binding.reset();
-            m_binding = b;
-        }
+    std::shared_ptr<cfg::binding> get_binding()
+    {
+        return m_binding;
+    }
 
-        virtual void deinit() { /* NO-OP */ }
-        virtual void init() { /* NO-OP */ }
-        virtual void update() { /* NO-OP */ }
-    };
+    virtual void set_binding(std::shared_ptr<cfg::binding>&& b)
+    {
+        m_binding.reset();
+        m_binding = b;
+    }
+
+    virtual void deinit()
+    { /* NO-OP */
+    }
+    virtual void init()
+    { /* NO-OP */
+    }
+    virtual void update()
+    { /* NO-OP */
+    }
+};
 }

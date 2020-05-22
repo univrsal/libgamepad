@@ -16,9 +16,9 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
+#include <chrono>
 #include <libgamepad.hpp>
 #include <thread>
-#include <chrono>
 #ifdef LGP_UNIX
 #include <csignal>
 #else
@@ -57,9 +57,9 @@ int main()
     auto devs = h->get_devices();
 
     /* Print out devices */
-    for (const auto &dev : devs) {
+    for (const auto& dev : devs) {
         ginfo("Device ID: %s \t\t\tDevice Name: %s", dev->get_id().c_str(),
-              dev->get_name().c_str());
+            dev->get_name().c_str());
     }
 
     if (devs.size() < 1) {
@@ -86,13 +86,13 @@ int main()
 
             if (dev->last_axis_event()->time != last_axis) {
                 ginfo("Received axis event: %i val: %i", dev->last_axis_event()->id,
-                      dev->last_axis_event()->value);
+                    dev->last_axis_event()->value);
                 last_axis = dev->last_axis_event()->time;
             }
 
             if (dev->last_button_event()->time != last_button) {
                 ginfo("Received button event: %i val: %i", dev->last_button_event()->id,
-                      dev->last_button_event()->value);
+                    dev->last_button_event()->value);
                 last_button = dev->last_button_event()->time;
             }
 

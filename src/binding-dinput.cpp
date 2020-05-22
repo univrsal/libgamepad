@@ -24,12 +24,13 @@ namespace gamepad::cfg {
 json dinput_default_binding = json::parse(gamepad::defaults::dinput_bind_json);
 
 binding_dinput::binding_dinput(const json& j)
+    : binding(j)
 {
-    load(j);
 }
 
 void binding_dinput::load(const json& j)
 {
+    binding::load(j);
     m_axis_mappings.clear();
     m_buttons_mappings.clear();
 
@@ -49,6 +50,7 @@ void binding_dinput::load(const json& j)
 
 void binding_dinput::save(json& j)
 {
+    binding::save(j);
     for (const auto& val : m_axis_mappings) {
         json obj;
         obj["is_axis"] = true;

@@ -61,9 +61,9 @@ void default_hook_thread(class hook* h)
     ginfo("Hook thread started");
     while (h->running()) {
         h->get_mutex()->lock();
-        for (auto& dev : h->get_devices()) {
+        for (auto& dev : h->get_devices())
             dev->update();
-        }
+
         sleep_time = h->get_sleep_time();
         h->get_mutex()->unlock();
         this_thread::sleep_for(chrono::milliseconds(sleep_time));
@@ -79,7 +79,12 @@ uint64_t hook::ms_ticks()
 
 std::shared_ptr<cfg::binding> hook::get_binding_for_device(const std::string& id)
 {
-    return m_bindings[id];
+    auto result = find_if(m_devices.begin(), m_devices.end(),
+        [&id](shared_ptr<device>& b) {
+            return b->get_id() == id;
+        });
+
+    return (*result)->get_binding();
 }
 
 std::shared_ptr<hook> hook::make(hook_type type)
@@ -113,11 +118,14 @@ void hook::close_bindings()
 {
     m_mutex.lock();
     for (const auto& bind : m_bindings) {
-        if (bind.second.use_count() > 2) { /* The for loop also takes a reference */
-            gerr("Gamepad binding for '%s' is still in use! (Ref count %li)",
-                bind.first.c_str(), bind.second.use_count());
+        /* One reference in the bindings list,
+         * one in the bindings map and one for this for loop */
+        if (bind.use_count() > 3) {
+            gerr("Gamepad binding '%s' is still in use! (Ref count %li)",
+                bind->get_name().c_str(), bind.use_count());
         }
     }
+
     m_bindings.clear();
     m_mutex.unlock();
 }
@@ -150,14 +158,25 @@ bool hook::save_bindings(const std::string& path)
 
 bool hook::save_bindings(json& j)
 {
+    json binding_array, binding_map;
+
     for (const auto& bind : m_bindings) {
-        json obj, binds;
-        bind.second->save(binds);
-        obj["device"] = bind.first;
-        obj["binds"] = binds;
-        j.emplace_back(obj);
+        json b;
+        bind->save(b);
+        binding_array.emplace_back(b);
     }
-    /* TODO: error checking? */
+
+    for (const auto& device : m_devices) {
+        if (device->has_binding()) {
+            json m;
+            m["device_id"] = device->get_id();
+            m["binding_id"] = device->get_binding()->get_name();
+        }
+    }
+
+    j["bindings"] = binding_array;
+    j["bindings_map"] = binding_map;
+
     return true;
 }
 
@@ -175,6 +194,66 @@ bool hook::load_bindings(const std::string& path)
     }
     gerr("Couldn't read bindings from '%s'", path.c_str());
     return false;
+}
+
+bool hook::load_bindings(const json& j)
+{
+    json device_array = j["devices"],
+         binding_array = j["bindings"];
+
+    for (const auto& bind : binding_array)
+        m_bindings.emplace_back(make_native_binding(bind));
+
+    for (const auto& entry : device_array) {
+        auto device_id = entry["device_id"];
+        auto bind_id = entry["binding_id"];
+
+        if (!set_device_binding(device_id, bind_id))
+            gwarn("Couldn't set binding.");
+    }
+}
+
+bool hook::set_device_binding(const std::string& device_id,
+    const std::string& binding_id)
+{
+    auto dev = get_device_by_id(device_id);
+    auto result = false;
+
+    if (dev) {
+        auto bind = get_binding_by_name(binding_id);
+        if (bind)
+            dev->set_binding(move(bind));
+        else
+            gwarn("No binding with name '%s'", binding_id.c_str());
+    } else {
+        gwarn("No device with id '%s'", device_id.c_str());
+    }
+
+    return result;
+}
+
+shared_ptr<device> hook::get_device_by_id(const std::string& id)
+{
+    auto result = find_if(m_devices.begin(), m_devices.end(),
+        [&id](shared_ptr<device>& d) {
+            return d->get_id() == id;
+        });
+
+    if (result == m_devices.end())
+        return nullptr;
+    return *result;
+}
+
+std::shared_ptr<cfg::binding> hook::get_binding_by_name(const std::string& name)
+{
+    auto result = find_if(m_bindings.begin(), m_bindings.end(),
+        [&name](shared_ptr<cfg::binding>& b) {
+            return b->get_name() == name;
+        });
+
+    if (result == m_bindings.end())
+        return nullptr;
+    return *result;
 }
 
 void hook::make_xbox_config(const std::shared_ptr<gamepad::device>& dv,

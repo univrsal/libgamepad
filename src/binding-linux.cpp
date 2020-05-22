@@ -22,13 +22,14 @@
 namespace gamepad::cfg {
 json linux_default_binding = json::parse(gamepad::defaults::linux_bind_json);
 
-binding_linux::binding_linux(const json& json)
+binding_linux::binding_linux(const json& j)
+    : binding(j)
 {
-    load(json);
 }
 
 void binding_linux::load(const json& j)
 {
+    binding::load(j);
     m_axis_mappings.clear();
     m_buttons_mappings.clear();
 
@@ -43,6 +44,8 @@ void binding_linux::load(const json& j)
 
 void binding_linux::save(json& j)
 {
+    binding::save(j);
+
     for (const auto& val : m_axis_mappings) {
         json obj;
         obj["is_axis"] = true;

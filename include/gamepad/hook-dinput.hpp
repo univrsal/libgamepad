@@ -26,45 +26,46 @@
 
 #include <string>
 
-namespace gamepad::util
+namespace gamepad::util {
+static std::string wchar_to_utf8(const std::wstring& wstr)
 {
-    static std::string wchar_to_utf8(const std::wstring &wstr)
-    {
-        if (wstr.empty())
-            return "";
-        std::string result;
-        int char_count = 0;
-    	if ((char_count = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1,
-            nullptr, 0, 0, 0) - 1) > 0)
-    	{
-            char* buf = new char[(int)char_count + 1];
-    		if (buf)
-    		{
-                WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, buf,
-                    char_count, 0, 0);
-                buf[char_count] = '\0';
-                result = buf;
-    		}
-    	}
-        return result;
+    if (wstr.empty())
+        return "";
+    std::string result;
+    int char_count = 0;
+    if ((char_count = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1,
+                          nullptr, 0, 0, 0)
+                - 1)
+        > 0) {
+        char* buf = new char[(int)char_count + 1];
+        if (buf) {
+            WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, buf,
+                char_count, 0, 0);
+            buf[char_count] = '\0';
+            result = buf;
+        }
     }
+    return result;
+}
 }
 
 namespace gamepad {
 
-    class hook_dinput : public hook {
-        IDirectInput8* m_dinput = nullptr;
-        HWND m_hook_window = nullptr; /* Invisible window needed to initialize devices */
-        std::thread m_window_message_thread;
-    public:
-        void query_devices() override;
-        bool start() override;
-        bool load_bindings(const json& j) override;
-        virtual void make_xbox_config(const std::shared_ptr<gamepad::device>
-            &dv, json &out) override;
+class hook_dinput : public hook {
+    IDirectInput8* m_dinput = nullptr;
+    HWND m_hook_window = nullptr; /* Invisible window needed to initialize devices */
+    std::thread m_window_message_thread;
 
-        friend BOOL CALLBACK enum_callback(LPCDIDEVICEINSTANCE dev,
-            LPVOID data);
-    };
+public:
+    void query_devices() override;
+    bool start() override;
+    bool load_bindings(const json& j) override;
+
+    virtual std::shared_ptr<cfg::binding> make_native_binding(const json& j) override;
+    virtual void make_xbox_config(const std::shared_ptr<gamepad::device>& dv, json& out) override;
+
+    friend BOOL CALLBACK enum_callback(LPCDIDEVICEINSTANCE dev,
+        LPVOID data);
+};
 }
 #endif

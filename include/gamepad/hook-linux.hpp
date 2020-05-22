@@ -17,16 +17,17 @@
  **/
 
 #pragma once
-#include <gamepad/hook.hpp>
 #include <gamepad/config.h>
+#include <gamepad/hook.hpp>
 
 #ifdef LGP_LINUX
 namespace gamepad {
-    class hook_linux : public hook {
-    public:
-        void query_devices() override;
-        bool start() override;
-        bool load_bindings(const json &j) override;
-    };
+class hook_linux : public hook {
+public:
+    virtual std::shared_ptr<cfg::binding> make_native_binding(const json& j) override;
+
+    void query_devices() override;
+    bool start() override;
+};
 }
 #endif

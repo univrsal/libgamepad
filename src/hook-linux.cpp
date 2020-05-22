@@ -44,9 +44,7 @@ void hook_linux::query_devices()
 
             if ((path.find("gamepad") != string::npos || path.find("joystick") != string::npos) && path.find("event") == string::npos) {
                 gdebug("Found potential gamepad at '%s'", path.c_str());
-                /* TODO: use make_shared and just let the pointer free
-                     * by leaving the scope */
-                device_linux* dev = new device_linux(path);
+                auto dev = make_shared<device_linux>(path);
                 if (dev->is_valid()) {
                     m_devices.emplace_back(dev);
                     auto b = get_binding_for_device(dev->get_id());
@@ -55,16 +53,18 @@ void hook_linux::query_devices()
                         dev->set_binding(move(b));
                     } else {
                         auto b = make_shared<cfg::binding_linux>(cfg::linux_default_binding);
-                        m_bindings[dev->get_id()] = b;
                         dev->set_binding(dynamic_pointer_cast<cfg::binding>(b));
                     }
-                } else {
-                    delete dev;
                 }
             }
         }
     }
     m_mutex.unlock();
+}
+
+shared_ptr<cfg::binding> hook_linux::make_native_binding(const json& j)
+{
+    return make_shared<cfg::binding_linux>(j);
 }
 
 bool hook_linux::start()
@@ -73,24 +73,12 @@ bool hook_linux::start()
     query_devices();
 
     if (m_devices.size() > 0) {
-        m_hook_thread = thread(thread_method, this);
+        ginfo("No Devices detected.");
+        m_hook_thread = thread(default_hook_thread, this);
         result = true;
     }
     m_running = result;
     return result;
 }
 
-bool hook_linux::load_bindings(const json& j)
-{
-    for (const auto& bind : j) {
-        json obj = bind["binds"];
-        std::string device = bind["device"];
-        auto loaded_binding = make_shared<cfg::binding_linux>(obj);
-        if (m_bindings[device]) {
-            m_bindings[device].reset();
-        }
-        m_bindings[device] = loaded_binding;
-    }
-    return true;
-}
 }

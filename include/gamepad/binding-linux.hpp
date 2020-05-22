@@ -24,22 +24,22 @@
 #if LGP_LINUX
 
 namespace gamepad {
-    class device_linux;
+class device_linux;
 }
 
 namespace gamepad::cfg {
 
-    extern json linux_default_binding;
-    class binding_linux : public binding {
-        std::map<uint8_t, uint16_t> m_buttons_mappings;
-        std::map<uint8_t, uint16_t> m_axis_mappings;
-        friend class gamepad::device_linux;
-    public:
-        binding_linux() = default;
-        binding_linux(const json &json);
+extern json linux_default_binding;
+class binding_linux : public binding {
+    std::map<uint8_t, uint16_t> m_buttons_mappings;
+    std::map<uint8_t, uint16_t> m_axis_mappings;
+    friend class gamepad::device_linux;
 
-        void load(const json &j) override;
-        void save(json &j) override;
-    };
+public:
+    binding_linux(const json& j);
+
+    void load(const json& j) override;
+    void save(json& j) override;
+};
 }
 #endif
