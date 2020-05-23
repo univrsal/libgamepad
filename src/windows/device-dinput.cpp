@@ -215,7 +215,7 @@ const DIDATAFORMAT dinput_dataformat = {
     dfDIJoystick2
 };
 
-static BOOL CALLBACK enum_device_objects_callback(
+BOOL CALLBACK enum_device_objects_callback(
     LPCDIDEVICEOBJECTINSTANCE obj,
     LPVOID data)
 {

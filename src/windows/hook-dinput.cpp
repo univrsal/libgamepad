@@ -25,7 +25,7 @@ using namespace std;
 
 namespace gamepad {
 
-static BOOL CALLBACK enum_callback(LPCDIDEVICEINSTANCE dev, LPVOID data)
+BOOL CALLBACK enum_callback(LPCDIDEVICEINSTANCE dev, LPVOID data)
 {
     auto h = static_cast<hook_dinput*>(data);
 
