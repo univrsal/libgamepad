@@ -102,7 +102,7 @@ std::shared_ptr<hook> hook::make(hook_type type)
     LGP_UNUSED(type);
     return std::make_shared<hook_linux>();
 #else
-#warning "No native hook found"
+#error "No native hook found"
 	return nullptr;
 #endif
 }
