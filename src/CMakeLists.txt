@@ -43,7 +43,7 @@ if (UNIX)
     configure_file("../pc/gamepad.pc.in"
         "${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.pc" @ONLY)
     install(FILES "${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.pc" DESTINATION
-        "${CMAKE_INSTALL_LIB_DIR}/pkgconfig")
+        "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 endif()
 
 if (ENABLE_SHARED)
