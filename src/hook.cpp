@@ -96,12 +96,14 @@ std::shared_ptr<hook> hook::make(hook_type type)
 #if LGP_WINDOWS
     if (type == hook_type::XINPUT || type == hook_type::NATIVE_DEFAULT) {
         return std::make_shared<hook_xinput>();
-    } else {
-        return std::make_shared<hook_dinput>();
     }
+    return std::make_shared<hook_dinput>();
 #elif LGP_LINUX
     LGP_UNUSED(type);
     return std::make_shared<hook_linux>();
+#else
+#warning "No native hook found"
+	return nullptr;
 #endif
 }
 
