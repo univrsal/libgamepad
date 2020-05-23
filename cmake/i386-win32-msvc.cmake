@@ -20,4 +20,3 @@ set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 set(CMAKE_C_COMPILER cl.exe)
 set(CMAKE_C_FLAGS "/arch:IA32")
-set(CMAKE_CXX_FLAGS "/std:c++17")
