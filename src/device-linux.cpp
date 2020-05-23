@@ -72,6 +72,11 @@ const std::string& device_linux::get_id() const
     return m_device_id;
 }
 
+inline float clamp(float x, float upper, float lower)
+{
+    return fminf(upper, fmaxf(x, lower));
+}
+
 void device_linux::update()
 {
     /* This will only process the last event, since any other
@@ -84,8 +89,9 @@ void device_linux::update()
             auto new_code = m_native_binding->m_axis_mappings[m_event.number];
             auto val = float(m_event.value);
 
-            m_axis[new_code] = std::clamp(val / 0xffff, -1.f, 1.f);
+            m_axis[new_code] = clamp(val / 0xffff, -1.f, 1.f);
         }
+
         m_last_axis_event.id = m_event.number;
         m_last_axis_event.value = m_event.value;
         m_last_axis_event.time = m_event.time;

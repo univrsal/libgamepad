@@ -19,13 +19,11 @@
 #include "device-linux.hpp"
 #include <algorithm>
 #include <chrono>
-#include <filesystem>
+#include <dirent.h>
 #include <gamepad/hook-linux.hpp>
 #include <gamepad/log.hpp>
 #include <tuple>
 #include <vector>
-
-namespace fs = std::filesystem;
 
 using namespace std;
 
@@ -33,11 +31,22 @@ namespace gamepad {
 
 void hook_linux::query_devices()
 {
+    static const char* DEV_FOLDER = "/dev/input/by-id";
     close_devices();
     m_mutex.lock();
-    for (const auto& entry : fs::directory_iterator("/dev/input/by-id")) {
-        if (!entry.is_directory()) {
-            auto path = entry.path().string();
+
+    DIR* dir;
+    struct dirent* ent;
+
+    if ((dir = opendir(DEV_FOLDER)) == NULL) {
+        gerr("Couldn't open %s", DEV_FOLDER);
+        return;
+    }
+
+    while ((ent = readdir(dir)) != NULL) {
+        DIR* dir2 = opendir(ent->d_name); /* NULL if not a directory */
+        if (!dir2) {
+            auto path = DEV_FOLDER + std::string("/") + std::string(ent->d_name);
             auto path_cpy = path;
             transform(path_cpy.begin(), path_cpy.end(), path_cpy.begin(),
                 [](unsigned char c) { return tolower(c); });
@@ -57,6 +66,8 @@ void hook_linux::query_devices()
                     }
                 }
             }
+        } else {
+            closedir(dir2);
         }
     }
     m_mutex.unlock();

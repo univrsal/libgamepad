@@ -1,8 +1,5 @@
 add_library(gamepad OBJECT)
 
-set_property(TARGET gamepad PROPERTY CXX_STANDARD 17)
-set_property(TARGET gamepad PROPERTY CXX_STANDARD_REQUIRED ON)
-
 option(ENABLE_STATIC "Static library (default: OFF)" ON)
 option(ENABLE_SHARED "Shared library (default: ON)" OFF)
 
