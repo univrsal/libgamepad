@@ -1,8 +1,5 @@
 add_library(gamepad OBJECT)
 
-option(ENABLE_STATIC "Static library (default: OFF)" ON)
-option(ENABLE_SHARED "Shared library (default: ON)" OFF)
-
 target_include_directories(gamepad
     PUBLIC
         $<INSTALL_INTERFACE:include>
@@ -49,7 +46,6 @@ endif()
 if (ENABLE_SHARED)
     add_library(shared SHARED $<TARGET_OBJECTS:gamepad>)
     set_target_properties(shared PROPERTIES OUTPUT_NAME "gamepad")
-    install(TARGETS shared DESTINATION ${CMAKE_INSTALL_LIBDIR})
     if (UNIX)
         target_link_libraries (shared ${CMAKE_THREAD_LIBS_INIT})
     elseif (MSVC)
@@ -57,6 +53,7 @@ if (ENABLE_SHARED)
             dinput8
             dxguid)
     endif()
+    install(TARGETS shared DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
 
 if (ENABLE_STATIC)

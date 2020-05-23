@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 
 option(ENABLE_TESTS "Compile test binary (default: ON)" ON)
+option(ENABLE_STATIC "Static library (default: OFF)" ON)
+option(ENABLE_SHARED "Shared library (default: ON)" OFF)
 
 project(libgamepad)
 if (UNIX)
@@ -10,7 +12,6 @@ if (UNIX)
     set(CMAKE_CXX_FLAGS_RELEASE        "-O4 -DNDEBUG")
     set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -DDEBUG")
 endif()
-
 
 add_subdirectory(src)
 

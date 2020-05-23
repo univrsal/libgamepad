@@ -14,3 +14,5 @@ else()
     target_link_libraries(libgamepad_tests gamepad)
     add_dependencies(libgamepad_tests gamepad)
 endif()
+
+install(TARGETS libgamepad_tests DESTINATION bin)
