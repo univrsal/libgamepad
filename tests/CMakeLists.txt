@@ -4,7 +4,13 @@ add_executable(libgamepad_tests
 
 include_directories("../include")
 
-target_link_libraries(libgamepad_tests
-    PRIVATE
-        shared
-)
+if (ENABLE_SHARED)
+    target_link_libraries(libgamepad_tests static)
+    add_dependencies(libgamepad_tests static)
+elseif (ENABLE_STATIC)
+    target_link_libraries(libgamepad_tests shared)
+    add_dependencies(libgamepad_tests shared)
+else()
+    target_link_libraries(libgamepad_tests gamepad)
+    add_dependencies(libgamepad_tests gamepad)
+endif()

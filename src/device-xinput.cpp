@@ -15,3 +15,11 @@
  ** You should have received a copy of the GNU Lesser General Public License
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
+
+#include "device-xinput.hpp"
+
+namespace gamepad {
+void device_xinput::init() {}
+void device_xinput::deinit() {}
+void device_xinput::update() {}
+}

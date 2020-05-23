@@ -20,57 +20,56 @@
 #include <gamepad/binding-dinput.hpp>
 #include <gamepad/hook.hpp>
 
-namespace gamepad::cfg {
+namespace gamepad {
+namespace cfg {
 json dinput_default_binding = json::parse(gamepad::defaults::dinput_bind_json);
 
-binding_dinput::binding_dinput(const json& j)
-    : binding(j)
+binding_dinput::binding_dinput(const json &j) : binding(j) {}
+
+void binding_dinput::load(const json &j)
 {
+	binding::load(j);
+	m_axis_mappings.clear();
+	m_buttons_mappings.clear();
+
+	for (const auto &val : j) {
+		if (val["is_axis"]) {
+			m_axis_mappings[val["from"]] = val["to"];
+			if (val["to"] == axis::LEFT_TRIGGER) {
+				m_left_trigger_polarity = val["trigger_polarity"];
+			} else if (val["to"] == axis::RIGHT_TRIGGER) {
+				m_right_trigger_polarity = val["trigger_polarity"];
+			}
+		} else {
+			m_buttons_mappings[val["from"]] = val["to"];
+		}
+	}
 }
 
-void binding_dinput::load(const json& j)
+void binding_dinput::save(json &j)
 {
-    binding::load(j);
-    m_axis_mappings.clear();
-    m_buttons_mappings.clear();
+	binding::save(j);
+	for (const auto &val : m_axis_mappings) {
+		json obj;
+		obj["is_axis"] = true;
+		obj["from"] = val.first;
+		obj["to"] = val.second;
+		if (val.second == axis::LEFT_TRIGGER) {
+			obj["trigger_polarity"] = m_left_trigger_polarity;
+		} else if (val.second == axis::RIGHT_TRIGGER) {
+			obj["trigger_polarity"] = m_right_trigger_polarity;
+		}
+		j.push_back(obj);
+	}
 
-    for (const auto& val : j) {
-        if (val["is_axis"]) {
-            m_axis_mappings[val["from"]] = val["to"];
-            if (val["to"] == axis::LEFT_TRIGGER) {
-                m_left_trigger_polarity = val["trigger_polarity"];
-            } else if (val["to"] == axis::RIGHT_TRIGGER) {
-                m_right_trigger_polarity = val["trigger_polarity"];
-            }
-        } else {
-            m_buttons_mappings[val["from"]] = val["to"];
-        }
-    }
+	for (const auto &val : m_buttons_mappings) {
+		json obj;
+		obj["is_axis"] = false;
+		obj["from"] = val.first;
+		obj["to"] = val.second;
+		j.push_back(obj);
+	}
 }
 
-void binding_dinput::save(json& j)
-{
-    binding::save(j);
-    for (const auto& val : m_axis_mappings) {
-        json obj;
-        obj["is_axis"] = true;
-        obj["from"] = val.first;
-        obj["to"] = val.second;
-        if (val.second == axis::LEFT_TRIGGER) {
-            obj["trigger_polarity"] = m_left_trigger_polarity;
-        } else if (val.second == axis::RIGHT_TRIGGER) {
-            obj["trigger_polarity"] = m_right_trigger_polarity;
-        }
-        j.push_back(obj);
-    }
-
-    for (const auto& val : m_buttons_mappings) {
-        json obj;
-        obj["is_axis"] = false;
-        obj["from"] = val.first;
-        obj["to"] = val.second;
-        j.push_back(obj);
-    }
 }
-
 }

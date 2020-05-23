@@ -18,7 +18,9 @@
 
 #pragma once
 
-namespace gamepad::defaults {
-extern const char* linux_bind_json;
-extern const char* dinput_bind_json;
+namespace gamepad {
+namespace defaults {
+extern const char *linux_bind_json;
+extern const char *dinput_bind_json;
+}
 }

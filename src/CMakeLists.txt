@@ -52,6 +52,10 @@ if (ENABLE_SHARED)
     install(TARGETS shared DESTINATION ${CMAKE_INSTALL_LIBDIR})
     if (UNIX)
         target_link_libraries (shared ${CMAKE_THREAD_LIBS_INIT})
+    elseif (MSVC)
+        target_link_libraries(shared
+            dinput8
+            dxguid)
     endif()
 endif()
 
@@ -60,6 +64,10 @@ if (ENABLE_STATIC)
     set_target_properties(static PROPERTIES OUTPUT_NAME "gamepad")
     if (UNIX)
         target_link_libraries (static ${CMAKE_THREAD_LIBS_INIT})
+    elseif (MSVC)
+        target_link_libraries(static
+            dinput8
+            dxguid)
     endif()
     install(TARGETS static DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()

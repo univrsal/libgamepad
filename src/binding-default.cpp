@@ -18,7 +18,8 @@
 
 #include "binding-default.hpp"
 
-namespace gamepad::defaults {
+namespace gamepad {
+namespace defaults {
 const char* linux_bind_json = "["
                               "{"
                               "    \"from\": 0,"
@@ -231,4 +232,5 @@ const char* dinput_bind_json = "["
                                "    \"trigger_polarity\": -1"
                                "}"
                                "]";
+}
 }

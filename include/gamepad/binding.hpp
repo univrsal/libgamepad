@@ -22,27 +22,20 @@
 
 using json = nlohmann::json;
 
-namespace gamepad::cfg {
+namespace gamepad {
+namespace cfg {
 
 class binding {
-    std::string m_binding_name;
+	std::string m_binding_name;
 
 public:
-    binding(const json& j)
-    {
-        load(j);
-    }
+	binding(const json &j) { load(j); }
 
-    virtual void load(const json& j)
-    {
-        m_binding_name = j["name"];
-    };
+	virtual void load(const json &j) { m_binding_name = j["name"].get<std::string>(); };
 
-    virtual void save(json& j)
-    {
-        j["name"] = m_binding_name;
-    }
+	virtual void save(json &j) { j["name"] = m_binding_name; }
 
-    const std::string& get_name() const { return m_binding_name; }
+	const std::string &get_name() const { return m_binding_name; }
 };
+}
 }

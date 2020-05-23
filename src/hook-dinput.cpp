@@ -39,7 +39,6 @@ static BOOL CALLBACK enum_callback(LPCDIDEVICEINSTANCE dev, LPVOID data)
             new_device->set_binding(move(b));
         } else {
             auto b = make_shared<cfg::binding_dinput>(cfg::dinput_default_binding);
-            h->m_bindings[new_device->get_id()] = b;
             new_device->set_binding(dynamic_pointer_cast<cfg::binding>(b));
         }
     }
@@ -104,15 +103,7 @@ bool hook_dinput::start()
         return false;
     }
 
-    query_devices();
-
-    if (m_devices.size() > 0) {
-        m_hook_thread = thread(default_hook_thread, this);
-        result = true;
-    }
-    m_running = result;
-
-    return result;
+    return hook::start();
 }
 
 shared_ptr<cfg::binding> hook_dinput::make_native_binding(const json& j)
