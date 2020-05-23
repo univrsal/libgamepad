@@ -28,7 +28,7 @@
 using namespace std;
 
 namespace gamepad {
-vector<tuple<string, uint16_t>> button_prompts = {
+vector<tuple<string, uint16_t>> hook::button_prompts = {
     { "A", button::A },
     { "B", button::B },
     { "X", button::X },
@@ -46,7 +46,7 @@ vector<tuple<string, uint16_t>> button_prompts = {
     { "RB", button::RB }
 };
 
-vector<tuple<string, uint16_t>> axis_prompts = {
+vector<tuple<string, uint16_t>> hook::axis_prompts = {
     { "left analog stick horizontally", axis::LEFT_STICK_X },
     { "left analog stick vertically", axis::LEFT_STICK_Y },
     { "left trigger", axis::LEFT_TRIGGER },
@@ -60,12 +60,16 @@ void default_hook_thread(class hook* h)
     auto sleep_time = h->get_sleep_time();
     ginfo("Hook thread started");
     while (h->running()) {
-        h->get_mutex()->lock();
-        for (auto& dev : h->get_devices())
-            dev->update();
 
-        sleep_time = h->get_sleep_time();
-        h->get_mutex()->unlock();
+        if (h->get_devices().size() < 1) {
+            h->query_devices();
+        } else {
+            h->get_mutex()->lock();
+            for (auto& dev : h->get_devices())
+                dev->update();
+            sleep_time = h->get_sleep_time();
+            h->get_mutex()->unlock();
+        }
         this_thread::sleep_for(chrono::milliseconds(sleep_time));
     }
     ginfo("Hook thread ended");
@@ -90,7 +94,7 @@ std::shared_ptr<cfg::binding> hook::get_binding_for_device(const std::string& id
 std::shared_ptr<hook> hook::make(hook_type type)
 {
 #if LGP_WINDOWS
-    if (type == hook_type::XINPUT) {
+    if (type == hook_type::XINPUT || type == hook_type::NATIVE_DEFAULT) {
         return std::make_shared<hook_xinput>();
     } else {
         return std::make_shared<hook_dinput>();
@@ -105,8 +109,10 @@ void hook::close_devices()
 {
     m_mutex.lock();
     for (size_t i = 0; i < m_devices.size(); i++) {
+        /* Tell any left over references that this instance isn't updated anymore */
+        m_devices[i]->invalidate();
         if (m_devices[i].use_count() > 1) {
-            gerr("Gamepad device '%s' is still in use! (Ref count %li)",
+            gwarn("Gamepad device '%s' is still in use! (Ref count %li)",
                 m_devices[i]->get_id().c_str(), m_devices[i].use_count());
         }
     }
@@ -118,9 +124,9 @@ void hook::close_bindings()
 {
     m_mutex.lock();
     for (const auto& bind : m_bindings) {
-        /* One reference in the bindings list,
-         * one in the bindings map and one for this for loop */
-        if (bind.use_count() > 3) {
+        /* One reference in the bindings list
+         * and one for this for loop */
+        if (bind.use_count() > 2) {
             gerr("Gamepad binding '%s' is still in use! (Ref count %li)",
                 bind->get_name().c_str(), bind.use_count());
         }
@@ -128,6 +134,17 @@ void hook::close_bindings()
 
     m_bindings.clear();
     m_mutex.unlock();
+}
+
+bool hook::start()
+{
+    query_devices();
+
+    if (m_devices.size() < 1)
+        ginfo("No Devices detected. Waiting for connection...");
+    m_running = true;
+    m_hook_thread = thread(default_hook_thread, this);
+    return true;
 }
 
 void hook::stop()
@@ -211,6 +228,7 @@ bool hook::load_bindings(const json& j)
         if (!set_device_binding(device_id, bind_id))
             gwarn("Couldn't set binding.");
     }
+    return true;
 }
 
 bool hook::set_device_binding(const std::string& device_id,

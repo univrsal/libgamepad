@@ -27,7 +27,6 @@ public:
     virtual std::shared_ptr<cfg::binding> make_native_binding(const json& j) override;
 
     void query_devices() override;
-    bool start() override;
 };
 }
 #endif

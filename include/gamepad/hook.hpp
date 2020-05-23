@@ -30,16 +30,17 @@ using bindings_list = std::vector<std::shared_ptr<gamepad::cfg::binding>>;
 
 namespace gamepad {
 enum class hook_type {
+    NATIVE_DEFAULT,
     XINPUT,
     DIRECT_INPUT,
 };
 
 extern void default_hook_thread(class hook* h);
-extern std::vector<std::tuple<std::string, uint16_t>> button_prompts;
-extern std::vector<std::tuple<std::string, uint16_t>> axis_prompts;
 
 class hook {
 protected:
+    static std::vector<std::tuple<std::string, uint16_t>> button_prompts;
+    static std::vector<std::tuple<std::string, uint16_t>> axis_prompts;
     /* List of all devices found after querying */
     device_list m_devices;
     /* List of all bindnigs */
@@ -106,7 +107,7 @@ public:
     virtual void close_devices();
     virtual void close_bindings();
     virtual void query_devices() = 0;
-    virtual bool start() = 0;
+    virtual bool start();
     virtual void stop();
     virtual std::shared_ptr<cfg::binding> make_native_binding(const json& j) = 0;
     virtual void make_xbox_config(const std::shared_ptr<gamepad::device>& dv, json& out);
@@ -118,7 +119,7 @@ public:
     bool set_device_binding(const std::string& device_id,
         const std::string& binding_id);
 
-    static std::shared_ptr<hook> make(hook_type type = hook_type::XINPUT);
+    static std::shared_ptr<hook> make(hook_type type = hook_type::NATIVE_DEFAULT);
     static uint64_t ms_ticks();
 };
 }

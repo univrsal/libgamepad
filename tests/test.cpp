@@ -54,17 +54,26 @@ int main()
         return 0;
     }
 
+    if (h->get_devices().size() < 1) {
+        bool flag = true;
+        while (flag && run_flag) {
+            h->get_mutex()->lock();
+            if (h->get_devices().size() > 0)
+                flag = false;
+            h->get_mutex()->unlock();
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        }
+
+        if (!run_flag)
+            return 0;
+    }
+
     auto devs = h->get_devices();
 
     /* Print out devices */
     for (const auto& dev : devs) {
         ginfo("Device ID: %s \t\t\tDevice Name: %s", dev->get_id().c_str(),
             dev->get_name().c_str());
-    }
-
-    if (devs.size() < 1) {
-        ginfo("No devices found, shutting down");
-        return 0;
     }
 
     auto dev = devs[0];

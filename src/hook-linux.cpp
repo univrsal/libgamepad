@@ -67,18 +67,4 @@ shared_ptr<cfg::binding> hook_linux::make_native_binding(const json& j)
     return make_shared<cfg::binding_linux>(j);
 }
 
-bool hook_linux::start()
-{
-    bool result = false;
-    query_devices();
-
-    if (m_devices.size() > 0) {
-        ginfo("No Devices detected.");
-        m_hook_thread = thread(default_hook_thread, this);
-        result = true;
-    }
-    m_running = result;
-    return result;
-}
-
 }

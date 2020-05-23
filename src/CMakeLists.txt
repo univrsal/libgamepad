@@ -3,8 +3,8 @@ add_library(gamepad OBJECT)
 set_property(TARGET gamepad PROPERTY CXX_STANDARD 17)
 set_property(TARGET gamepad PROPERTY CXX_STANDARD_REQUIRED ON)
 
-option(ENABLE_SHARED "Shared library (default: ON)" ON)
-option(ENABLE_STATIC "Static library (default: OFF)" OFF)
+option(ENABLE_STATIC "Static library (default: OFF)" ON)
+option(ENABLE_SHARED "Shared library (default: ON)" OFF)
 
 target_include_directories(gamepad
     PUBLIC
@@ -22,6 +22,19 @@ target_sources(gamepad PRIVATE
     )
 
 include(GNUInstallDirs)
+
+if (ENABLE_SHARED OR ENABLE_STATIC)
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/libgamepad.hpp DESTINATION include)
+endif()
+
+if (UNIX)
+    find_package(Threads)
+    target_link_libraries (gamepad ${CMAKE_THREAD_LIBS_INIT})
+    configure_file("../pc/gamepad.pc.in"
+        "${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.pc" @ONLY)
+    install(FILES "${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.pc" DESTINATION
+        "${CMAKE_INSTALL_LIB_DIR}/pkgconfig")
+endif()
 
 if (ENABLE_SHARED)
     add_library(shared SHARED $<TARGET_OBJECTS:gamepad>)
@@ -41,24 +54,11 @@ if (ENABLE_STATIC)
     install(TARGETS static DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
 
-if (ENABLE_SHARED OR ENABLE_STATIC)
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/libgamepad.hpp DESTINATION include)
-endif()
-
-if (UNIX)
-    find_package(Threads)
-    target_link_libraries (gamepad ${CMAKE_THREAD_LIBS_INIT})
-    configure_file("../pc/gamepad.pc.in"
-        "${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.pc" @ONLY)
-    install(FILES "${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.pc" DESTINATION
-        "${CMAKE_INSTALL_LIB_DIR}/pkgconfig")
-endif()
-
 if (UNIX AND NOT APPLE)
     target_sources(gamepad PRIVATE
         hook-linux.cpp
         device-linux.cpp
-    device-linux.hpp
+        device-linux.hpp
         binding-linux.cpp
         )
 elseif (APPLE)
@@ -78,8 +78,8 @@ elseif(WIN32)
         )
     add_compile_definitions(UNICODE _UNICODE)
     target_link_libraries(gamepad
-    dinput8
-    dxguid)
+        dinput8
+        dxguid)
 endif()
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DDEBUG")

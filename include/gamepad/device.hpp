@@ -68,18 +68,18 @@ struct input_event {
 class device {
 protected:
     /**
-         * @brief Maps a button code to its state
-         * On Windows this will only contain X-Box gamepad::buttons
-         * when using XInput. With DirectInput or on Linux it will
-         * contain all button inputs.
-         */
+     * @brief Maps a button code to its state
+     * On Windows this will only contain X-Box gamepad::buttons
+     * when using XInput. With DirectInput or on Linux it will
+     * contain all button inputs.
+     */
     std::map<uint16_t, bool> m_buttons;
 
     /**
-         * @brief Maps an axis to it's state.
-         * The state will range from -1 to 1.
-         * For most gamepads the axis mapping in gamepad::axis is used
-         */
+     * @brief Maps an axis to it's state.
+     * The state will range from -1 to 1.
+     * For most gamepads the axis mapping in gamepad::axis is used
+     */
     std::map<uint16_t, float> m_axis;
 
     /* Misc */
@@ -89,9 +89,9 @@ protected:
     input_event m_last_axis_event = { 0xffff, 0, 0 };
 
     /* Device name, will be used for identifying if no other
-         * IDs where found. Bindings will be mapped using this or
-         * the ID returned from gamepad::device::get_id()
-         */
+     * IDs where found. Bindings will be mapped using this or
+     * the ID returned from gamepad::device::get_id()
+     */
     std::string m_name;
 
     /* Instance of the bindings used for this device
@@ -134,6 +134,11 @@ public:
     bool is_valid() const
     {
         return m_valid;
+    }
+
+    void invalidate()
+    {
+        m_valid = false;
     }
 
     bool has_binding() const
