@@ -121,7 +121,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        target: [arm7ve-win32-msvc, i386-win32-msvc, x86_64-win32-msvc]
+        target: [i386-win32-msvc, x86_64-win32-msvc]
 
     steps:
       - uses: actions/checkout@v1
