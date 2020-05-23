@@ -21,7 +21,20 @@ target_sources(gamepad PRIVATE
 include(GNUInstallDirs)
 
 if (ENABLE_SHARED OR ENABLE_STATIC)
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/libgamepad.hpp DESTINATION include)
+    install(FILES ../include/libgamepad.hpp
+        DESTINATION include)
+    install(FILES ../include/gamepad/binding.hpp
+        ../include/gamepad/binding-dinput.hpp
+        ../include/gamepad/binding-xinput.hpp
+        ../include/gamepad/binding-linux.hpp
+        ../include/gamepad/config.h
+        ../include/gamepad/device.hpp
+        ../include/gamepad/hook.hpp
+        ../include/gamepad/hook-dinput.hpp
+        ../include/gamepad/hook-linux.hpp
+        ../include/gamepad/hook-xinput.hpp
+        ../include/gamepad/log.hpp
+        DESTINATION include/gamepad)
 endif()
 
 if (UNIX)
