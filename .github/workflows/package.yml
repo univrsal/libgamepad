@@ -149,7 +149,6 @@ jobs:
       - name: Compile
         run: |
           cmake -S ${{github.workspace}} -B ${{github.workspace}}\build\${{matrix.target}} `
-          -G "Ninja" `
           -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}\cmake\${{matrix.target}}.cmake `
           -DCMAKE_INSTALL_PREFIX=${{github.workspace}}\dist\${{matrix.target}} `
           -DCMAKE_VERBOSE_MAKEFILE=true -DENABLE_TESTS=ON -DENABLE_STATIC=ON -DENABLE_SHARED=ON
