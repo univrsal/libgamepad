@@ -23,11 +23,12 @@
 namespace gamepad {
 
 class device_xinput : public device {
-	cfg::binding_xinput *m_native_binding = nullptr;
+    cfg::binding_xinput* m_native_binding = nullptr;
+
 public:
-	void init() override;
-	void deinit() override;
-	void update() override;
+    void init() override;
+    void deinit() override;
+    void update() override;
 };
 
 }

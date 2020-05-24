@@ -27,24 +27,24 @@
 #include <string>
 
 namespace gamepad {
-	namespace util {
-	static std::string wchar_to_utf8(const std::wstring &wstr)
-	{
-		if (wstr.empty())
-			return "";
-		std::string result;
-		int char_count = 0;
-		if ((char_count = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, nullptr, 0, 0, 0) - 1) > 0) {
-			char *buf = new char[(int)char_count + 1];
-			if (buf) {
-				WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, buf, char_count, 0, 0);
-				buf[char_count] = '\0';
-				result = buf;
-			}
-		}
-		return result;
-	}
-	}
+namespace util {
+    static std::string wchar_to_utf8(const std::wstring& wstr)
+    {
+        if (wstr.empty())
+            return "";
+        std::string result;
+        int char_count = 0;
+        if ((char_count = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, nullptr, 0, 0, 0) - 1) > 0) {
+            char* buf = new char[(int)char_count + 1];
+            if (buf) {
+                WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, buf, char_count, 0, 0);
+                buf[char_count] = '\0';
+                result = buf;
+            }
+        }
+        return result;
+    }
+}
 
 class hook_dinput : public hook {
     IDirectInput8* m_dinput = nullptr;

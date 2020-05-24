@@ -19,47 +19,14 @@
 #include "binding-default.hpp"
 #include <gamepad/binding-linux.hpp>
 
-namespace gamepad::cfg {
-json linux_default_binding = json::parse(gamepad::defaults::linux_bind_json);
+namespace gamepad {
+namespace cfg {
 
-binding_linux::binding_linux(const json& j)
-    : binding(j)
-{
-}
+    json linux_default_binding = json::parse(gamepad::defaults::linux_bind_json);
 
-void binding_linux::load(const json& j)
-{
-    binding::load(j);
-    m_axis_mappings.clear();
-    m_buttons_mappings.clear();
-
-    for (const auto& val : j) {
-        if (val["is_axis"]) {
-            m_axis_mappings[val["from"]] = val["to"];
-        } else {
-            m_buttons_mappings[val["from"]] = val["to"];
-        }
-    }
-}
-
-void binding_linux::save(json& j)
-{
-    binding::save(j);
-
-    for (const auto& val : m_axis_mappings) {
-        json obj;
-        obj["is_axis"] = true;
-        obj["from"] = val.first;
-        obj["to"] = val.second;
-        j.push_back(obj);
-    }
-
-    for (const auto& val : m_buttons_mappings) {
-        json obj;
-        obj["is_axis"] = false;
-        obj["from"] = val.first;
-        obj["to"] = val.second;
-        j.push_back(obj);
+    binding_linux::binding_linux(const json& j)
+    {
+        load(j);
     }
 }
 }

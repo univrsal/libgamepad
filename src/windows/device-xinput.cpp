@@ -19,7 +19,7 @@
 #include "device-xinput.hpp"
 
 namespace gamepad {
-void device_xinput::init() {}
-void device_xinput::deinit() {}
-void device_xinput::update() {}
+void device_xinput::init() { }
+void device_xinput::deinit() { }
+void device_xinput::update() { }
 }

@@ -103,7 +103,7 @@ std::shared_ptr<hook> hook::make(hook_type type)
     return std::make_shared<hook_linux>();
 #else
 #error "No native hook found"
-	return nullptr;
+    return nullptr;
 #endif
 }
 

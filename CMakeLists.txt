@@ -6,17 +6,12 @@ option(ENABLE_SHARED "Shared library (default: ON)" OFF)
 
 project(libgamepad VERSION 1.0.0 LANGUAGES CXX)
 
-if (UNIX)
-    set(CMAKE_CXX_FLAGS                " ${CMAKE_CXX_FLAGS_INIT} -fPIC")
-    set(CMAKE_CXX_FLAGS_DEBUG          "-g -DDEBUG")
-    set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
-    set(CMAKE_CXX_FLAGS_RELEASE        "-O4 -DNDEBUG")
-    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -DDEBUG")
-endif()
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 
 add_library(gamepad OBJECT
     ./src/hook.cpp
     ./src/log.cpp
+    ./src/binding.cpp
     ./src/binding-default.hpp
     ./src/binding-default.cpp
     )
@@ -112,8 +107,6 @@ if (UNIX)
     find_package(Threads REQUIRED)
     target_link_libraries (gamepad ${CMAKE_THREAD_LIBS_INIT})
 endif()
-
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DDEBUG")
 
 if (ENABLE_TESTS)
     add_executable(libgamepad_tests

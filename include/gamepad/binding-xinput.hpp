@@ -20,13 +20,14 @@
 #include <gamepad/binding.hpp>
 
 namespace gamepad {
-	class device_xinput;
+class device_xinput;
 namespace cfg {
     class binding_xinput : public binding {
 
-    	friend class gamepad::device_xinput;
+        friend class gamepad::device_xinput;
+
     public:
-		binding_xinput(const json &j);
+        binding_xinput(const json& j);
     };
 }
 }

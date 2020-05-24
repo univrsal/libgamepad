@@ -71,10 +71,19 @@ int main()
     auto devs = h->get_devices();
 
     /* Print out devices */
+    ginfo("+-- Connected devices:");
+    ginfo("|");
     for (const auto& dev : devs) {
-        ginfo("Device ID: %s \t\t\tDevice Name: %s", dev->get_id().c_str(),
-            dev->get_name().c_str());
+        ginfo("+-+-- Device ID: %s", dev->get_id().c_str());
+        ginfo("| |");
+        ginfo("| +------- Name: %s", dev->get_name().c_str());
+        if (dev->has_binding()) {
+            ginfo("| |");
+            ginfo("| +---- Binding: %s", dev->get_binding()->get_name().c_str());
+        }
+        ginfo("|");
     }
+    ginfo("+--/");
 
     auto dev = devs[0];
 

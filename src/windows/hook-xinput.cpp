@@ -16,8 +16,8 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <gamepad/hook-xinput.hpp>
 #include <gamepad/binding-xinput.hpp>
+#include <gamepad/hook-xinput.hpp>
 
 namespace gamepad {
 void hook_xinput::query_devices()
@@ -34,9 +34,9 @@ bool hook_xinput::start()
     return false;
 }
 
-std::shared_ptr<cfg::binding> hook_xinput::make_native_binding(const json &j)
+std::shared_ptr<cfg::binding> hook_xinput::make_native_binding(const json& j)
 {
-	return std::make_shared<cfg::binding_xinput>(j);
+    return std::make_shared<cfg::binding_xinput>(j);
 }
 
 }
