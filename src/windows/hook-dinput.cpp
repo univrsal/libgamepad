@@ -77,6 +77,9 @@ void hook_dinput::query_devices()
 
 bool hook_dinput::start()
 {
+    if (m_running)
+        return true;
+
     auto result = DirectInput8Create(GetModuleHandle(nullptr),
         DIRECTINPUT_VERSION, IID_IDirectInput8W, reinterpret_cast<void**>(&m_dinput),
         nullptr);
@@ -111,90 +114,11 @@ shared_ptr<cfg::binding> hook_dinput::make_native_binding(const json& j)
     return make_shared<cfg::binding_dinput>(j);
 }
 
-void hook_dinput::make_xbox_config(const shared_ptr<gamepad::device>& dv,
-    json& out)
+void hook_dinput::on_bind(json& j, uint16_t native_code, uint16_t vc, int16_t val,
+    bool is_axis)
 {
-    if (!m_running)
-        return;
-
-    ginfo("Starting config creation wizard");
-    uint16_t sleep_time = get_sleep_time();
-    uint64_t last_key_input = 0;
-    bool running = true;
-    mutex key_thread_mutex;
-
-    auto key_thread_method = [&]() {
-        while (running) {
-            getchar();
-            key_thread_mutex.lock();
-            last_key_input = ms_ticks();
-            key_thread_mutex.unlock();
-        }
-    };
-
-    thread key_thread(key_thread_method);
-
-    auto binder = [&](const char* prompt, bool axis,
-                      const input_event* e, uint16_t* last,
-                      const vector<tuple<string, uint16_t>>& prompts) {
-        for (const auto& p : prompts) {
-            ginfo("Please %s %s on your gamepad or press enter on your keyboard "
-                  "to skip this bind.",
-                prompt, get<0>(p).c_str());
-            bool success = false;
-            for (;;) {
-                m_mutex.lock();
-                if (e->id != *last && e->value != 0) {
-                    *last = e->id;
-                    m_mutex.unlock();
-                    success = true;
-                    break;
-                }
-                m_mutex.unlock();
-
-                key_thread_mutex.lock();
-                if (ms_ticks() - last_key_input < 100) {
-                    ginfo("Received key input, skipping bind...");
-                    last_key_input = 0;
-                    key_thread_mutex.unlock();
-                    break;
-                }
-                key_thread_mutex.unlock();
-                this_thread::sleep_for(chrono::milliseconds(sleep_time));
-            }
-
-            if (!success)
-                continue;
-
-            ginfo("Received input with id %i", *last);
-            json bind;
-            bind["is_axis"] = axis;
-            bind["from"] = *last;
-            bind["to"] = get<1>(p);
-            /* Special check since Direct Input puts left and right trigger on the same
-                 * axis (one in positive and one in negative direction
-                 */
-            if (get<1>(p) == axis::LEFT_TRIGGER || get<1>(p) == axis::RIGHT_TRIGGER) {
-                bind["trigger_polarity"] = e->value > 0 ? 1 : -1;
-            }
-            out.emplace_back(bind);
-        }
-    };
-
-    uint16_t last_button = dv->last_button_event()->id,
-             last_axis = dv->last_axis_event()->id;
-
-    /* Button bindings */
-    binder("press", false, dv->last_button_event(), &last_button,
-        button_prompts);
-
-    /* Axis bindings */
-    binder("move", true, dv->last_axis_event(), &last_axis, axis_prompts);
-    key_thread_mutex.lock();
-    running = false;
-    key_thread_mutex.unlock();
-    ginfo("Done. Press Enter to print config json.");
-    key_thread.join();
+    if (is_axis && vc == axis::LEFT_TRIGGER || vc == axis::RIGHT_TRIGGER)
+        j["trigger_polarity"] = val > 0 ? 1 : -1;
 }
 
 }

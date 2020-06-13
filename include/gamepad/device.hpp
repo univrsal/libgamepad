@@ -60,8 +60,9 @@ namespace axis {
 }
 
 struct input_event {
-    uint16_t id;
-    int16_t value;
+    uint16_t native_id;
+    uint16_t vc;
+    int32_t value;
     uint64_t time;
 };
 
@@ -100,6 +101,9 @@ protected:
          */
     std::shared_ptr<cfg::binding> m_binding;
     bool m_valid = false;
+
+    void button_event(uint16_t native_id, uint16_t vc, int32_t value);
+    void axis_event(uint16_t native_id, uint16_t vc, int32_t value);
 
 public:
     device() = default;

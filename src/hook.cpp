@@ -28,8 +28,7 @@
 using namespace std;
 
 namespace gamepad {
-vector<tuple<string, uint16_t>> hook::button_prompts = {
-    { "A", button::A },
+vector<tuple<string, uint16_t>> hook::button_prompts = { { "A", button::A },
     { "B", button::B },
     { "X", button::X },
     { "Y", button::Y },
@@ -43,17 +42,14 @@ vector<tuple<string, uint16_t>> hook::button_prompts = {
     { "dpad up", button::DPAD_UP },
     { "dpad down", button::DPAD_DOWN },
     { "LB", button::LB },
-    { "RB", button::RB }
-};
+    { "RB", button::RB } };
 
-vector<tuple<string, uint16_t>> hook::axis_prompts = {
-    { "left analog stick horizontally", axis::LEFT_STICK_X },
+vector<tuple<string, uint16_t>> hook::axis_prompts = { { "left analog stick horizontally", axis::LEFT_STICK_X },
     { "left analog stick vertically", axis::LEFT_STICK_Y },
     { "left trigger", axis::LEFT_TRIGGER },
     { "right analog stick horizontally", axis::RIGHT_STICK_X },
     { "right analog vertically", axis::RIGHT_STICK_Y },
-    { "right trigger", axis::RIGHT_TRIGGER }
-};
+    { "right trigger", axis::RIGHT_TRIGGER } };
 
 void default_hook_thread(class hook* h)
 {
@@ -75,6 +71,11 @@ void default_hook_thread(class hook* h)
     ginfo("Hook thread ended");
 }
 
+void hook::on_bind(json& j, uint16_t native_code, uint16_t vc, int16_t val, bool is_axis)
+{
+    /* NO-OP */
+}
+
 uint64_t hook::ms_ticks()
 {
     auto now = chrono::system_clock::now();
@@ -83,10 +84,7 @@ uint64_t hook::ms_ticks()
 
 std::shared_ptr<cfg::binding> hook::get_binding_for_device(const std::string& id)
 {
-    auto result = find_if(m_devices.begin(), m_devices.end(),
-        [&id](shared_ptr<device>& b) {
-            return b->get_id() == id;
-        });
+    auto result = find_if(m_devices.begin(), m_devices.end(), [&id](shared_ptr<device>& b) { return b->get_id() == id; });
 
     return (*result)->get_binding();
 }
@@ -114,8 +112,8 @@ void hook::close_devices()
         /* Tell any left over references that this instance isn't updated anymore */
         m_devices[i]->invalidate();
         if (m_devices[i].use_count() > 1) {
-            gwarn("Gamepad device '%s' is still in use! (Ref count %li)",
-                m_devices[i]->get_id().c_str(), m_devices[i].use_count());
+            gwarn("Gamepad device '%s' is still in use! (Ref count %li)", m_devices[i]->get_id().c_str(),
+                m_devices[i].use_count());
         }
     }
     m_devices.clear();
@@ -129,8 +127,7 @@ void hook::close_bindings()
         /* One reference in the bindings list
          * and one for this for loop */
         if (bind.use_count() > 2) {
-            gerr("Gamepad binding '%s' is still in use! (Ref count %li)",
-                bind->get_name().c_str(), bind.use_count());
+            gerr("Gamepad binding '%s' is still in use! (Ref count %li)", bind->get_name().c_str(), bind.use_count());
         }
     }
 
@@ -140,6 +137,9 @@ void hook::close_bindings()
 
 bool hook::start()
 {
+    if (m_running)
+        return true;
+
     query_devices();
 
     if (m_devices.size() < 1)
@@ -208,8 +208,7 @@ bool hook::load_bindings(const std::string& path)
         if (load_bindings(j)) {
             return true;
         }
-        gerr("Couldn't parse json when loading bindings from '%s'",
-            path.c_str());
+        gerr("Couldn't parse json when loading bindings from '%s'", path.c_str());
     }
     gerr("Couldn't read bindings from '%s'", path.c_str());
     return false;
@@ -217,8 +216,7 @@ bool hook::load_bindings(const std::string& path)
 
 bool hook::load_bindings(const json& j)
 {
-    json device_array = j["devices"],
-         binding_array = j["bindings"];
+    json device_array = j["devices"], binding_array = j["bindings"];
 
     for (const auto& bind : binding_array)
         m_bindings.emplace_back(make_native_binding(bind));
@@ -233,8 +231,7 @@ bool hook::load_bindings(const json& j)
     return true;
 }
 
-bool hook::set_device_binding(const std::string& device_id,
-    const std::string& binding_id)
+bool hook::set_device_binding(const std::string& device_id, const std::string& binding_id)
 {
     auto dev = get_device_by_id(device_id);
     auto result = false;
@@ -254,10 +251,7 @@ bool hook::set_device_binding(const std::string& device_id,
 
 shared_ptr<device> hook::get_device_by_id(const std::string& id)
 {
-    auto result = find_if(m_devices.begin(), m_devices.end(),
-        [&id](shared_ptr<device>& d) {
-            return d->get_id() == id;
-        });
+    auto result = find_if(m_devices.begin(), m_devices.end(), [&id](shared_ptr<device>& d) { return d->get_id() == id; });
 
     if (result == m_devices.end())
         return nullptr;
@@ -267,17 +261,14 @@ shared_ptr<device> hook::get_device_by_id(const std::string& id)
 std::shared_ptr<cfg::binding> hook::get_binding_by_name(const std::string& name)
 {
     auto result = find_if(m_bindings.begin(), m_bindings.end(),
-        [&name](shared_ptr<cfg::binding>& b) {
-            return b->get_name() == name;
-        });
+        [&name](shared_ptr<cfg::binding>& b) { return b->get_name() == name; });
 
     if (result == m_bindings.end())
         return nullptr;
     return *result;
 }
 
-void hook::make_xbox_config(const std::shared_ptr<gamepad::device>& dv,
-    json& out)
+void hook::make_xbox_config(const std::shared_ptr<gamepad::device>& dv, json& out)
 {
     if (!m_running)
         return;
@@ -299,8 +290,7 @@ void hook::make_xbox_config(const std::shared_ptr<gamepad::device>& dv,
 
     thread key_thread(key_thread_method);
 
-    auto binder = [&](const char* prompt, bool axis,
-                      const input_event* e, uint16_t* last,
+    auto binder = [&](const char* prompt, bool axis, const input_event* e, uint16_t* last,
                       const vector<tuple<string, uint16_t>>& prompts) {
         for (const auto& p : prompts) {
             ginfo("Please %s %s on your gamepad or press enter on your keyboard "
@@ -309,8 +299,8 @@ void hook::make_xbox_config(const std::shared_ptr<gamepad::device>& dv,
             bool success = false;
             for (;;) {
                 m_mutex.lock();
-                if (e->id != *last && e->value != 0) {
-                    *last = e->id;
+                if (e->native_id != *last && e->value != 0) {
+                    *last = e->native_id;
                     m_mutex.unlock();
                     success = true;
                     break;
@@ -336,16 +326,16 @@ void hook::make_xbox_config(const std::shared_ptr<gamepad::device>& dv,
             bind["is_axis"] = axis;
             bind["from"] = *last;
             bind["to"] = get<1>(p);
+            on_bind(bind, *last, get<1>(p), e->value, axis);
+
             out.emplace_back(bind);
         }
     };
 
-    uint16_t last_button = dv->last_button_event()->id,
-             last_axis = dv->last_axis_event()->id;
+    uint16_t last_button = dv->last_button_event()->native_id, last_axis = dv->last_axis_event()->native_id;
 
     /* Button bindings */
-    binder("press", false, dv->last_button_event(), &last_button,
-        button_prompts);
+    binder("press", false, dv->last_button_event(), &last_button, button_prompts);
 
     /* Axis bindings */
     binder("move", true, dv->last_axis_event(), &last_axis, axis_prompts);
@@ -355,5 +345,4 @@ void hook::make_xbox_config(const std::shared_ptr<gamepad::device>& dv,
     ginfo("Done. Press Enter to print config json.");
     key_thread.join();
 }
-
 }

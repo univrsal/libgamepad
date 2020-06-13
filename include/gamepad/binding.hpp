@@ -33,6 +33,7 @@ namespace cfg {
 
     public:
         binding() = default;
+        binding(const json& j);
 
         virtual bool load(const json& j);
         virtual void save(json& j) const;

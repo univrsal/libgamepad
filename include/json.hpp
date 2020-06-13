@@ -10040,7 +10040,8 @@ private:
              pos != std::string::npos; // make sure f was found
              s.replace(pos, f.size(), t), // replace with t, and
              pos = s.find(f, pos + t.size())) // find next occurrence of f
-        { }
+        {
+        }
     }
 
     /// escape "~" to "~0" and "/" to "~1"

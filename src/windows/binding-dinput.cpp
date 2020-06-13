@@ -27,13 +27,13 @@ namespace cfg {
 
     binding_dinput::binding_dinput(const json& j)
     {
-        load(j);
+        binding_dinput::load(j);
     }
 
     bool binding_dinput::load(const json& j)
     {
         /* Do not call super method here since
-     * we reimplement the entire save process */
+         * we reimplement the entire save process */
         bool result = false;
         if (j.is_object()) {
             m_binding_name = j["name"].get<std::string>();

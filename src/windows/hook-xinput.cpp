@@ -17,11 +17,18 @@
  **/
 
 #include <gamepad/binding-xinput.hpp>
+#include <gamepad/hook-dinput.hpp>
 #include <gamepad/hook-xinput.hpp>
+#include <gamepad/log.hpp>
 
 namespace gamepad {
+
 void hook_xinput::query_devices()
 {
+    m_mutex.lock();
+    m_devices.clear();
+
+    m_mutex.unlock();
 }
 
 bool hook_xinput::load_bindings(const json& j)
@@ -31,12 +38,36 @@ bool hook_xinput::load_bindings(const json& j)
 
 bool hook_xinput::start()
 {
-    return false;
+    if (m_running)
+        return true;
+
+    TCHAR sys_dir[MAX_PATH];
+    GetSystemDirectory(sys_dir, sizeof(sys_dir));
+    std::wstring dll = L"\\xinput1_3.dll";
+    dll = sys_dir + dll;
+
+    ginfo("Loading Xinput from %s", util::wchar_to_utf8(dll).c_str());
+
+    m_xinput = LoadLibrary(dll.c_str());
+
+    if (m_xinput) {
+        m_xinput_refresh = reinterpret_cast<xinput_refresh_t>(GetProcAddress(m_xinput, LPCSTR(100)));
+
+        if (m_xinput_refresh) {
+            ginfo("Xinput 1.3 loaded successfuly");
+        } else {
+            gerr("Loading Xinput failed: %lu", GetLastError());
+        }
+    } else {
+        auto code = GetLastError();
+        gerr("Loading Xinput failed: %lu", GetLastError());
+        return false;
+    }
+    return hook::start();
 }
 
 std::shared_ptr<cfg::binding> hook_xinput::make_native_binding(const json& j)
 {
     return std::make_shared<cfg::binding_xinput>(j);
 }
-
 }

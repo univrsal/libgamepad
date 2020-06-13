@@ -19,6 +19,9 @@
 #pragma once
 
 #define DIRECTINPUT_VERSION 0x0800
+#define VC_EXTRALEAN
+#define WIN32_LEAN_AND_MEAN
+
 #include <dinput.h>
 #include <gamepad/binding-dinput.hpp>
 #include <gamepad/device.hpp>
@@ -46,9 +49,6 @@ class device_dinput : public device {
     DIDEVCAPS m_capabilities;
     DIJOYSTATE2 m_new_state {}, m_old_state {};
 
-    void button_event(uint16_t id, uint16_t value);
-    void axis_event(uint16_t id, uint16_t value);
-
     enum {
         DPAD_UP = 128, /* 0 - 127 is used for other gamepad buttons in DIJOYSTATE2 */
         DPAD_LEFT,
@@ -66,8 +66,6 @@ public:
     void update() override;
     void set_binding(std::shared_ptr<cfg::binding>&& b) override;
 
-    friend BOOL CALLBACK enum_device_objects_callback(
-        LPCDIDEVICEOBJECTINSTANCE obj,
-        LPVOID data);
+    friend BOOL CALLBACK enum_device_objects_callback(LPCDIDEVICEOBJECTINSTANCE obj, LPVOID data);
 };
 }

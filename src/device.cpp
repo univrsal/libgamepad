@@ -16,39 +16,23 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#pragma once
-
+#include <gamepad/device.hpp>
 #include <gamepad/hook.hpp>
 
-#ifdef LGP_WINDOWS
-#define VC_EXTRALEAN
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-
 namespace gamepad {
-
-typedef struct {
-    unsigned long eventCount;
-    WORD wButtons;
-    BYTE bLeftTrigger;
-    BYTE bRightTrigger;
-    SHORT sThumbLX;
-    SHORT sThumbLY;
-    SHORT sThumbRX;
-    SHORT sThumbRY;
-} xinput_pad;
-
-typedef int(__stdcall* xinput_refresh_t)(int, xinput_pad*);
-
-class hook_xinput : public hook {
-    HINSTANCE m_xinput;
-    xinput_refresh_t m_xinput_refresh = nullptr;
-
-public:
-    void query_devices() override;
-    bool start() override;
-    bool load_bindings(const json& j) override;
-    virtual std::shared_ptr<cfg::binding> make_native_binding(const json& j) override;
-};
+void device::button_event(uint16_t native_id, uint16_t vc, int32_t value)
+{
+    m_last_button_event.native_id = native_id;
+    m_last_button_event.value = value;
+    m_last_button_event.vc = vc;
+    m_last_button_event.time = gamepad::hook::ms_ticks();
 }
-#endif
+
+void device::axis_event(uint16_t native_id, uint16_t vc, int32_t value)
+{
+    m_last_axis_event.native_id = native_id;
+    m_last_axis_event.value = value;
+    m_last_axis_event.vc = vc;
+    m_last_axis_event.time = hook::ms_ticks();
+}
+};

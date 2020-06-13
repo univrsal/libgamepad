@@ -275,24 +275,9 @@ BOOL CALLBACK enum_device_objects_callback(
     return DIENUM_CONTINUE;
 }
 
-void device_dinput::button_event(uint16_t id, uint16_t value)
-{
-    m_last_button_event.id = id;
-    m_last_button_event.value = value;
-    m_last_button_event.time = hook::ms_ticks();
-}
-
-void device_dinput::axis_event(uint16_t id, uint16_t value)
-{
-
-    m_last_axis_event.id = id;
-    m_last_axis_event.value = value;
-    m_last_axis_event.time = hook::ms_ticks();
-}
-
 device_dinput::device_dinput(LPCDIDEVICEINSTANCE dev, IDirectInput8* dinput, HWND hook_window)
-    : m_device_instance(dev)
-    , m_dinput(dinput)
+    : m_dinput(dinput)
+    , m_device_instance(dev)
     , m_hook_window(hook_window)
 {
     device_dinput::init();
@@ -492,10 +477,10 @@ void device_dinput::update()
 
         bool pressed = (m_new_state.rgbButtons[i] & 0x80) == 0x80;
         bool old_pressed = (m_old_state.rgbButtons[i] & 0x80) == 0x80;
-
+        uint16_t vc = 0;
         if (m_native_binding) {
-            auto new_code = m_native_binding->m_buttons_mappings[i];
-            m_buttons[new_code] = pressed;
+            vc = m_native_binding->m_buttons_mappings[i];
+            m_buttons[vc] = pressed;
         }
 
         /* This button changed over to pressed
@@ -505,7 +490,7 @@ void device_dinput::update()
              * this is only used for creating binds it's not an issue.
              */
         if (pressed != old_pressed) {
-            button_event(i, pressed);
+            button_event(i, vc, pressed);
         }
     }
 
@@ -553,20 +538,12 @@ void device_dinput::update()
     check_pov(m_new_state.rgdwPOV[0], up, down, left, right);
     check_pov(m_old_state.rgdwPOV[0], old_up, old_down, old_left, old_right);
 
-    if (up != old_up)
-        button_event(DPAD_UP, up);
-    if (left != old_left)
-        button_event(DPAD_LEFT, left);
-    if (down != old_down)
-        button_event(DPAD_DOWN, down);
-    if (right != old_right)
-        button_event(DPAD_RIGHT, right);
-
+    uint16_t up_code = 0, left_code = 0, down_code = 0, right_code = 0;
     if (m_native_binding) {
-        auto up_code = m_native_binding->m_buttons_mappings[DPAD_UP];
-        auto left_code = m_native_binding->m_buttons_mappings[DPAD_LEFT];
-        auto down_code = m_native_binding->m_buttons_mappings[DPAD_DOWN];
-        auto right_code = m_native_binding->m_buttons_mappings[DPAD_RIGHT];
+        up_code = m_native_binding->m_buttons_mappings[DPAD_UP];
+        left_code = m_native_binding->m_buttons_mappings[DPAD_LEFT];
+        down_code = m_native_binding->m_buttons_mappings[DPAD_DOWN];
+        right_code = m_native_binding->m_buttons_mappings[DPAD_RIGHT];
 
         m_buttons[up_code] = up;
         m_buttons[down_code] = down;
@@ -574,86 +551,44 @@ void device_dinput::update()
         m_buttons[right_code] = right;
     }
 
+    if (up != old_up)
+        button_event(DPAD_UP, up_code, up);
+    if (left != old_left)
+        button_event(DPAD_LEFT, left_code, left);
+    if (down != old_down)
+        button_event(DPAD_DOWN, down_code, down);
+    if (right != old_right)
+        button_event(DPAD_RIGHT, right_code, right);
+
     /* Check all axis */
-    if (m_analog) {
-        for (const auto& axis : m_axis_inputs) {
-            int16_t val = 0, last_val = 0;
-            switch (axis.offset) {
-            case DIJOFS_X:
-                val = m_new_state.lX;
-                last_val = m_old_state.lX;
-                break;
-            case DIJOFS_Y:
-                val = m_new_state.lY;
-                last_val = m_old_state.lY;
-                break;
-            case DIJOFS_Z:
-                val = m_new_state.lZ;
-                last_val = m_old_state.lZ;
-                break;
-            case DIJOFS_RX:
-                val = m_new_state.lRx;
-                last_val = m_old_state.lRx;
-                break;
-            case DIJOFS_RY:
-                val = m_new_state.lRy;
-                last_val = m_old_state.lRy;
-                break;
-            case DIJOFS_RZ:
-                val = m_new_state.lRz;
-                last_val = m_old_state.lRz;
-                break;
-            case DIJOFS_SLIDER(0):
-                val = m_new_state.rglSlider[0];
-                last_val = m_old_state.rglSlider[0];
-                break;
-            case DIJOFS_SLIDER(1):
-                val = m_new_state.rglSlider[1];
-                last_val = m_old_state.rglSlider[1];
-                break;
-            default:;
-            }
-
-            if (m_native_binding) {
-
-                auto vc = m_native_binding->m_axis_mappings[axis.offset];
-                if (vc == axis::LEFT_TRIGGER || vc == axis::RIGHT_TRIGGER) {
-                    if (val > 0) {
-                        if (m_native_binding->m_right_trigger_polarity > 0) {
-                            m_axis[axis::RIGHT_TRIGGER] = (val - (DINPUT_AXIS_MAX / 2)) / (DINPUT_AXIS_MAX / 2);
-                        } else {
-                            m_axis[axis::LEFT_TRIGGER] = (val - (DINPUT_AXIS_MAX / 2)) / (DINPUT_AXIS_MAX / 2);
-                        }
-                    } else {
-                        if (m_native_binding->m_left_trigger_polarity < 0) {
-                            m_axis[axis::LEFT_TRIGGER] = (val + (DINPUT_AXIS_MAX / 2)) / (DINPUT_AXIS_MAX / 2);
-                        } else {
-                            m_axis[axis::RIGHT_TRIGGER] = (val + (DINPUT_AXIS_MAX / 2)) / (DINPUT_AXIS_MAX / 2);
-                        }
-                    }
-                } else {
-                    m_axis[vc] = float(val) / DINPUT_AXIS_MAX;
-                }
-            }
-
-            if (abs(last_val - val) > 50) {
-                axis_event(axis.offset, val);
-            }
-        }
-    }
-
     for (auto i = 0ul; i < m_axis_new.size(); i++) {
-        /* Range is -1000 to 1000 so 10 should be a good threshold */
-        bool moved = *(m_axis_new[i]) > 50 || *(m_axis_new[i]) < -50;
 
+        uint16_t vc = 0;
         if (m_native_binding) {
-            auto new_code = m_native_binding->m_axis_mappings[i];
-            m_axis[new_code] = *(m_axis_new[i]) / DINPUT_AXIS_MAX;
+            auto val = *(m_axis_new[i]);
+            vc = m_native_binding->m_axis_mappings[i];
+            if (vc == axis::LEFT_TRIGGER || vc == axis::RIGHT_TRIGGER) {
+                if (val > 0) {
+                    if (m_native_binding->m_right_trigger_polarity > 0)
+                        vc = axis::RIGHT_TRIGGER;
+                    else
+                        vc = axis::LEFT_TRIGGER;
+                } else {
+                    if (m_native_binding->m_left_trigger_polarity < 0)
+                        vc = axis::LEFT_TRIGGER;
+                    else
+                        vc = axis::RIGHT_TRIGGER;
+                }
+
+                m_axis[vc] = (val - (DINPUT_AXIS_MAX / 2)) / (DINPUT_AXIS_MAX / 2);
+            } else {
+                m_axis[vc] = float(val) / DINPUT_AXIS_MAX;
+            }
         }
 
         /* If the position changed */
-        if (moved && abs((*(m_axis_old)[i]) - (*m_axis_new[i])) > 50) {
-            axis_event(i, *m_axis_new[i]);
+        if (abs((*(m_axis_old)[i]) - (*m_axis_new[i])) > 50) {
+            axis_event(i, vc, *m_axis_new[i]);
         }
     }
 }

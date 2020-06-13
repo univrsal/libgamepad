@@ -51,48 +51,51 @@ protected:
     volatile bool m_running = false;
     uint16_t m_thread_sleep = 50;
 
+    /* Can be used for platform specific bind options
+	 * Only used for DirectInput currently, which needs a sepcial hack
+	 * for separating the left and right trigger
+	 */
+    virtual void on_bind(json& j, uint16_t native_code, uint16_t vc, int16_t val, bool is_axis);
+
 public:
-    ~hook()
-    {
-        stop();
-    }
+    ~hook() { stop(); }
 
     /**
-         * @brief get the hook thread mutex, use this to safely access
-         * input data
-         * @return The hook mutex
-         */
+     * @brief get the hook thread mutex, use this to safely access
+     * input data
+     * @return The hook mutex
+     */
     std::mutex* get_mutex() { return &m_mutex; }
 
     /**
-         * @return Thread sleep time in miliseconds
-         */
+     * @return Thread sleep time in miliseconds
+     */
     uint16_t get_sleep_time() const { return m_thread_sleep; }
 
     /**
-         * @return true if the hook thread is running
-         */
+     * @return true if the hook thread is running
+     */
     bool running() const { return m_running; }
 
     /**
-         * @brief Save bindings to a file
-         * @param path The target path
-         * @return true on success
-         */
+     * @brief Save bindings to a file
+     * @param path The target path
+     * @return true on success
+     */
     bool save_bindings(const std::string& path);
 
     /**
-         * @brief Saves bindings and the mapping to json
-         * @param j Output json
-         * @return true on success
-         */
+     * @brief Saves bindings and the mapping to json
+     * @param j Output json
+     * @return true on success
+     */
     virtual bool save_bindings(json& j);
 
     /**
-         * @brief load bindings from file
-         * @param path
-         * @return true on sucess
-         */
+     * @brief load bindings from file
+     * @param path
+     * @return true on sucess
+     */
     bool load_bindings(const std::string& path);
 
     virtual bool load_bindings(const json& j);
@@ -116,8 +119,7 @@ public:
     std::shared_ptr<device> get_device_by_id(const std::string& id);
     std::shared_ptr<cfg::binding> get_binding_by_name(const std::string& name);
     const device_list& get_devices() const { return m_devices; }
-    bool set_device_binding(const std::string& device_id,
-        const std::string& binding_id);
+    bool set_device_binding(const std::string& device_id, const std::string& binding_id);
 
     static std::shared_ptr<hook> make(hook_type type = hook_type::NATIVE_DEFAULT);
     static uint64_t ms_ticks();

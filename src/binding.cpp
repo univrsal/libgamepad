@@ -22,6 +22,11 @@
 namespace gamepad {
 namespace cfg {
 
+    binding::binding(const json& j)
+    {
+        binding::load(j);
+    }
+
     bool binding::load(const json& j)
     {
         bool result = false;

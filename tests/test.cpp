@@ -71,6 +71,7 @@ int main()
     auto devs = h->get_devices();
 
     /* Print out devices */
+    h->get_mutex()->lock(); /* Make sure this gets printed in one piece as sometimes the hook thread will barge in */
     ginfo("+-- Connected devices:");
     ginfo("|");
     for (const auto& dev : devs) {
@@ -84,15 +85,11 @@ int main()
         ginfo("|");
     }
     ginfo("+--/");
+    h->get_mutex()->unlock();
 
-    auto dev = devs[0];
+    const auto& dev = devs[0];
 
-    if (!dev->has_binding()) {
-        ginfo("Found device, running config wizard");
-        json cfg;
-        h->make_xbox_config(dev, cfg);
-        ginfo("Result config: %s", cfg.dump(4).c_str());
-    } else {
+    if (dev->has_binding()) {
         ginfo("First device already has default bindings");
         h->get_mutex()->lock();
         auto last_axis = dev->last_axis_event()->time;
@@ -103,13 +100,14 @@ int main()
             h->get_mutex()->lock();
 
             if (dev->last_axis_event()->time != last_axis) {
-                ginfo("Received axis event: %i val: %i", dev->last_axis_event()->id,
-                    dev->last_axis_event()->value);
+                ginfo("Received axis event: Native id: %i, Virtual id: %i val: %i", dev->last_axis_event()->native_id,
+                    dev->last_axis_event()->vc, dev->last_axis_event()->value);
                 last_axis = dev->last_axis_event()->time;
             }
 
             if (dev->last_button_event()->time != last_button) {
-                ginfo("Received button event: %i val: %i", dev->last_button_event()->id,
+                ginfo("Received button event: Native id: %i, Virtual id: %i val: %i",
+                    dev->last_button_event()->native_id, dev->last_button_event()->vc,
                     dev->last_button_event()->value);
                 last_button = dev->last_button_event()->time;
             }
@@ -117,5 +115,10 @@ int main()
             h->get_mutex()->unlock();
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
         }
+    } else {
+        ginfo("Found device, running config wizard");
+        json cfg;
+        h->make_xbox_config(dev, cfg);
+        ginfo("Result config: %s", cfg.dump(4).c_str());
     }
 }
