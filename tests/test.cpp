@@ -116,9 +116,13 @@ int main()
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
         }
     } else {
+#ifdef LGP_ENABLE_JSON
         ginfo("Found device, running config wizard");
-        json cfg;
+        json11::Json cfg;
         h->make_xbox_config(dev, cfg);
-        ginfo("Result config: %s", cfg.dump(4).c_str());
+        ginfo("Result config: %s", cfg.dump().c_str());
+#else
+        ginfo("Json isn't enabled for libgamepad, so the config wizard can't be used");
+#endif
     }
 }

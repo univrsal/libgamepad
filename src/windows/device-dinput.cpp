@@ -22,13 +22,6 @@
 #include <gamepad/hook-dinput.hpp>
 #include <gamepad/log.hpp>
 
-/* Nabbed from ppsspp dinput code */
-#define DIFF (JOY_POVRIGHT - JOY_POVFORWARD) / 2
-#define JOY_POVFORWARD_RIGHT JOY_POVFORWARD + DIFF
-#define JOY_POVRIGHT_BACKWARD JOY_POVRIGHT + DIFF
-#define JOY_POVBACKWARD_LEFT JOY_POVBACKWARD + DIFF
-#define JOY_POVLEFT_FORWARD JOY_POVLEFT + DIFF
-
 using namespace std;
 
 #define DINPUT_AXIS_MAX 1000

@@ -19,30 +19,33 @@
 #include <gamepad/binding.hpp>
 #include <gamepad/log.hpp>
 
+using namespace json11;
+
 namespace gamepad {
 namespace cfg {
 
-    binding::binding(const json& j)
+#ifdef LGP_ENABLE_JSON
+    binding::binding(const Json& j)
     {
         binding::load(j);
     }
 
-    bool binding::load(const json& j)
+    bool binding::load(const Json& j)
     {
         bool result = false;
         if (j.is_object()) {
-            m_binding_name = j["name"].get<std::string>();
+            m_binding_name = j["name"].string_value();
             auto arr = j["binds"];
 
             if (arr.is_array()) {
                 m_axis_mappings.clear();
                 m_buttons_mappings.clear();
 
-                for (const auto& val : arr) {
-                    if (val["is_axis"]) {
-                        m_axis_mappings[val["from"]] = val["to"];
+                for (const auto& val : arr.array_items()) {
+                    if (val["is_axis"].bool_value()) {
+                        m_axis_mappings[val["from"].int_value()] = val["to"].int_value();
                     } else {
-                        m_buttons_mappings[val["from"]] = val["to"];
+                        m_buttons_mappings[val["from"].int_value()] = val["to"].int_value();
                     }
                 }
                 result = true;
@@ -55,27 +58,41 @@ namespace cfg {
         return result;
     }
 
-    void binding::save(json& j) const
+    void binding::save(Json& j) const
     {
-        j["name"] = m_binding_name;
-        json arr = json::array();
+        Json name = Json::object { { "name", m_binding_name } };
+        Json arr;
+        std::vector<Json> binds;
 
         for (const auto& val : m_axis_mappings) {
-            json obj;
-            obj["is_axis"] = true;
-            obj["from"] = val.first;
-            obj["to"] = val.second;
-            arr.push_back(obj);
+            Json obj = Json::object { { "is_axis", true }, { "from", val.first }, { "to", val.second } };
+            binds.emplace_back(obj);
         }
 
         for (const auto& val : m_buttons_mappings) {
-            json obj;
-            obj["is_axis"] = false;
-            obj["from"] = val.first;
-            obj["to"] = val.second;
-            arr.push_back(obj);
+            Json obj = Json::object { { "is_axis", false }, { "from", val.first }, { "to", val.second } };
+            binds.emplace_back(obj);
         }
-        j["binds"] = arr;
+        j = Json::object { { "name", m_binding_name }, { "binds", binds } };
+    }
+#endif /* LGP_ENABLE_JSON */
+
+    bool binding::load(const std::string& json)
+    {
+        std::string err;
+        const auto j = Json::parse(json.c_str(), err);
+        if (err.empty()) {
+            return load(j);
+        }
+        gerr("Couldn't load JSON: %s", err.c_str());
+        return false;
+    }
+
+    void binding::save(std::string& json)
+    {
+        Json j;
+        save(j);
+        j.dump(json);
     }
 
 }

@@ -47,8 +47,10 @@ class hook_xinput : public hook {
 public:
     void query_devices() override;
     bool start() override;
-    bool load_bindings(const json& j) override;
-    virtual std::shared_ptr<cfg::binding> make_native_binding(const json& j) override;
+
+#ifdef LGP_ENABLE_JSON
+    virtual std::shared_ptr<cfg::binding> make_native_binding(const json11::Json& j) override;
+#endif
 };
 }
 #endif

@@ -22,6 +22,7 @@
 #include <gamepad/log.hpp>
 
 using namespace std;
+using namespace json11;
 
 namespace gamepad {
 
@@ -65,8 +66,7 @@ void hook_dinput::query_devices()
 {
     m_mutex.lock();
     m_devices.clear();
-    auto result = m_dinput->EnumDevices(DI8DEVCLASS_GAMECTRL, enum_callback,
-        this, DIEDFL_ATTACHEDONLY);
+    auto result = m_dinput->EnumDevices(DI8DEVCLASS_GAMECTRL, enum_callback, this, DIEDFL_ATTACHEDONLY);
 
     if (FAILED(result)) {
         gerr("Enumeration of Direct Input devices failed");
@@ -80,9 +80,8 @@ bool hook_dinput::start()
     if (m_running)
         return true;
 
-    auto result = DirectInput8Create(GetModuleHandle(nullptr),
-        DIRECTINPUT_VERSION, IID_IDirectInput8W, reinterpret_cast<void**>(&m_dinput),
-        nullptr);
+    auto result = DirectInput8Create(GetModuleHandle(nullptr), DIRECTINPUT_VERSION, IID_IDirectInput8W,
+        reinterpret_cast<void**>(&m_dinput), nullptr);
     if (FAILED(result)) {
         gerr("Couldn't create DirectInput interface");
         return false;
@@ -96,9 +95,9 @@ bool hook_dinput::start()
     wc.lpszClassName = L"libgamepad_window_class";
 
     if (RegisterClass(&wc)) {
-        m_hook_window = CreateWindowEx(WS_EX_CLIENTEDGE, L"libgamepad_window_class",
-            L"libgampead_window", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
-            240, 120, nullptr, nullptr, wc.hInstance, nullptr);
+        m_hook_window = CreateWindowEx(WS_EX_CLIENTEDGE, L"libgamepad_window_class", L"libgampead_window",
+            WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 240, 120, nullptr, nullptr,
+            wc.hInstance, nullptr);
     }
 
     if (m_hook_window == nullptr) {
@@ -109,16 +108,14 @@ bool hook_dinput::start()
     return hook::start();
 }
 
-shared_ptr<cfg::binding> hook_dinput::make_native_binding(const json& j)
+shared_ptr<cfg::binding> hook_dinput::make_native_binding(const Json& j)
 {
     return make_shared<cfg::binding_dinput>(j);
 }
 
-void hook_dinput::on_bind(json& j, uint16_t native_code, uint16_t vc, int16_t val,
-    bool is_axis)
+void hook_dinput::on_bind(Json::object& j, uint16_t native_code, uint16_t vc, int16_t val, bool is_axis)
 {
     if (is_axis && vc == axis::LEFT_TRIGGER || vc == axis::RIGHT_TRIGGER)
         j["trigger_polarity"] = val > 0 ? 1 : -1;
 }
-
 }

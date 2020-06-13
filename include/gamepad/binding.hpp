@@ -18,9 +18,7 @@
 
 #pragma once
 
-#include <json.hpp>
-
-using json = nlohmann::json;
+#include <json/json11.hpp>
 
 namespace gamepad {
 namespace cfg {
@@ -33,10 +31,16 @@ namespace cfg {
 
     public:
         binding() = default;
-        binding(const json& j);
 
-        virtual bool load(const json& j);
-        virtual void save(json& j) const;
+#ifdef LGP_ENABLE_JSON
+        binding(const json11::Json& j);
+
+        virtual bool load(const json11::Json& j);
+        virtual void save(json11::Json& j) const;
+#endif
+
+        virtual bool load(const std::string& json);
+        virtual void save(std::string& json);
 
         const std::string& get_name() const { return m_binding_name; }
     };

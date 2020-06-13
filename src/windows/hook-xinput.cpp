@@ -21,6 +21,8 @@
 #include <gamepad/hook-xinput.hpp>
 #include <gamepad/log.hpp>
 
+using namespace json11;
+
 namespace gamepad {
 
 void hook_xinput::query_devices()
@@ -29,11 +31,6 @@ void hook_xinput::query_devices()
     m_devices.clear();
 
     m_mutex.unlock();
-}
-
-bool hook_xinput::load_bindings(const json& j)
-{
-    return false;
 }
 
 bool hook_xinput::start()
@@ -66,7 +63,7 @@ bool hook_xinput::start()
     return hook::start();
 }
 
-std::shared_ptr<cfg::binding> hook_xinput::make_native_binding(const json& j)
+std::shared_ptr<cfg::binding> hook_xinput::make_native_binding(const Json& j)
 {
     return std::make_shared<cfg::binding_xinput>(j);
 }

@@ -26,6 +26,7 @@
 #include <iomanip>
 
 using namespace std;
+using namespace json11;
 
 namespace gamepad {
 vector<tuple<string, uint16_t>> hook::button_prompts = { { "A", button::A },
@@ -71,9 +72,21 @@ void default_hook_thread(class hook* h)
     ginfo("Hook thread ended");
 }
 
-void hook::on_bind(json& j, uint16_t native_code, uint16_t vc, int16_t val, bool is_axis)
+void hook::on_bind(Json::object& j, uint16_t native_code, uint16_t vc, int16_t val, bool is_axis)
 {
     /* NO-OP */
+}
+
+std::shared_ptr<cfg::binding> hook::make_native_binding(const std::string& json)
+{
+    std::string err;
+    auto j = Json::parse(json, err);
+    if (err.empty()) {
+        return make_native_binding(j);
+    }
+
+    gerr("Failed to make gamepad binding from json: %s", err.c_str());
+    return nullptr;
 }
 
 uint64_t hook::ms_ticks()
@@ -162,11 +175,11 @@ void hook::stop()
 
 bool hook::save_bindings(const std::string& path)
 {
-    json j;
+    Json j;
     if (save_bindings(j)) {
         std::ofstream out(path);
         if (out.good()) {
-            out << std::setw(4) << j << std::endl;
+            out << std::setw(4) << j.dump() << std::endl;
             out.close();
             return true;
         }
@@ -175,26 +188,24 @@ bool hook::save_bindings(const std::string& path)
     return false;
 }
 
-bool hook::save_bindings(json& j)
+bool hook::save_bindings(Json& j)
 {
-    json binding_array, binding_map;
+    std::vector<Json> binding_array, binding_map;
 
     for (const auto& bind : m_bindings) {
-        json b;
+        Json b;
         bind->save(b);
         binding_array.emplace_back(b);
     }
 
     for (const auto& device : m_devices) {
         if (device->has_binding()) {
-            json m;
-            m["device_id"] = device->get_id();
-            m["binding_id"] = device->get_binding()->get_name();
+            Json m = Json::object { { "device_id", device->get_id() }, { "binding_id", device->get_binding()->get_name() } };
+            binding_map.emplace_back(m);
         }
     }
 
-    j["bindings"] = binding_array;
-    j["bindings_map"] = binding_map;
+    j = Json::object { { "bindings", binding_array }, { "bindings_map", binding_map } };
 
     return true;
 }
@@ -202,30 +213,33 @@ bool hook::save_bindings(json& j)
 bool hook::load_bindings(const std::string& path)
 {
     std::ifstream in(path);
-    json j;
+
     if (in.good()) {
-        in >> j;
+        std::string content = std::string(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>());
+        std::string err;
+        auto j = Json::parse(content, err);
+
         if (load_bindings(j)) {
             return true;
         }
-        gerr("Couldn't parse json when loading bindings from '%s'", path.c_str());
+        gerr("Couldn't parse json when loading bindings from '%s': %s", path.c_str(), err.c_str());
     }
     gerr("Couldn't read bindings from '%s'", path.c_str());
     return false;
 }
 
-bool hook::load_bindings(const json& j)
+bool hook::load_bindings(const Json& j)
 {
-    json device_array = j["devices"], binding_array = j["bindings"];
+    Json device_array = j["devices"], binding_array = j["bindings"];
 
-    for (const auto& bind : binding_array)
+    for (const auto& bind : binding_array.array_items())
         m_bindings.emplace_back(make_native_binding(bind));
 
-    for (const auto& entry : device_array) {
+    for (const auto& entry : device_array.array_items()) {
         auto device_id = entry["device_id"];
         auto bind_id = entry["binding_id"];
 
-        if (!set_device_binding(device_id, bind_id))
+        if (!set_device_binding(device_id.string_value(), bind_id.string_value()))
             gwarn("Couldn't set binding.");
     }
     return true;
@@ -268,7 +282,7 @@ std::shared_ptr<cfg::binding> hook::get_binding_by_name(const std::string& name)
     return *result;
 }
 
-void hook::make_xbox_config(const std::shared_ptr<gamepad::device>& dv, json& out)
+void hook::make_xbox_config(const std::shared_ptr<gamepad::device>& dv, Json& out)
 {
     if (!m_running)
         return;
@@ -278,6 +292,7 @@ void hook::make_xbox_config(const std::shared_ptr<gamepad::device>& dv, json& ou
     uint64_t last_key_input = 0;
     bool running = true;
     mutex key_thread_mutex;
+    std::vector<Json> bind_array;
 
     auto key_thread_method = [&]() {
         while (running) {
@@ -322,13 +337,11 @@ void hook::make_xbox_config(const std::shared_ptr<gamepad::device>& dv, json& ou
                 continue;
 
             ginfo("Received input with id %i", *last);
-            json bind;
-            bind["is_axis"] = axis;
-            bind["from"] = *last;
-            bind["to"] = get<1>(p);
+
+            Json::object bind = Json::object { { "is_axis", axis }, { "from", *last }, { "to", get<1>(p) } };
             on_bind(bind, *last, get<1>(p), e->value, axis);
 
-            out.emplace_back(bind);
+            bind_array.emplace_back(bind);
         }
     };
 
@@ -339,6 +352,9 @@ void hook::make_xbox_config(const std::shared_ptr<gamepad::device>& dv, json& ou
 
     /* Axis bindings */
     binder("move", true, dv->last_axis_event(), &last_axis, axis_prompts);
+
+    out = Json::array(bind_array);
+
     key_thread_mutex.lock();
     running = false;
     key_thread_mutex.unlock();

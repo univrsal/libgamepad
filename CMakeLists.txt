@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.5)
 option(ENABLE_TESTS "Compile test binary (default: ON)" ON)
 option(ENABLE_STATIC "Static library (default: OFF)" ON)
 option(ENABLE_SHARED "Shared library (default: ON)" OFF)
+option(ENABLE_JSON "Provide interface to load and save with json11 (default: ON)" ON)
 
 project(libgamepad VERSION 1.0.0 LANGUAGES CXX)
 
@@ -12,8 +13,9 @@ add_library(gamepad OBJECT
     ./src/hook.cpp
     ./src/log.cpp
     ./src/binding.cpp
-    ./src/binding-default.hpp
     ./src/binding-default.cpp
+    ./src/json11.cpp
+    ./src/device.cpp
     )
 
 set_property(TARGET gamepad PROPERTY POSITION_INDEPENDENT_CODE 1)
@@ -27,6 +29,10 @@ target_include_directories(gamepad
 )
 
 include(GNUInstallDirs)
+
+if (ENABLE_JSON)
+    add_compile_definitions(LGP_ENABLE_JSON)
+endif()
 
 if (UNIX AND NOT APPLE)
     target_sources(gamepad PRIVATE

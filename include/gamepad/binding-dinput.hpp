@@ -22,16 +22,19 @@
 namespace gamepad {
 class device_dinput;
 namespace cfg {
-    extern json dinput_default_binding;
-
+#ifdef LGP_ENABLE_JSON
+    extern json11::Json dinput_default_binding;
+#endif
     class binding_dinput : public binding {
         int m_left_trigger_polarity = 0, m_right_trigger_polarity = 0;
         friend class gamepad::device_dinput;
 
     public:
-        binding_dinput(const json& j);
-        bool load(const json& j) override;
-        void save(json& j) const override;
+#ifdef LGP_ENABLE_JSON
+        binding_dinput(const json11::Json& j);
+        bool load(const json11::Json& j) override;
+        void save(json11::Json& j) const override;
+#endif
     };
 }
 }

@@ -27,7 +27,10 @@ namespace cfg {
         friend class gamepad::device_xinput;
 
     public:
-        binding_xinput(const json& j);
+        binding_xinput() = default;
+#ifdef LGP_ENABLE_JSON
+        binding_xinput(const json11::Json& j);
+#endif
     };
 }
 }

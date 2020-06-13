@@ -51,16 +51,17 @@ class hook_dinput : public hook {
     HWND m_hook_window = nullptr; /* Invisible window needed to initialize devices */
     std::thread m_window_message_thread;
 
-    void on_bind(json& j, uint16_t native_code, uint16_t vc, int16_t val, bool is_axis) override;
-
+#ifdef LGP_ENABLE_JSON
+    void on_bind(json11::Json::object& j, uint16_t native_code, uint16_t vc, int16_t val, bool is_axis) override;
+#endif
 public:
     void query_devices() override;
     bool start() override;
 
-    virtual std::shared_ptr<cfg::binding> make_native_binding(const json& j) override;
-
-    friend BOOL CALLBACK enum_callback(LPCDIDEVICEINSTANCE dev,
-        LPVOID data);
+#ifdef LGP_ENABLE_JSON
+    virtual std::shared_ptr<cfg::binding> make_native_binding(const json11::Json& j) override;
+#endif
+    friend BOOL CALLBACK enum_callback(LPCDIDEVICEINSTANCE dev, LPVOID data);
 };
 }
 #endif

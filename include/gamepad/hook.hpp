@@ -55,7 +55,9 @@ protected:
 	 * Only used for DirectInput currently, which needs a sepcial hack
 	 * for separating the left and right trigger
 	 */
-    virtual void on_bind(json& j, uint16_t native_code, uint16_t vc, int16_t val, bool is_axis);
+#ifdef LGP_ENABLE_JSON
+    virtual void on_bind(json11::Json::object& j, uint16_t native_code, uint16_t vc, int16_t val, bool is_axis);
+#endif
 
 public:
     ~hook() { stop(); }
@@ -89,7 +91,9 @@ public:
      * @param j Output json
      * @return true on success
      */
-    virtual bool save_bindings(json& j);
+#ifdef LGP_ENABLE_JSON
+    virtual bool save_bindings(json11::Json& j);
+#endif
 
     /**
      * @brief load bindings from file
@@ -98,7 +102,9 @@ public:
      */
     bool load_bindings(const std::string& path);
 
-    virtual bool load_bindings(const json& j);
+#ifdef LGP_ENABLE_JSON
+    virtual bool load_bindings(const json11::Json& j);
+#endif
 
     void set_sleep_time(uint16_t ms)
     {
@@ -112,8 +118,13 @@ public:
     virtual void query_devices() = 0;
     virtual bool start();
     virtual void stop();
-    virtual std::shared_ptr<cfg::binding> make_native_binding(const json& j) = 0;
-    virtual void make_xbox_config(const std::shared_ptr<gamepad::device>& dv, json& out);
+
+#ifdef LGP_ENABLE_JSON
+    virtual std::shared_ptr<cfg::binding> make_native_binding(const json11::Json& j) = 0;
+    virtual void make_xbox_config(const std::shared_ptr<gamepad::device>& dv, json11::Json& out);
+#endif
+
+    virtual std::shared_ptr<cfg::binding> make_native_binding(const std::string& json);
 
     std::shared_ptr<cfg::binding> get_binding_for_device(const std::string& id);
     std::shared_ptr<device> get_device_by_id(const std::string& id);
