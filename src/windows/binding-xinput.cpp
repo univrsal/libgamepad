@@ -20,7 +20,6 @@
 namespace gamepad {
 namespace cfg {
     binding_xinput::binding_xinput(const json& j)
-        : binding(j)
     {
     }
 }
