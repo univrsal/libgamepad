@@ -48,15 +48,13 @@ namespace button {
 }
 
 namespace axis {
-    enum {
-        LEFT_STICK_X = button::COUNT,
+    enum { LEFT_STICK_X = button::COUNT,
         LEFT_STICK_Y,
         LEFT_TRIGGER,
         RIGHT_STICK_X,
         RIGHT_STICK_Y,
         RIGHT_TRIGGER,
-        COUNT
-    };
+        COUNT };
 }
 
 struct input_event {
@@ -84,6 +82,8 @@ protected:
      */
     std::map<uint16_t, float> m_axis;
 
+    std::map<uint16_t, int32_t> m_axis_deadzones;
+
     /* Misc */
 
     /* These contain the last native input event received for this device*/
@@ -107,16 +107,21 @@ protected:
     void axis_event(uint16_t native_id, uint16_t vc, int32_t value);
 
 public:
-    device() = default;
-
-    ~device()
+    device()
     {
-    }
+        m_axis_deadzones[axis::RIGHT_TRIGGER] = 100;
+        m_axis_deadzones[axis::LEFT_TRIGGER] = 100;
+        m_axis_deadzones[axis::LEFT_STICK_X] = 100;
+        m_axis_deadzones[axis::LEFT_STICK_Y] = 100;
+        m_axis_deadzones[axis::RIGHT_STICK_X] = 100;
+        m_axis_deadzones[axis::RIGHT_STICK_Y] = 100;
+    };
 
-    const std::string& get_name() const
-    {
-        return m_name;
-    }
+    ~device() {}
+
+    void set_axis_deadzone(uint16_t id, int32_t val) { m_axis_deadzones[id] = val; }
+
+    const std::string& get_name() const { return m_name; }
 
     /* Can be overriden to make
      * saving of bindings more accurate since
@@ -126,45 +131,21 @@ public:
      * connected multiple times */
     virtual const std::string& get_id() const { return m_name; }
 
-    bool is_button_pressed(uint16_t code)
-    {
-        return m_buttons[code];
-    }
+    bool is_button_pressed(uint16_t code) { return m_buttons[code]; }
 
-    float get_axis(uint16_t axis)
-    {
-        return m_axis[axis];
-    }
+    float get_axis(uint16_t axis) { return m_axis[axis]; }
 
-    bool is_valid() const
-    {
-        return m_valid;
-    }
+    bool is_valid() const { return m_valid; }
 
-    void invalidate()
-    {
-        m_valid = false;
-    }
+    void invalidate() { m_valid = false; }
 
-    bool has_binding() const
-    {
-        return m_binding != nullptr;
-    }
+    bool has_binding() const { return m_binding != nullptr; }
 
-    const input_event* last_button_event() const
-    {
-        return &m_last_button_event;
-    }
+    const input_event* last_button_event() const { return &m_last_button_event; }
 
-    const input_event* last_axis_event() const
-    {
-        return &m_last_axis_event;
-    }
+    const input_event* last_axis_event() const { return &m_last_axis_event; }
 
-    std::shared_ptr<cfg::binding> get_binding()
-    {
-        return m_binding;
-    }
+    std::shared_ptr<cfg::binding> get_binding() { return m_binding; }
 
     virtual void set_binding(std::shared_ptr<cfg::binding>&& b)
     {

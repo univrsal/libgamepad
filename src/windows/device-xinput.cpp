@@ -46,9 +46,7 @@ device_xinput::device_xinput(uint8_t id, const xinput_refresh_t& refresh)
 
 void device_xinput::update()
 {
-    if (m_xinput_refresh(m_id, &m_current_state) != ERROR_SUCCESS) {
-        m_valid = false;
-    } else {
+    if (m_xinput_refresh(m_id, &m_current_state) == ERROR_SUCCESS) {
         for (const auto& btn : XINPUT_BUTTONS) {
             bool state = m_current_state.wButtons & btn;
             bool old_state = m_old_state.wButtons & btn;
@@ -70,24 +68,28 @@ void device_xinput::update()
 		 * but maybe someone really wants to bind his right trigger to his
 		 * left trigger
 		 */
-#define CHECK(var, m, id)                                           \
-    if (m_current_state.var != m_old_state.var) {                   \
-        uint16_t vc = 0;                                            \
-        if (m_native_binding) {                                     \
-            vc = m_native_binding->m_axis_mappings[id];             \
-            m_axis[vc] = m_current_state.bLeftTrigger / (float(m)); \
-        }                                                           \
-        axis_event(id, vc, m_current_state.var);                    \
+#define CHECK(var, m, id)                                                      \
+    if (m_current_state.var != m_old_state.var) {                              \
+        uint16_t vc = 0;                                                       \
+        if (m_native_binding) {                                                \
+            vc = m_native_binding->m_axis_mappings[id];                        \
+            m_axis[vc] = m_current_state.bLeftTrigger / (float(m));            \
+        }                                                                      \
+        if (abs(m_current_state.var - m_old_state.var) > m_axis_deadzones[vc]) \
+            axis_event(id, vc, m_current_state.var);                           \
     }
 
         CHECK(bRightTrigger, 0xff, axis::RIGHT_TRIGGER);
         CHECK(bLeftTrigger, 0xff, axis::LEFT_TRIGGER);
         CHECK(sThumbLX, 0xffff, axis::LEFT_STICK_X);
         CHECK(sThumbLY, 0xffff, axis::LEFT_STICK_Y);
-        CHECK(sThumbRX, 0xffff, axis::LEFT_STICK_X);
-        CHECK(sThumbRY, 0xffff, axis::LEFT_STICK_Y);
+        CHECK(sThumbRX, 0xffff, axis::RIGHT_STICK_X);
+        CHECK(sThumbRY, 0xffff, axis::RIGHT_STICK_Y);
 
 #undef CHECK
+        m_old_state = m_current_state;
+    } else {
+        m_valid = false;
     }
 }
 }

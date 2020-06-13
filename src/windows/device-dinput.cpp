@@ -274,6 +274,12 @@ device_dinput::device_dinput(LPCDIDEVICEINSTANCE dev, IDirectInput8* dinput, HWN
     , m_hook_window(hook_window)
 {
     device_dinput::init();
+    m_axis_deadzones[axis::RIGHT_TRIGGER] = 50;
+    m_axis_deadzones[axis::LEFT_TRIGGER] = 50;
+    m_axis_deadzones[axis::LEFT_STICK_X] = 50;
+    m_axis_deadzones[axis::LEFT_STICK_Y] = 50;
+    m_axis_deadzones[axis::RIGHT_STICK_X] = 50;
+    m_axis_deadzones[axis::RIGHT_STICK_Y] = 50;
 }
 
 device_dinput::~device_dinput()
@@ -580,7 +586,7 @@ void device_dinput::update()
         }
 
         /* If the position changed */
-        if (abs((*(m_axis_old)[i]) - (*m_axis_new[i])) > 50) {
+        if (abs((*(m_axis_old)[i]) - (*m_axis_new[i])) > m_axis_deadzones[vc]) {
             axis_event(i, vc, *m_axis_new[i]);
         }
     }

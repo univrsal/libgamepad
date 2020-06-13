@@ -32,10 +32,20 @@ void hook_xinput::query_devices()
     m_devices.clear();
     xinput_pad tmp {};
 
-    for (int i = 0; i < LGP_XINPUT_DEVICES; i++) {
+    for (int i = 1; i <= LGP_XINPUT_DEVICES; i++) {
         if (m_xinput_refresh(i, &tmp) == ERROR_SUCCESS) {
             gdebug("Xinput device %i present", i);
-            m_devices.emplace_back(std::make_shared<device_xinput>(i, m_xinput_refresh));
+            auto new_device = std::make_shared<device_xinput>(i, m_xinput_refresh);
+
+            m_devices.emplace_back(new_device);
+            auto b = get_binding_for_device(new_device->get_id());
+
+            if (b) {
+                new_device->set_binding(std::move(b));
+            } else {
+                auto b = std::make_shared<cfg::binding_xinput>(cfg::dinput_default_binding);
+                new_device->set_binding(std::dynamic_pointer_cast<cfg::binding>(b));
+            }
         }
     }
     m_mutex.unlock();

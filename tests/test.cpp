@@ -75,9 +75,16 @@ int main()
     ginfo("+-- Connected devices:");
     ginfo("|");
     for (const auto& dev : devs) {
-        ginfo("+-+-- Device ID: %s", dev->get_id().c_str());
-        ginfo("| |");
-        ginfo("| +------- Name: %s", dev->get_name().c_str());
+        std::string id = dev->get_id();
+        std::string name = dev->get_name();
+
+        ginfo("+-%s-- Device ID: %s", (id != name || dev->has_binding()) ? "+" : "-", dev->get_id().c_str());
+
+        if (id != name) {
+            ginfo("| |");
+            ginfo("| +------- Name: %s", dev->get_name().c_str());
+        }
+
         if (dev->has_binding()) {
             ginfo("| |");
             ginfo("| +---- Binding: %s", dev->get_binding()->get_name().c_str());

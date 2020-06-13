@@ -16,9 +16,16 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
+#include <gamepad/binding-default.hpp>
 #include <gamepad/binding-xinput.hpp>
+
+using namespace json11;
+
 namespace gamepad {
 namespace cfg {
+    static std::string default_error;
+    Json xinput_default_binding = Json::parse(defaults::xinput_bind_json, default_error);
+
     binding_xinput::binding_xinput(const json11::Json& j)
         : binding(j)
     {

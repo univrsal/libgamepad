@@ -55,7 +55,11 @@ vector<tuple<string, uint16_t>> hook::axis_prompts = { { "left analog stick hori
 void default_hook_thread(class hook* h)
 {
     auto sleep_time = h->get_sleep_time();
+
+    h->get_mutex()->lock();
     ginfo("Hook thread started");
+    h->get_mutex()->unlock();
+
     while (h->running()) {
 
         if (h->get_devices().size() < 1) {
@@ -286,6 +290,14 @@ void hook::make_xbox_config(const std::shared_ptr<gamepad::device>& dv, Json& ou
 {
     if (!m_running)
         return;
+
+    /* Up the deadzones to make sure we don't pick up the wrong input accidentally */
+    dv->set_axis_deadzone(axis::RIGHT_TRIGGER, 500);
+    dv->set_axis_deadzone(axis::LEFT_TRIGGER, 500);
+    dv->set_axis_deadzone(axis::LEFT_STICK_X, 500);
+    dv->set_axis_deadzone(axis::LEFT_STICK_Y, 500);
+    dv->set_axis_deadzone(axis::RIGHT_STICK_X, 500);
+    dv->set_axis_deadzone(axis::RIGHT_STICK_Y, 500);
 
     ginfo("Starting config creation wizard");
     uint16_t sleep_time = get_sleep_time();
