@@ -79,7 +79,8 @@ protected:
     /**
      * @brief Maps an axis to it's state.
      * The state will range from -1 to 1.
-     * For most gamepads the axis mapping in gamepad::axis is used
+     * For most gamepads the axis mapping in gamepad::axis is used,
+     * but for gamepads with more axis this will also contain them
      */
     std::map<uint16_t, float> m_axis;
 
@@ -96,9 +97,9 @@ protected:
     std::string m_name;
 
     /* Instance of the bindings used for this device
-         * This uses bindings matched for the hook that is
-         * used for this device
-         */
+     * This uses bindings matched for the hook that is
+     * used for this device
+     */
     std::shared_ptr<cfg::binding> m_binding;
     bool m_valid = false;
 
@@ -118,11 +119,11 @@ public:
     }
 
     /* Can be overriden to make
-         * saving of bindings more accurate since
-         * they then will be mapped to the device id
-         * instead of the device name which can occur
-         * multiple times if the same controller type is
-         * connected multiple times */
+     * saving of bindings more accurate since
+     * they then will be mapped to the device id
+     * instead of the device name which can occur
+     * multiple times if the same controller type is
+     * connected multiple times */
     virtual const std::string& get_id() const { return m_name; }
 
     bool is_button_pressed(uint16_t code)

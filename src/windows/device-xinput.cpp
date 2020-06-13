@@ -40,6 +40,7 @@ device_xinput::device_xinput(uint8_t id, const xinput_refresh_t& refresh)
     : m_xinput_refresh(refresh)
     , m_id(id)
 {
+    m_name = "Generic Xinput gamepad " + std::to_string(id);
     device_xinput::update();
 }
 
@@ -69,14 +70,14 @@ void device_xinput::update()
 		 * but maybe someone really wants to bind his right trigger to his
 		 * left trigger
 		 */
-#define CHECK(var, m, id)                                  \
-    if (m_current_state.var != m_old_state.var) {          \
-        uint16_t vc = 0;                                   \
-        if (m_native_binding) {                            \
-            vc = m_native_binding->m_axis_mappings[id];    \
-            m_axis[vc] = m_current_state.bLeftTrigger / m; \
-        }                                                  \
-        axis_event(id, vc, m_current_state.var);           \
+#define CHECK(var, m, id)                                           \
+    if (m_current_state.var != m_old_state.var) {                   \
+        uint16_t vc = 0;                                            \
+        if (m_native_binding) {                                     \
+            vc = m_native_binding->m_axis_mappings[id];             \
+            m_axis[vc] = m_current_state.bLeftTrigger / (float(m)); \
+        }                                                           \
+        axis_event(id, vc, m_current_state.var);                    \
     }
 
         CHECK(bRightTrigger, 0xff, axis::RIGHT_TRIGGER);

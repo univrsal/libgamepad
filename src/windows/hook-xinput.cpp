@@ -16,6 +16,7 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
+#include "device-xinput.hpp"
 #include <gamepad/binding-xinput.hpp>
 #include <gamepad/hook-dinput.hpp>
 #include <gamepad/hook-xinput.hpp>
@@ -29,7 +30,14 @@ void hook_xinput::query_devices()
 {
     m_mutex.lock();
     m_devices.clear();
+    xinput_pad tmp {};
 
+    for (int i = 0; i < LGP_XINPUT_DEVICES; i++) {
+        if (m_xinput_refresh(i, &tmp) == ERROR_SUCCESS) {
+            gdebug("Xinput device %i present", i);
+            m_devices.emplace_back(std::make_shared<device_xinput>(i, m_xinput_refresh));
+        }
+    }
     m_mutex.unlock();
 }
 

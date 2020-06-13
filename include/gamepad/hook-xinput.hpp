@@ -21,6 +21,7 @@
 #include <gamepad/hook.hpp>
 
 #ifdef LGP_WINDOWS
+#define LGP_XINPUT_DEVICES 4
 #define VC_EXTRALEAN
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>

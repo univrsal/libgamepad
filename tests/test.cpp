@@ -47,7 +47,7 @@ int main()
     SetConsoleCtrlHandler(handler, TRUE);
 #endif
 
-    auto h = gamepad::hook::make(gamepad::hook_type::DIRECT_INPUT);
+    auto h = gamepad::hook::make();
 
     if (!h->start()) {
         gerr("Couldn't start hook");
