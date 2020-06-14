@@ -92,4 +92,10 @@ void device_xinput::update()
         m_valid = false;
     }
 }
+
+void device_xinput::set_binding(shared_ptr<cfg::binding>&& b)
+{
+    device::set_binding(move(b));
+    m_native_binding = dynamic_cast<cfg::binding_xinput*>(b.get());
+}
 }
