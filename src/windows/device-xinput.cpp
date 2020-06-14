@@ -18,6 +18,8 @@
 
 #include "device-xinput.hpp"
 
+using namespace std;
+
 namespace gamepad {
 
 static xinput_code XINPUT_BUTTONS[] = { XINPUT_DPAD_UP,
@@ -40,7 +42,7 @@ device_xinput::device_xinput(uint8_t id, const xinput_refresh_t& refresh)
     : m_xinput_refresh(refresh)
     , m_id(id)
 {
-    m_name = "Generic Xinput gamepad " + std::to_string(id);
+    m_name = "Generic Xinput gamepad " + to_string(id);
     device_xinput::update();
 }
 
