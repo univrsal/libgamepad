@@ -30,6 +30,9 @@ namespace cfg {
         friend class gamepad::device_dinput;
 
     public:
+        binding_dinput() = default;
+        binding_dinput(const std::string& json);
+
 #ifdef LGP_ENABLE_JSON
         binding_dinput(const json11::Json& j);
         bool load(const json11::Json& j) override;

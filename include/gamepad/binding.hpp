@@ -31,7 +31,7 @@ namespace cfg {
 
     public:
         binding() = default;
-
+        binding(const std::string& json);
 #ifdef LGP_ENABLE_JSON
         binding(const json11::Json& j);
 

@@ -24,7 +24,11 @@ using namespace json11;
 namespace gamepad {
 namespace cfg {
 
-#ifdef LGP_ENABLE_JSON
+    binding::binding(const std::string& json)
+    {
+        binding::load(json);
+    }
+
     binding::binding(const Json& j)
     {
         binding::load(j);
@@ -75,7 +79,6 @@ namespace cfg {
         }
         j = Json::object { { "name", m_binding_name }, { "binds", binds } };
     }
-#endif /* LGP_ENABLE_JSON */
 
     bool binding::load(const std::string& json)
     {

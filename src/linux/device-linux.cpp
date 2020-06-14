@@ -18,6 +18,7 @@
 
 #include "device-linux.hpp"
 #include <algorithm>
+#include <cmath>
 #include <fcntl.h>
 #include <gamepad/binding-linux.hpp>
 #include <gamepad/log.hpp>
@@ -85,22 +86,25 @@ void device_linux::update()
         ;
 
     if (m_event.type == JS_EVENT_AXIS) {
+        uint16_t vc = 0;
         if (m_native_binding) {
-            auto new_code = m_native_binding->m_axis_mappings[m_event.number];
+            vc = m_native_binding->m_axis_mappings[m_event.number];
             auto val = float(m_event.value);
 
-            m_axis[new_code] = clamp(val / 0xffff, -1.f, 1.f);
+            m_axis[vc] = clamp(val / 0xffff, -1.f, 1.f);
         }
-
-        m_last_axis_event.id = m_event.number;
+        m_last_axis_event.vc = vc;
+        m_last_axis_event.native_id = m_event.number;
         m_last_axis_event.value = m_event.value;
         m_last_axis_event.time = m_event.time;
     } else if (m_event.type == JS_EVENT_BUTTON) {
+        uint16_t vc = 0;
         if (m_native_binding) {
-            auto new_code = m_native_binding->m_buttons_mappings[m_event.number];
-            m_buttons[new_code] = m_event.value;
+            vc = m_native_binding->m_buttons_mappings[m_event.number];
+            m_buttons[vc] = m_event.value;
         }
-        m_last_button_event.id = m_event.number;
+        m_last_button_event.vc = vc;
+        m_last_button_event.native_id = m_event.number;
         m_last_button_event.value = m_event.value;
         m_last_button_event.time = m_event.time;
     }

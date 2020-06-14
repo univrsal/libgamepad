@@ -117,7 +117,7 @@ public:
         m_axis_deadzones[axis::RIGHT_STICK_Y] = 100;
     };
 
-    ~device() {}
+    ~device() { }
 
     void set_axis_deadzone(uint16_t id, int32_t val) { m_axis_deadzones[id] = val; }
 

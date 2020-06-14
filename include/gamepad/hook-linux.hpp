@@ -24,7 +24,9 @@
 namespace gamepad {
 class hook_linux : public hook {
 public:
-    virtual std::shared_ptr<cfg::binding> make_native_binding(const json& j) override;
+#ifdef LGP_ENABLE_JSON
+    virtual std::shared_ptr<cfg::binding> make_native_binding(const json11::Json& j) override;
+#endif
 
     void query_devices() override;
 };

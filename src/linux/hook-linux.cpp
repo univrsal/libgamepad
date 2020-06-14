@@ -26,6 +26,7 @@
 #include <vector>
 
 using namespace std;
+using namespace json11;
 
 namespace gamepad {
 
@@ -73,7 +74,7 @@ void hook_linux::query_devices()
     m_mutex.unlock();
 }
 
-shared_ptr<cfg::binding> hook_linux::make_native_binding(const json& j)
+shared_ptr<cfg::binding> hook_linux::make_native_binding(const Json& j)
 {
     return make_shared<cfg::binding_linux>(j);
 }

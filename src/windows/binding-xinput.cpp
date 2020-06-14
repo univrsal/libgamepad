@@ -26,6 +26,11 @@ namespace cfg {
     static std::string default_error;
     Json xinput_default_binding = Json::parse(defaults::xinput_bind_json, default_error);
 
+    binding_xinput::binding_xinput(const std::string& json)
+        : binding(json)
+    {
+    }
+
     binding_xinput::binding_xinput(const json11::Json& j)
         : binding(j)
     {

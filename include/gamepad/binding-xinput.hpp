@@ -31,6 +31,8 @@ namespace cfg {
 
     public:
         binding_xinput() = default;
+        binding_xinput(const std::string& json);
+
 #ifdef LGP_ENABLE_JSON
         binding_xinput(const json11::Json& j);
 #endif

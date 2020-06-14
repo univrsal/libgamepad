@@ -16,15 +16,22 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include "binding-default.hpp"
+#include <gamepad/binding-default.hpp>
 #include <gamepad/binding-linux.hpp>
+
+using namespace json11;
 
 namespace gamepad {
 namespace cfg {
+    static std::string default_error;
+    Json linux_default_binding = Json::parse(gamepad::defaults::linux_bind_json, default_error);
 
-    json linux_default_binding = json::parse(gamepad::defaults::linux_bind_json);
+    binding_linux::binding_linux(const std::string& json)
+        : binding(json)
+    {
+    }
 
-    binding_linux::binding_linux(const json& j)
+    binding_linux::binding_linux(const Json& j)
     {
         load(j);
     }

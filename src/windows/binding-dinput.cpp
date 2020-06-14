@@ -28,6 +28,11 @@ namespace cfg {
     static std::string default_error;
     Json dinput_default_binding = Json::parse(defaults::dinput_bind_json, default_error);
 
+    binding_dinput::binding_dinput(const std::string& json)
+    {
+        load(json);
+    }
+
     binding_dinput::binding_dinput(const Json& j)
     {
         binding_dinput::load(j);

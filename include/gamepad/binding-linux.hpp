@@ -27,13 +27,19 @@ namespace gamepad {
 class device_linux;
 namespace cfg {
 
-    extern json linux_default_binding;
-
+#ifdef LGP_ENABLE_JSON
+    extern json11::Json linux_default_binding;
+#endif
     class binding_linux : public binding {
         friend class gamepad::device_linux;
 
     public:
-        binding_linux(const json& j);
+        binding_linux() = default;
+        binding_linux(const std::string& json);
+
+#ifdef LGP_ENABLE_JSON
+        binding_linux(const json11::Json& j);
+#endif
     };
 }
 }
