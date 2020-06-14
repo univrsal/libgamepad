@@ -54,11 +54,11 @@ int main()
     auto last_button = dev->last_button_event()->time;
     h->get_mutex()->unlock();
     
-    /* Output any events for teh first device */
+    /* Output any events for the first device */
     bool run_flag = true;
     printf("Press Y to exit\n");
     
-    while (run_flag ) {
+    while (run_flag) {
         /* The hook mutex should be locked whenever you need access
          * to the hook or device data */
         h->get_mutex()->lock();
