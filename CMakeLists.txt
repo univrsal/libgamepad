@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 
-option(ENABLE_TESTS "Compile test binary (default: ON)" ON)
-option(ENABLE_STATIC "Static library (default: OFF)" ON)
-option(ENABLE_SHARED "Shared library (default: ON)" OFF)
+option(GAMEPAD_ENABLE_TESTS "Compile test binary (default: ON)" ON)
+option(GAMEPAD_ENABLE_STATIC "Static library (default: OFF)" ON)
+option(GAMEPAD_ENABLE_SHARED "Shared library (default: ON)" OFF)
 option(ENABLE_JSON "Provide interface to load and save with json11 (default: ON)" ON)
 
 project(libgamepad VERSION 1.0.0 LANGUAGES CXX)
@@ -62,37 +62,37 @@ elseif(WIN32)
         dxguid)
 endif()
 
-if (ENABLE_SHARED)
-    add_library(shared SHARED $<TARGET_OBJECTS:gamepad>)
-    set_target_properties(shared PROPERTIES OUTPUT_NAME "gamepad")
+if (GAMEPAD_ENABLE_SHARED)
+    add_library(gamepad_shared SHARED $<TARGET_OBJECTS:gamepad>)
+    set_target_properties(gamepad_shared PROPERTIES OUTPUT_NAME "gamepad")
 
     if (UNIX)
-        target_link_libraries (shared ${CMAKE_THREAD_LIBS_INIT})
+        target_link_libraries (gamepad_shared ${CMAKE_THREAD_LIBS_INIT})
     elseif (MSVC)
-        target_link_libraries(shared
+        target_link_libraries(gamepad_shared
             dinput8
             dxguid)
     endif()
 
-    install(TARGETS shared DESTINATION ${CMAKE_INSTALL_LIBDIR})
+    install(TARGETS gamepad_shared DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
 
-if (ENABLE_STATIC)
-    add_library(static STATIC $<TARGET_OBJECTS:gamepad>)
-    set_target_properties(static PROPERTIES OUTPUT_NAME "gamepad")
+if (GAMEPAD_ENABLE_STATIC)
+    add_library(gamepad_static STATIC $<TARGET_OBJECTS:gamepad>)
+    set_target_properties(gamepad_static PROPERTIES OUTPUT_NAME "gamepad")
 
     if (UNIX)
-        target_link_libraries (static ${CMAKE_THREAD_LIBS_INIT})
+        target_link_libraries (gamepad_static ${CMAKE_THREAD_LIBS_INIT})
     elseif (MSVC)
-        target_link_libraries(static
+        target_link_libraries(gamepad_static
             dinput8
             dxguid)
     endif()
 
-    install(TARGETS static DESTINATION ${CMAKE_INSTALL_LIBDIR})
+    install(TARGETS gamepad_static DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
 
-if (ENABLE_SHARED OR ENABLE_STATIC)
+if (GAMEPAD_ENABLE_SHARED OR GAMEPAD_ENABLE_STATIC)
     install(FILES ./include/libgamepad.hpp
         DESTINATION include)
     install(FILES ./include/gamepad/binding.hpp
@@ -114,7 +114,7 @@ if (UNIX)
     target_link_libraries (gamepad ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
-if (ENABLE_TESTS)
+if (GAMEPAD_GAMEPAD_ENABLE_TESTS)
     add_executable(libgamepad_tests
         tests/test.cpp
     )
@@ -123,12 +123,12 @@ if (ENABLE_TESTS)
         target_link_libraries(libgamepad_tests "${CMAKE_THREAD_LIBS_INIT}")
     endif()
 
-    if (ENABLE_STATIC)
-        target_link_libraries(libgamepad_tests static)
-        add_dependencies(libgamepad_tests static)
-    elseif (ENABLE_SHARED)
-        target_link_libraries(libgamepad_tests shared)
-        add_dependencies(libgamepad_tests shared)
+    if (GAMEPAD_ENABLE_STATIC)
+        target_link_libraries(libgamepad_tests gamepad_static)
+        add_dependencies(libgamepad_tests gamepad_static)
+    elseif (GAMEPAD_ENABLE_SHARED)
+        target_link_libraries(libgamepad_tests gamepad_shared)
+        add_dependencies(libgamepad_tests gamepad_shared)
         set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
         set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
     else()
