@@ -19,7 +19,8 @@
 #pragma once
 
 #include <json/json11.hpp>
-
+#include <string>
+#include <map>
 namespace gamepad {
 namespace cfg {
 

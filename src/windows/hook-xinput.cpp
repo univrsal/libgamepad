@@ -36,7 +36,7 @@ void hook_xinput::query_devices()
         if (m_xinput_refresh(i, &tmp) == ERROR_SUCCESS) {
             gdebug("Xinput device %i present", i);
             auto new_device = std::make_shared<device_xinput>(i, m_xinput_refresh);
-
+            new_device->set_index(i);
             m_devices.emplace_back(new_device);
             auto b = get_binding_for_device(new_device->get_id());
 
