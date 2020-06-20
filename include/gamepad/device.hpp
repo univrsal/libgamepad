@@ -26,6 +26,7 @@
 
 namespace gamepad {
 
+/* Virtual button ids */
 namespace button {
     enum {
         A = 0xEC00,
@@ -47,6 +48,7 @@ namespace button {
     };
 }
 
+/* Virtual axis ids */
 namespace axis {
     enum { LEFT_STICK_X = button::COUNT,
         LEFT_STICK_Y,
@@ -57,12 +59,15 @@ namespace axis {
         COUNT };
 }
 
+/* clang-format off */
 struct input_event {
-    uint16_t native_id;
-    uint16_t vc;
-    int32_t value;
-    uint64_t time;
+    uint16_t native_id;     /* Native event number              */
+    uint16_t vc;            /* Platform independent id          */
+    int32_t value;          /* Native event value               */
+    float virtual_value;    /* Virtual value, between 0 and 1   */
+    uint64_t time;          /* Native Timestamp                 */
 };
+/* clang-format on */
 
 class device {
 protected:
@@ -103,8 +108,8 @@ protected:
     std::shared_ptr<cfg::binding> m_binding;
     bool m_valid = false;
 
-    void button_event(uint16_t native_id, uint16_t vc, int32_t value);
-    void axis_event(uint16_t native_id, uint16_t vc, int32_t value);
+    void button_event(uint16_t native_id, uint16_t vc, int32_t value, float vv);
+    void axis_event(uint16_t native_id, uint16_t vc, int32_t value, float vv);
 
 public:
     device()
@@ -115,7 +120,7 @@ public:
         m_axis_deadzones[axis::LEFT_STICK_Y] = 100;
         m_axis_deadzones[axis::RIGHT_STICK_X] = 100;
         m_axis_deadzones[axis::RIGHT_STICK_Y] = 100;
-    };
+    }
 
     ~device() { }
 

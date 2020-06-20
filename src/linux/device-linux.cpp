@@ -84,29 +84,24 @@ void device_linux::update()
          * queued up events aren't useful anymore, I think */
     while (read(m_fd, &m_event, sizeof(m_event)) > 0)
         ;
+    uint16_t vc = 0;
+    float vv = 0.0f;
 
     if (m_event.type == JS_EVENT_AXIS) {
-        uint16_t vc = 0;
         if (m_native_binding) {
             vc = m_native_binding->m_axis_mappings[m_event.number];
             auto val = float(m_event.value);
-
-            m_axis[vc] = clamp(val / 0xffff, -1.f, 1.f);
+            vv = clamp(val / 0xffff, -1.f, 1.f);
+            m_axis[vc] = vv;
         }
-        m_last_axis_event.vc = vc;
-        m_last_axis_event.native_id = m_event.number;
-        m_last_axis_event.value = m_event.value;
-        m_last_axis_event.time = m_event.time;
+        axis_event(m_event.number, vc, m_event.value, vv);
     } else if (m_event.type == JS_EVENT_BUTTON) {
-        uint16_t vc = 0;
         if (m_native_binding) {
             vc = m_native_binding->m_buttons_mappings[m_event.number];
+            vv = m_event.value;
             m_buttons[vc] = m_event.value;
         }
-        m_last_button_event.vc = vc;
-        m_last_button_event.native_id = m_event.number;
-        m_last_button_event.value = m_event.value;
-        m_last_button_event.time = m_event.time;
+        button_event(m_event.number, vc, m_event.value, vv);
     }
 }
 

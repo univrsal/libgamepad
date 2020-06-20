@@ -477,19 +477,21 @@ void device_dinput::update()
         bool pressed = (m_new_state.rgbButtons[i] & 0x80) == 0x80;
         bool old_pressed = (m_old_state.rgbButtons[i] & 0x80) == 0x80;
         uint16_t vc = 0;
+        float vv = 0.0f;
         if (m_native_binding) {
             vc = m_native_binding->m_buttons_mappings[i];
+            vv = pressed ? 1.0f : 0.0f;
             m_buttons[vc] = pressed;
         }
 
         /* This button changed over to pressed
-             * Since button presses aren't sent in individually this means
-             * that if multiple buttons have been pressed since the last update
-             * only the one with the highest ID will be reported, but since
-             * this is only used for creating binds it's not an issue.
-             */
+         * Since button presses aren't sent in individually this means
+         * that if multiple buttons have been pressed since the last update
+         * only the one with the highest ID will be reported, but since
+         * this is only used for creating binds it's not an issue.
+         */
         if (pressed != old_pressed) {
-            button_event(i, vc, pressed);
+            button_event(i, vc, pressed, vv);
         }
     }
 
@@ -538,6 +540,7 @@ void device_dinput::update()
     check_pov(m_old_state.rgdwPOV[0], old_up, old_down, old_left, old_right);
 
     uint16_t up_code = 0, left_code = 0, down_code = 0, right_code = 0;
+
     if (m_native_binding) {
         up_code = m_native_binding->m_buttons_mappings[DPAD_UP];
         left_code = m_native_binding->m_buttons_mappings[DPAD_LEFT];
@@ -551,18 +554,19 @@ void device_dinput::update()
     }
 
     if (up != old_up)
-        button_event(DPAD_UP, up_code, up);
+        button_event(DPAD_UP, up_code, up, up ? 1.0f : 0.0f);
     if (left != old_left)
-        button_event(DPAD_LEFT, left_code, left);
+        button_event(DPAD_LEFT, left_code, left, left ? 1.0f : 0.0f);
     if (down != old_down)
-        button_event(DPAD_DOWN, down_code, down);
+        button_event(DPAD_DOWN, down_code, down, down ? 1.0f : 0.0f);
     if (right != old_right)
-        button_event(DPAD_RIGHT, right_code, right);
+        button_event(DPAD_RIGHT, right_code, right, right ? 1.0f : 0.0f);
 
     /* Check all axis */
     for (uint16_t i = 0; i < m_axis_new.size(); i++) {
-
         uint16_t vc = 0;
+        float vv = 0.0f;
+
         if (m_native_binding) {
             auto val = *(m_axis_new[i]);
             vc = m_native_binding->m_axis_mappings[i];
@@ -579,15 +583,17 @@ void device_dinput::update()
                         vc = axis::RIGHT_TRIGGER;
                 }
 
-                m_axis[vc] = float((val - (DINPUT_AXIS_MAX / 2)) / (DINPUT_AXIS_MAX / 2));
+                vv = float((val - (DINPUT_AXIS_MAX / 2)) / (DINPUT_AXIS_MAX / 2));
+                m_axis[vc] = vv;
             } else {
-                m_axis[vc] = float(val) / DINPUT_AXIS_MAX;
+                vv = float(val) / DINPUT_AXIS_MAX;
+                m_axis[vc] = vv;
             }
         }
 
         /* If the position changed */
         if (abs((*(m_axis_old)[i]) - (*m_axis_new[i])) > m_axis_deadzones[vc]) {
-            axis_event(i, vc, *m_axis_new[i]);
+            axis_event(i, vc, *m_axis_new[i], vv);
         }
     }
 }

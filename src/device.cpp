@@ -20,19 +20,21 @@
 #include <gamepad/hook.hpp>
 
 namespace gamepad {
-void device::button_event(uint16_t native_id, uint16_t vc, int32_t value)
+void device::button_event(uint16_t native_id, uint16_t vc, int32_t value, float vv)
 {
     m_last_button_event.native_id = native_id;
     m_last_button_event.value = value;
     m_last_button_event.vc = vc;
+    m_last_button_event.virtual_value = vv;
     m_last_button_event.time = gamepad::hook::ms_ticks();
 }
 
-void device::axis_event(uint16_t native_id, uint16_t vc, int32_t value)
+void device::axis_event(uint16_t native_id, uint16_t vc, int32_t value, float vv)
 {
     m_last_axis_event.native_id = native_id;
     m_last_axis_event.value = value;
     m_last_axis_event.vc = vc;
+    m_last_axis_event.virtual_value = vv;
     m_last_axis_event.time = hook::ms_ticks();
 }
 };
