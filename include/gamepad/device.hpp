@@ -108,6 +108,9 @@ protected:
     std::shared_ptr<cfg::binding> m_binding;
     bool m_valid = false;
 
+    /* Device index assigned when querying the devices */
+    int m_index = 0;
+
     void button_event(uint16_t native_id, uint16_t vc, int32_t value, float vv);
     void axis_event(uint16_t native_id, uint16_t vc, int32_t value, float vv);
 
@@ -123,6 +126,9 @@ public:
     }
 
     ~device() { }
+
+    void set_index(int i) { m_index = i; }
+    int get_index() const { return m_index; }
 
     void set_axis_deadzone(uint16_t id, int32_t val) { m_axis_deadzones[id] = val; }
 

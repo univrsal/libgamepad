@@ -33,6 +33,7 @@ BOOL CALLBACK enum_callback(LPCDIDEVICEINSTANCE dev, LPVOID data)
     auto new_device = make_shared<device_dinput>(dev, h->m_dinput, h->m_hook_window);
 
     if (new_device->is_valid()) {
+        h->set_index(h->m_dev_counter++);
         h->m_devices.emplace_back(dynamic_pointer_cast<device>(new_device));
         auto b = h->get_binding_for_device(new_device->get_id());
 
@@ -66,6 +67,7 @@ void hook_dinput::query_devices()
 {
     m_mutex.lock();
     m_devices.clear();
+    m_dev_counter = 0;
     auto result = m_dinput->EnumDevices(DI8DEVCLASS_GAMECTRL, enum_callback, this, DIEDFL_ATTACHEDONLY);
 
     if (FAILED(result)) {

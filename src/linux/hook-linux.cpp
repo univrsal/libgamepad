@@ -35,7 +35,7 @@ void hook_linux::query_devices()
     static const char* DEV_FOLDER = "/dev/input/by-id";
     close_devices();
     m_mutex.lock();
-
+    int dev_counter = 0;
     DIR* dir;
     struct dirent* ent;
 
@@ -56,6 +56,7 @@ void hook_linux::query_devices()
                 gdebug("Found potential gamepad at '%s'", path.c_str());
                 auto dev = make_shared<device_linux>(path);
                 if (dev->is_valid()) {
+                    dev->set_index(dev_counter++);
                     m_devices.emplace_back(dev);
                     auto b = get_binding_for_device(dev->get_id());
 
