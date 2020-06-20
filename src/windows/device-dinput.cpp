@@ -561,8 +561,9 @@ void device_dinput::update()
 
     /* Check all axis */
     for (uint16_t i = 0; i < m_axis_new.size(); i++) {
-
         uint16_t vc = 0;
+        float vv = 0.0f;
+
         if (m_native_binding) {
             auto val = *(m_axis_new[i]);
             vc = m_native_binding->m_axis_mappings[i];
@@ -579,15 +580,17 @@ void device_dinput::update()
                         vc = axis::RIGHT_TRIGGER;
                 }
 
-                m_axis[vc] = float((val - (DINPUT_AXIS_MAX / 2)) / (DINPUT_AXIS_MAX / 2));
+                vv = float((val - (DINPUT_AXIS_MAX / 2)) / (DINPUT_AXIS_MAX / 2));
+                m_axis[vc] = vv;
             } else {
-                m_axis[vc] = float(val) / DINPUT_AXIS_MAX;
+                vv = float(val) / DINPUT_AXIS_MAX;
+                m_axis[vc] = vv;
             }
         }
 
         /* If the position changed */
         if (abs((*(m_axis_old)[i]) - (*m_axis_new[i])) > m_axis_deadzones[vc]) {
-            axis_event(i, vc, *m_axis_new[i]);
+            axis_event(i, vc, *m_axis_new[i], vv);
         }
     }
 }

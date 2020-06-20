@@ -53,14 +53,16 @@ void device_xinput::update()
             bool state = m_current_state.wButtons & btn;
             bool old_state = m_old_state.wButtons & btn;
             uint16_t vc = 0;
+            float vv = 0.0f;
 
             if (m_native_binding) {
                 vc = m_native_binding->m_buttons_mappings[btn];
                 m_buttons[vc] = state;
+                vv = state ? 1.0f : 0.0f;
             }
 
             if (state != old_state) {
-                button_event(btn, vc, state);
+                button_event(btn, vc, state, vv);
             }
         }
 
@@ -73,12 +75,14 @@ void device_xinput::update()
 #define CHECK(var, m, id)                                                      \
     if (m_current_state.var != m_old_state.var) {                              \
         uint16_t vc = 0;                                                       \
+        float vv = 0.0f;                                                       \
         if (m_native_binding) {                                                \
             vc = m_native_binding->m_axis_mappings[id];                        \
-            m_axis[vc] = m_current_state.bLeftTrigger / (float(m));            \
+            vv = m_current_state.var / (float(m));                             \
+            m_axis[vc] = vv;                                                   \
         }                                                                      \
         if (abs(m_current_state.var - m_old_state.var) > m_axis_deadzones[vc]) \
-            axis_event(id, vc, m_current_state.var);                           \
+            axis_event(id, vc, m_current_state.var, vv);                       \
     }
 
         CHECK(bRightTrigger, 0xff, axis::RIGHT_TRIGGER);
