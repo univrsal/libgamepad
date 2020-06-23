@@ -29,7 +29,9 @@ target_include_directories(gamepad
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-include(GNUInstallDirs)
+if (GAMEPAD_ENABLE_INSTALL)
+    include(GNUInstallDirs)
+endif()
 
 if (GAMEPAD_ENABLE_JSON)
     add_compile_definitions(LGP_ENABLE_JSON)
