@@ -3,7 +3,8 @@ cmake_minimum_required(VERSION 3.5)
 option(GAMEPAD_ENABLE_TESTS "Compile test binary (default: ON)" ON)
 option(GAMEPAD_ENABLE_STATIC "Static library (default: OFF)" ON)
 option(GAMEPAD_ENABLE_SHARED "Shared library (default: ON)" OFF)
-option(ENABLE_JSON "Provide interface to load and save with json11 (default: ON)" ON)
+option(GAMEPAD_ENABLE_JSON "Provide interface to load and save with json11 (default: ON)" ON)
+option(GAMEPAD_ENABLE_INSTALL "Register files for install target (default: ON)" ON)
 
 project(libgamepad VERSION 1.0.0 LANGUAGES CXX)
 
@@ -30,7 +31,7 @@ target_include_directories(gamepad
 
 include(GNUInstallDirs)
 
-if (ENABLE_JSON)
+if (GAMEPAD_ENABLE_JSON)
     add_compile_definitions(LGP_ENABLE_JSON)
 endif()
 
@@ -74,7 +75,9 @@ if (GAMEPAD_ENABLE_SHARED)
             dxguid)
     endif()
 
-    install(TARGETS gamepad_shared DESTINATION ${CMAKE_INSTALL_LIBDIR})
+    if (GAMEPAD_ENABLE_INSTALL)
+        install(TARGETS gamepad_shared DESTINATION ${CMAKE_INSTALL_LIBDIR})
+    endif()
 endif()
 
 if (GAMEPAD_ENABLE_STATIC)
@@ -88,25 +91,30 @@ if (GAMEPAD_ENABLE_STATIC)
             dinput8
             dxguid)
     endif()
+    
 
-    install(TARGETS gamepad_static DESTINATION ${CMAKE_INSTALL_LIBDIR})
+    if (GAMEPAD_ENABLE_INSTALL)
+        install(TARGETS gamepad_static DESTINATION ${CMAKE_INSTALL_LIBDIR})
+    endif()
 endif()
 
 if (GAMEPAD_ENABLE_SHARED OR GAMEPAD_ENABLE_STATIC)
-    install(FILES ./include/libgamepad.hpp
-        DESTINATION include)
-    install(FILES ./include/gamepad/binding.hpp
-        ./include/gamepad/binding-dinput.hpp
-        ./include/gamepad/binding-xinput.hpp
-        ./include/gamepad/binding-linux.hpp
-        ./include/gamepad/config.h
-        ./include/gamepad/device.hpp
-        ./include/gamepad/hook.hpp
-        ./include/gamepad/hook-dinput.hpp
-        ./include/gamepad/hook-linux.hpp
-        ./include/gamepad/hook-xinput.hpp
-        ./include/gamepad/log.hpp
-        DESTINATION include/gamepad)
+    if (GAMEPAD_ENABLE_INSTALL)
+        install(FILES ./include/libgamepad.hpp
+            DESTINATION include)
+        install(FILES ./include/gamepad/binding.hpp
+            ./include/gamepad/binding-dinput.hpp
+            ./include/gamepad/binding-xinput.hpp
+            ./include/gamepad/binding-linux.hpp
+            ./include/gamepad/config.h
+            ./include/gamepad/device.hpp
+            ./include/gamepad/hook.hpp
+            ./include/gamepad/hook-dinput.hpp
+            ./include/gamepad/hook-linux.hpp
+            ./include/gamepad/hook-xinput.hpp
+            ./include/gamepad/log.hpp
+            DESTINATION include/gamepad)
+    endif()
 endif()
 
 if (UNIX)
@@ -135,15 +143,19 @@ if (GAMEPAD_GAMEPAD_ENABLE_TESTS)
         target_link_libraries(libgamepad_tests gamepad)
         add_dependencies(libgamepad_tests gamepad)
     endif()
-
-    install(TARGETS libgamepad_tests DESTINATION bin)
+    
+    if (GAMEPAD_ENABLE_INSTALL)
+        install(TARGETS libgamepad_tests DESTINATION bin)
+    endif()
 endif()
 
 if (UNIX)
     configure_file("./pc/gamepad.pc.in"
         "${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.pc" @ONLY)
-    install(FILES "${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.pc" DESTINATION
-        "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+    if (GAMEPAD_ENABLE_INSTALL)
+        install(FILES "${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.pc" DESTINATION
+            "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+    endif()
 endif()
 
 include_directories("./include")
