@@ -158,6 +158,7 @@ public:
         m_mutex.unlock();
     }
 
+    virtual void remove_invalid_devices();
     virtual void close_devices();
     virtual void close_bindings();
     virtual void query_devices() = 0;

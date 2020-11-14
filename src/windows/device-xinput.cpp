@@ -42,7 +42,7 @@ device_xinput::device_xinput(uint8_t id, const xinput_refresh_t& refresh)
     : m_xinput_refresh(refresh)
     , m_id(id)
 {
-    m_name = "Generic Xinput gamepad " + to_string(id);
+    m_name = XINPUT_DEVICE_NAME_BASE + to_string(id);
     device_xinput::update();
 }
 

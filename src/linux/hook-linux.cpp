@@ -97,16 +97,7 @@ void hook_linux::query_devices()
         }
     }
 
-    /* Remove any devices that aren't valid anymore & run disconnect handler */
-    auto it = std::remove_if(m_devices.begin(), m_devices.end(),
-        [this](std::shared_ptr<device>& d) {
-            auto result = !d->is_valid();
-            if (result && this->m_disconnect_handler)
-                m_disconnect_handler(d);
-            return result;
-        });
-
-    m_devices.erase(it, m_devices.end());
+    remove_invalid_devices();
     m_mutex.unlock();
 }
 

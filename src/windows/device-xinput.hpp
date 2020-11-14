@@ -22,6 +22,8 @@
 #include <gamepad/device.hpp>
 #include <gamepad/hook-xinput.hpp>
 
+#define XINPUT_DEVICE_NAME_BASE "Generic Xinput gamepad "
+
 namespace gamepad {
 enum xinput_code {
     XINPUT_DPAD_UP = 0x0001,

@@ -292,6 +292,18 @@ const string& device_dinput::get_id() const
     return m_id;
 }
 
+static std::string device_dinput::make_id(LPCDIDEVICEINSTANCE dev)
+{
+    auto product_name = util::wchar_to_utf8(dev->tszProductName);
+    auto device_id = device_instance->guidInstance;
+
+    wchar_t buf[512];
+    auto result = StringFromGUID2(m_device_id, buf, 512);
+    if (result > 0)
+        return util::wchar_to_utf8(buf) + " " + product_name;
+    return "";
+}
+
 void device_dinput::init()
 {
     deinit();

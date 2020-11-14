@@ -406,4 +406,18 @@ void hook::make_xbox_config(const std::shared_ptr<gamepad::device>& dv, Json& ou
     ginfo("Done. Press Enter to print config json.");
     key_thread.join();
 }
+
+void hook::remove_invalid_devices()
+{
+    auto it = std::remove_if(m_devices.begin(), m_devices.end(),
+        [this](std::shared_ptr<device>& d) {
+            auto result = !d->is_valid();
+            if (result && this->m_disconnect_handler)
+                m_disconnect_handler(d);
+            return result;
+        });
+
+    m_devices.erase(it, m_devices.end());
+}
+
 }

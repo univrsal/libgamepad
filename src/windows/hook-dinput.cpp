@@ -29,22 +29,27 @@ namespace gamepad {
 BOOL CALLBACK enum_callback(LPCDIDEVICEINSTANCE dev, LPVOID data)
 {
     auto h = static_cast<hook_dinput*>(data);
+    auto id = device_dinput::make_id(dev);
+    auto existing_device = h->get_device_by_id(id);
 
-    auto new_device = make_shared<device_dinput>(dev, h->m_dinput, h->m_hook_window);
+    if (existing_device) {
+        existing_device->set_valid();
+    } else {
+        auto new_device = make_shared<device_dinput>(dev, h->m_dinput, h->m_hook_window);
 
-    if (new_device->is_valid()) {
-        new_device->set_index(h->m_dev_counter++);
-        h->m_devices.emplace_back(dynamic_pointer_cast<device>(new_device));
-        auto b = h->get_binding_for_device(new_device->get_id());
+        if (new_device->is_valid()) {
+            new_device->set_index(h->m_dev_counter++);
+            h->m_devices.emplace_back(dynamic_pointer_cast<device>(new_device));
+            auto b = h->get_binding_for_device(new_device->get_id());
 
-        if (b) {
-            new_device->set_binding(move(b));
-        } else {
-            auto b = make_shared<cfg::binding_dinput>(cfg::dinput_default_binding);
-            new_device->set_binding(dynamic_pointer_cast<cfg::binding>(b));
+            if (b) {
+                new_device->set_binding(move(b));
+            } else {
+                auto b = make_shared<cfg::binding_dinput>(cfg::dinput_default_binding);
+                new_device->set_binding(dynamic_pointer_cast<cfg::binding>(b));
+            }
         }
     }
-
     return DIENUM_CONTINUE;
 }
 
@@ -66,14 +71,23 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 void hook_dinput::query_devices()
 {
     m_mutex.lock();
-    m_devices.clear();
+
+    /* Invalidate all devices so we can check later, which one
+     * are still connected/newly connected and which ones were
+     * disconnected
+     */
+    for (auto& dev : m_devices)
+        dev->invalidate();
+
     m_dev_counter = 0;
+
     auto result = m_dinput->EnumDevices(DI8DEVCLASS_GAMECTRL, enum_callback, this, DIEDFL_ATTACHEDONLY);
 
     if (FAILED(result)) {
         gerr("Enumeration of Direct Input devices failed");
     }
 
+    remove_invalid_devices();
     m_mutex.unlock();
 }
 
@@ -97,7 +111,7 @@ bool hook_dinput::start()
     wc.lpszClassName = L"libgamepad_window_class";
 
     if (RegisterClass(&wc)) {
-        m_hook_window = CreateWindowEx(WS_EX_CLIENTEDGE, L"libgamepad_window_class", L"libgampead_window",
+        m_hook_window = CreateWindowEx(WS_EX_CLIENTEDGE, L"libgamepad_window_class", L"libgamepad_window",
             WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 240, 120, nullptr, nullptr,
             wc.hInstance, nullptr);
     }
