@@ -93,7 +93,7 @@ if (GAMEPAD_ENABLE_STATIC)
             dinput8
             dxguid)
     endif()
-    
+
 
     if (GAMEPAD_ENABLE_INSTALL)
         install(TARGETS gamepad_static DESTINATION ${CMAKE_INSTALL_LIBDIR})
@@ -124,7 +124,7 @@ if (UNIX)
     target_link_libraries (gamepad ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
-if (GAMEPAD_GAMEPAD_ENABLE_TESTS)
+if (GAMEPAD_ENABLE_TESTS)
     add_executable(libgamepad_tests
         tests/test.cpp
     )
@@ -145,7 +145,7 @@ if (GAMEPAD_GAMEPAD_ENABLE_TESTS)
         target_link_libraries(libgamepad_tests gamepad)
         add_dependencies(libgamepad_tests gamepad)
     endif()
-    
+
     if (GAMEPAD_ENABLE_INSTALL)
         install(TARGETS libgamepad_tests DESTINATION bin)
     endif()

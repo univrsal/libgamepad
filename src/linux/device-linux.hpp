@@ -39,7 +39,7 @@ public:
     const std::string& get_id() const override;
     void init() override;
     void deinit() override;
-    void update() override;
-    void set_binding(std::shared_ptr<cfg::binding>&& b) override;
+    int update() override;
+    void set_binding(std::shared_ptr<cfg::binding> b) override;
 };
 }

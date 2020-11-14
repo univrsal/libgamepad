@@ -48,7 +48,7 @@ int main()
 #endif
 
     auto h = gamepad::hook::make();
-
+    h->set_sleep_time(5);
     if (!h->start()) {
         gerr("Couldn't start hook");
         return 0;
@@ -70,58 +70,27 @@ int main()
 
     auto devs = h->get_devices();
 
-    /* Print out devices */
-    h->get_mutex()->lock(); /* Make sure this gets printed in one piece as sometimes the hook thread will barge in */
-    ginfo("+-- Connected devices:");
-    ginfo("|");
-    for (const auto& dev : devs) {
-        std::string id = dev->get_id();
-        std::string name = dev->get_name();
-
-        ginfo("+-%s-- Device ID: %s", (id != name || dev->has_binding()) ? "+" : "-", dev->get_id().c_str());
-
-        if (id != name) {
-            ginfo("| |");
-            ginfo("| +------- Name: %s", dev->get_name().c_str());
-        }
-
-        if (dev->has_binding()) {
-            ginfo("| |");
-            ginfo("| +---- Binding: %s", dev->get_binding()->get_name().c_str());
-        }
-        ginfo("|");
-    }
-    ginfo("+--/");
-    h->get_mutex()->unlock();
-
     const auto& dev = devs[0];
 
     if (dev->has_binding()) {
         ginfo("First device already has default bindings");
-        h->get_mutex()->lock();
-        auto last_axis = dev->last_axis_event()->time;
-        auto last_button = dev->last_button_event()->time;
-        h->get_mutex()->unlock();
 
-        while (run_flag) {
-            h->get_mutex()->lock();
+        auto button_handler = [](std::shared_ptr<gamepad::device> dev) {
+            ginfo("Received button event: Native id: %i, Virtual id: %i val: %i",
+                dev->last_button_event()->native_id, dev->last_button_event()->vc,
+                dev->last_button_event()->value);
+        };
 
-            if (dev->last_axis_event()->time != last_axis) {
-                ginfo("Received axis event: Native id: %i, Virtual id: %i val: %i", dev->last_axis_event()->native_id,
-                    dev->last_axis_event()->vc, dev->last_axis_event()->value);
-                last_axis = dev->last_axis_event()->time;
-            }
+        auto axis_handler = [](std::shared_ptr<gamepad::device> dev) {
+            ginfo("Received axis event: Native id: %i, Virtual id: %i val: %i", dev->last_axis_event()->native_id,
+                dev->last_axis_event()->vc, dev->last_axis_event()->value);
+        };
 
-            if (dev->last_button_event()->time != last_button) {
-                ginfo("Received button event: Native id: %i, Virtual id: %i val: %i",
-                    dev->last_button_event()->native_id, dev->last_button_event()->vc,
-                    dev->last_button_event()->value);
-                last_button = dev->last_button_event()->time;
-            }
+        h->set_axis_event_handler(axis_handler);
+        h->set_button_event_handler(button_handler);
 
-            h->get_mutex()->unlock();
+        while (run_flag)
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
-        }
     } else {
 #ifdef LGP_ENABLE_JSON
         ginfo("Found device, running config wizard");

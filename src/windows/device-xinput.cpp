@@ -46,8 +46,9 @@ device_xinput::device_xinput(uint8_t id, const xinput_refresh_t& refresh)
     device_xinput::update();
 }
 
-void device_xinput::update()
+int device_xinput::update()
 {
+    int result = 0;
     if (m_xinput_refresh(m_id, &m_current_state) == ERROR_SUCCESS) {
         for (const auto& btn : XINPUT_BUTTONS) {
             bool state = m_current_state.wButtons & btn;
@@ -63,26 +64,29 @@ void device_xinput::update()
 
             if (state != old_state) {
                 button_event(btn, vc, state, vv);
+                result |= update_result::BUTTON;
             }
         }
 
         /* Check axis
-		 * Since Xinput doesn't assign ids to axis we just use our ids
-		 * and map our ids to our ids, which by default means no changes,
-		 * but maybe someone really wants to bind his right trigger to his
-		 * left trigger
-		 */
-#define CHECK(var, m, id)                                                      \
-    if (m_current_state.var != m_old_state.var) {                              \
-        uint16_t vc = 0;                                                       \
-        float vv = 0.0f;                                                       \
-        if (m_native_binding) {                                                \
-            vc = m_native_binding->m_axis_mappings[id];                        \
-            vv = m_current_state.var / (float(m));                             \
-            m_axis[vc] = vv;                                                   \
-        }                                                                      \
-        if (abs(m_current_state.var - m_old_state.var) > m_axis_deadzones[vc]) \
-            axis_event(id, vc, m_current_state.var, vv);                       \
+         * Since Xinput doesn't assign ids to axis we just use our ids
+         * and map our ids to our ids, which by default means no changes,
+         * but maybe someone really wants to bind his right trigger to his
+         * left trigger
+         */
+#define CHECK(var, m, id)                                                        \
+    if (m_current_state.var != m_old_state.var) {                                \
+        uint16_t vc = 0;                                                         \
+        float vv = 0.0f;                                                         \
+        if (m_native_binding) {                                                  \
+            vc = m_native_binding->m_axis_mappings[id];                          \
+            vv = m_current_state.var / (float(m));                               \
+            m_axis[vc] = vv;                                                     \
+        }                                                                        \
+        if (abs(m_current_state.var - m_old_state.var) > m_axis_deadzones[vc]) { \
+            axis_event(id, vc, m_current_state.var, vv);                         \
+            result |= update_result::AXIS;                                       \
+        }                                                                        \
     }
 
         CHECK(bRightTrigger, 0xff, axis::RIGHT_TRIGGER);
@@ -97,11 +101,12 @@ void device_xinput::update()
     } else {
         m_valid = false;
     }
+    return result;
 }
 
-void device_xinput::set_binding(shared_ptr<cfg::binding>&& b)
+void device_xinput::set_binding(shared_ptr<cfg::binding> b)
 {
-    device::set_binding(move(b));
+    device::set_binding(b);
     m_native_binding = dynamic_cast<cfg::binding_xinput*>(b.get());
 }
 }

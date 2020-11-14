@@ -50,7 +50,7 @@ class hook_dinput : public hook {
     IDirectInput8* m_dinput = nullptr;
     HWND m_hook_window = nullptr; /* Invisible window needed to initialize devices */
     std::thread m_window_message_thread;
-    
+
     int m_dev_counter = 0;
 #ifdef LGP_ENABLE_JSON
     void on_bind(json11::Json::object& j, uint16_t native_code, uint16_t vc, int16_t val, bool is_axis) override;

@@ -78,36 +78,48 @@ inline float clamp(float x, float upper, float lower)
     return fminf(upper, fmaxf(x, lower));
 }
 
-void device_linux::update()
+int device_linux::update()
 {
     /* This will only process the last event, since any other
-         * queued up events aren't useful anymore, I think */
+     * queued up events aren't useful anymore, I think */
     while (read(m_fd, &m_event, sizeof(m_event)) > 0)
         ;
     uint16_t vc = 0;
     float vv = 0.0f;
+    int result = update_result::NONE;
 
     if (m_event.type == JS_EVENT_AXIS) {
         if (m_native_binding) {
             vc = m_native_binding->m_axis_mappings[m_event.number];
+            float old_value = m_axis[vc];
             auto val = float(m_event.value);
-            vv = clamp(val / 0xffff, -1.f, 1.f);
-            m_axis[vc] = vv;
+
+            if (fabs(old_value - val) > m_axis_deadzones[vc]) {
+                vv = clamp(val / 0xffff, -1.f, 1.f);
+                m_axis[vc] = vv;
+                axis_event(m_event.number, vc, m_event.value, vv);
+                result = update_result::AXIS;
+            }
         }
-        axis_event(m_event.number, vc, m_event.value, vv);
     } else if (m_event.type == JS_EVENT_BUTTON) {
         if (m_native_binding) {
             vc = m_native_binding->m_buttons_mappings[m_event.number];
             vv = m_event.value;
-            m_buttons[vc] = m_event.value;
+            auto old_value = m_buttons[vc];
+            if (old_value != vv) {
+                m_buttons[vc] = m_event.value;
+                result = update_result::BUTTON;
+                button_event(m_event.number, vc, m_event.value, vv);
+            }
         }
-        button_event(m_event.number, vc, m_event.value, vv);
     }
+
+    return result;
 }
 
-void device_linux::set_binding(std::shared_ptr<cfg::binding>&& b)
+void device_linux::set_binding(std::shared_ptr<cfg::binding> b)
 {
-    device::set_binding(std::move(b));
+    device::set_binding(b);
     m_native_binding = dynamic_cast<cfg::binding_linux*>(b.get());
 }
 }

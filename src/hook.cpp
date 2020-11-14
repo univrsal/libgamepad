@@ -67,8 +67,13 @@ void default_hook_thread(class hook* h)
             h->query_devices();
         } else {
             h->get_mutex()->lock();
-            for (auto& dev : h->get_devices())
-                dev->update();
+            for (auto& dev : h->get_devices()) {
+                auto result = dev->update();
+                if (result & update_result::AXIS && h->m_axis_handler)
+                    h->m_axis_handler(dev);
+                if (result & update_result::BUTTON && h->m_button_handler)
+                    h->m_button_handler(dev);
+            }
             sleep_time = h->get_sleep_time();
             h->get_mutex()->unlock();
         }
@@ -77,9 +82,19 @@ void default_hook_thread(class hook* h)
     ginfo("Hook thread ended");
 }
 
-void hook::on_bind(Json::object& j, uint16_t native_code, uint16_t vc, int16_t val, bool is_axis)
+void hook::on_bind(Json::object&, uint16_t, uint16_t, int16_t, bool)
 {
     /* NO-OP */
+}
+
+void hook::set_button_event_handler(std::function<void(std::shared_ptr<device>)> handler)
+{
+    m_button_handler = handler;
+}
+
+void hook::set_axis_event_handler(std::function<void(std::shared_ptr<device>)> handler)
+{
+    m_axis_handler = handler;
 }
 
 std::shared_ptr<cfg::binding> hook::make_native_binding(const std::string& json)

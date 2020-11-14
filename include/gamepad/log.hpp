@@ -16,17 +16,22 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
+#pragma once
 #include <stdarg.h>
 
+#ifndef LGP_LOG_PREFIX
+#define LGP_LOG_PREFIX ""
+#endif
+
 #ifdef DEBUG
-#define gdebug(format, ...) gamepad::log(gamepad::LOG_DEBUG, format, ##__VA_ARGS__)
+#define gdebug(format, ...) gamepad::log(gamepad::LOG_DEBUG, LGP_LOG_PREFIX format, ##__VA_ARGS__)
 #else
 #define gdebug(format, ...) LGP_UNUSED(format)
 #endif
 
-#define ginfo(format, ...) gamepad::log(gamepad::LOG_INFO, format, ##__VA_ARGS__)
-#define gwarn(format, ...) gamepad::log(gamepad::LOG_WARNING, format, ##__VA_ARGS__)
-#define gerr(format, ...) gamepad::log(gamepad::LOG_ERROR, format, ##__VA_ARGS__)
+#define ginfo(format, ...) gamepad::log(gamepad::LOG_INFO, LGP_LOG_PREFIX format, ##__VA_ARGS__)
+#define gwarn(format, ...) gamepad::log(gamepad::LOG_WARNING, LGP_LOG_PREFIX format, ##__VA_ARGS__)
+#define gerr(format, ...) gamepad::log(gamepad::LOG_ERROR, LGP_LOG_PREFIX format, ##__VA_ARGS__)
 namespace gamepad {
 enum log_level {
     LOG_DEBUG,

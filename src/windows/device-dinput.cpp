@@ -432,29 +432,30 @@ void device_dinput::deinit()
     m_device = nullptr;
 }
 
-void device_dinput::update()
+int device_dinput::update()
 {
     if (!m_valid)
-        return;
+        return update_result::NONE;
+    int result = 0;
 
     m_old_state = m_new_state;
     ZeroMemory(&m_new_state, sizeof(DIJOYSTATE));
 
-    auto result = m_device->Poll();
-    if (FAILED(result)) {
+    auto poll_result = m_device->Poll();
+    if (FAILED(poll_result)) {
         gerr("Polling for device '%s' failed, trying to reacquire...", m_name.c_str());
-        result = m_device->Acquire();
-        while (result == DIERR_INPUTLOST)
-            result = m_device->Acquire();
+        poll_result = m_device->Acquire();
+        while (poll_result == DIERR_INPUTLOST)
+            poll_result = m_device->Acquire();
 
-        if (FAILED(result))
+        if (FAILED(poll_result))
             m_valid = false;
 
-        if (result == DIERR_INVALIDPARAM) {
+        if (poll_result == DIERR_INVALIDPARAM) {
             gerr("Invalid parameter error for %s", m_name.c_str());
-        } else if (result == DIERR_NOTINITIALIZED) {
+        } else if (poll_result == DIERR_NOTINITIALIZED) {
             gerr("Device '%s' is exclusively used by another process", m_name.c_str());
-        } else if (result == DIERR_OTHERAPPHASPRIO) {
+        } else if (poll_result == DIERR_OTHERAPPHASPRIO) {
             gdebug("Device '%s' is occupied by another process, waiting...", m_name.c_str());
             return;
         } else {
@@ -465,7 +466,7 @@ void device_dinput::update()
     if (FAILED(m_device->GetDeviceState(sizeof(DIJOYSTATE2), &m_new_state))) {
         gerr("Couldn't get device state for '%s'", m_name.c_str());
         m_valid = false;
-        return;
+        return result;
     }
 
     /* Check all buttons */
@@ -492,6 +493,7 @@ void device_dinput::update()
          */
         if (pressed != old_pressed) {
             button_event(i, vc, pressed, vv);
+            result |= update_result::button;
         }
     }
 
@@ -553,14 +555,25 @@ void device_dinput::update()
         m_buttons[right_code] = right;
     }
 
-    if (up != old_up)
+    if (up != old_up) {
         button_event(DPAD_UP, up_code, up, up ? 1.0f : 0.0f);
-    if (left != old_left)
+        result |= update_result::button;
+    }
+
+    if (left != old_left) {
         button_event(DPAD_LEFT, left_code, left, left ? 1.0f : 0.0f);
-    if (down != old_down)
+        result |= update_result::button;
+    }
+
+    if (down != old_down) {
         button_event(DPAD_DOWN, down_code, down, down ? 1.0f : 0.0f);
-    if (right != old_right)
+        result |= update_result::button;
+    }
+
+    if (right != old_right) {
         button_event(DPAD_RIGHT, right_code, right, right ? 1.0f : 0.0f);
+        result |= update_result::button;
+    }
 
     /* Check all axis */
     for (uint16_t i = 0; i < m_axis_new.size(); i++) {
@@ -594,13 +607,15 @@ void device_dinput::update()
         /* If the position changed */
         if (abs((*(m_axis_old)[i]) - (*m_axis_new[i])) > m_axis_deadzones[vc]) {
             axis_event(i, vc, *m_axis_new[i], vv);
+            result |= update_result::AXIS;
         }
     }
+    return result;
 }
 
-void device_dinput::set_binding(shared_ptr<cfg::binding>&& b)
+void device_dinput::set_binding(shared_ptr<cfg::binding> b)
 {
-    device::set_binding(move(b));
+    device::set_binding(b);
     m_native_binding = dynamic_cast<cfg::binding_dinput*>(b.get());
 }
 }

@@ -63,7 +63,7 @@ public:
     const std::string& get_id() const override;
     void init() override;
     void deinit() override;
-    void update() override;
+    int update() override;
     void set_binding(std::shared_ptr<cfg::binding>&& b) override;
 
     friend BOOL CALLBACK enum_device_objects_callback(LPCDIDEVICEOBJECTINSTANCE obj, LPVOID data);

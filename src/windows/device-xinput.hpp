@@ -50,7 +50,7 @@ class device_xinput : public device {
 public:
     device_xinput(uint8_t id, const xinput_refresh_t& refresh);
 
-    void update() override;
-    void set_binding(std::shared_ptr<cfg::binding>&& b) override;
+    int update() override;
+    void set_binding(std::shared_ptr<cfg::binding> b) override;
 };
 }

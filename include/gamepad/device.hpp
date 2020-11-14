@@ -59,6 +59,14 @@ namespace axis {
         COUNT };
 }
 
+namespace update_result {
+    enum {
+        NONE,
+        AXIS = 1 << 0,
+        BUTTON = 1 << 1
+    };
+}
+
 /* clang-format off */
 struct input_event {
     uint16_t native_id;     /* Native event number              */
@@ -146,6 +154,14 @@ public:
 
     float get_axis(uint16_t axis) { return m_axis[axis]; }
 
+    const std::map<uint16_t, bool>& get_buttons() const { return m_buttons; }
+
+    std::map<uint16_t, bool>& get_buttons() { return m_buttons; }
+
+    const std::map<uint16_t, float>& get_axis() const { return m_axis; }
+
+    std::map<uint16_t, float>& get_axis() { return m_axis; }
+
     bool is_valid() const { return m_valid; }
 
     void invalidate() { m_valid = false; }
@@ -158,7 +174,7 @@ public:
 
     std::shared_ptr<cfg::binding> get_binding() { return m_binding; }
 
-    virtual void set_binding(std::shared_ptr<cfg::binding>&& b)
+    virtual void set_binding(std::shared_ptr<cfg::binding> b)
     {
         m_binding.reset();
         m_binding = b;
@@ -170,8 +186,9 @@ public:
     virtual void init()
     { /* NO-OP */
     }
-    virtual void update()
+    virtual int update()
     { /* NO-OP */
+        return update_result::NONE;
     }
 };
 }

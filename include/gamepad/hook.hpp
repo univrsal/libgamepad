@@ -17,6 +17,7 @@
  **/
 
 #pragma once
+#include <functional>
 #include <gamepad/binding.hpp>
 #include <gamepad/config.h>
 #include <gamepad/device.hpp>
@@ -38,6 +39,8 @@ enum class hook_type {
 extern void default_hook_thread(class hook* h);
 
 class hook {
+    friend void default_hook_thread(class hook* h);
+
 protected:
     static std::vector<std::tuple<std::string, uint16_t>> button_prompts;
     static std::vector<std::tuple<std::string, uint16_t>> axis_prompts;
@@ -46,15 +49,18 @@ protected:
     /* List of all bindnigs */
     bindings_list m_bindings;
 
+    std::function<void(std::shared_ptr<device>)> m_axis_handler;
+    std::function<void(std::shared_ptr<device>)> m_button_handler;
+
     std::thread m_hook_thread;
     std::mutex m_mutex;
     volatile bool m_running = false;
     uint16_t m_thread_sleep = 50;
 
     /* Can be used for platform specific bind options
-	 * Only used for DirectInput currently, which needs a sepcial hack
-	 * for separating the left and right trigger
-	 */
+     * Only used for DirectInput currently, which needs a sepcial hack
+     * for separating the left and right trigger
+     */
 #ifdef LGP_ENABLE_JSON
     virtual void on_bind(json11::Json::object& j, uint16_t native_code, uint16_t vc, int16_t val, bool is_axis);
 #endif
@@ -101,6 +107,18 @@ public:
      * @return true on sucess
      */
     bool load_bindings(const std::string& path);
+
+    /**
+     * @brief Event handler function called when buttons are pressed on any device
+     * @param handler Function pointer to the handler
+     */
+
+    void set_button_event_handler(std::function<void(std::shared_ptr<device>)> handler);
+    /**
+     * @brief Event handler function called when axis are moved on any device
+     * @param handler Function pointer to the handler
+     */
+    void set_axis_event_handler(std::function<void(std::shared_ptr<device>)> handler);
 
 #ifdef LGP_ENABLE_JSON
     virtual bool load_bindings(const json11::Json& j);
