@@ -29,7 +29,14 @@ namespace gamepad {
 void hook_xinput::query_devices()
 {
     m_mutex.lock();
-    m_devices.clear();
+
+    /* Invalidate all devices so we can check later, which one
+     * are still connected/newly connected and which ones were
+     * disconnected
+     */
+    for (auto& dev : m_devices)
+        dev->invalidate();
+
     xinput_pad tmp {};
 
     for (int i = 1; i <= LGP_XINPUT_DEVICES; i++) {

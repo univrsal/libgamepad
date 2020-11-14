@@ -61,11 +61,9 @@ void default_hook_thread(class hook* h)
     ginfo("Hook thread started");
     h->get_mutex()->unlock();
 
+    uint32_t plug_n_play_wait = 0;
     while (h->running()) {
-
-        if (h->get_devices().size() < 1) {
-            h->query_devices();
-        } else {
+        if (h->get_devices().size() > 0) {
             h->get_mutex()->lock();
             for (auto& dev : h->get_devices()) {
                 auto result = dev->update();
@@ -76,6 +74,15 @@ void default_hook_thread(class hook* h)
             }
             sleep_time = h->get_sleep_time();
             h->get_mutex()->unlock();
+        }
+
+        if (h->m_plug_and_play) {
+            if (plug_n_play_wait >= h->m_plug_and_play_interval) {
+                plug_n_play_wait = 0;
+                gdebug("Updating device list");
+                h->query_devices();
+            }
+            plug_n_play_wait += sleep_time;
         }
         this_thread::sleep_for(chrono::milliseconds(sleep_time));
     }
@@ -95,6 +102,16 @@ void hook::set_button_event_handler(std::function<void(std::shared_ptr<device>)>
 void hook::set_axis_event_handler(std::function<void(std::shared_ptr<device>)> handler)
 {
     m_axis_handler = handler;
+}
+
+void hook::set_connect_event_handler(std::function<void(std::shared_ptr<device>)> handler)
+{
+    m_connect_handler = handler;
+}
+
+void hook::set_disconnect_event_handler(std::function<void(std::shared_ptr<device>)> handler)
+{
+    m_disconnect_handler = handler;
 }
 
 std::shared_ptr<cfg::binding> hook::make_native_binding(const std::string& json)

@@ -30,10 +30,18 @@ using namespace json11;
 
 namespace gamepad {
 
+std::shared_ptr<device> hook_linux::get_device_by_path(const std::string& path)
+{
+    for (auto& dev : m_devices) {
+        if (dynamic_pointer_cast<device_linux>(dev)->get_path() == path)
+            return dev;
+    }
+    return nullptr;
+}
+
 void hook_linux::query_devices()
 {
     static const char* DEV_FOLDER = "/dev/input/by-id";
-    close_devices();
     m_mutex.lock();
     int dev_counter = 0;
     DIR* dir;
@@ -43,6 +51,13 @@ void hook_linux::query_devices()
         gerr("Couldn't open %s", DEV_FOLDER);
         return;
     }
+
+    /* Invalidate all devices so we can check later, which one
+     * are still connected/newly connected and which ones were
+     * disconnected
+     */
+    for (auto& dev : m_devices)
+        dev->invalidate();
 
     while ((ent = readdir(dir)) != NULL) {
         DIR* dir2 = opendir(ent->d_name); /* NULL if not a directory */
@@ -54,17 +69,26 @@ void hook_linux::query_devices()
 
             if ((path.find("gamepad") != string::npos || path.find("joystick") != string::npos) && path.find("event") == string::npos) {
                 gdebug("Found potential gamepad at '%s'", path.c_str());
-                auto dev = make_shared<device_linux>(path);
-                if (dev->is_valid()) {
-                    dev->set_index(dev_counter++);
-                    m_devices.emplace_back(dev);
-                    auto b = get_binding_for_device(dev->get_id());
+                auto existing_dev = get_device_by_path(path);
 
-                    if (b) {
-                        dev->set_binding(move(b));
-                    } else {
-                        auto b = make_shared<cfg::binding_linux>(cfg::linux_default_binding);
-                        dev->set_binding(dynamic_pointer_cast<cfg::binding>(b));
+                if (existing_dev) {
+                    existing_dev->set_valid();
+                    existing_dev->init(); /* Refresh file descriptor if needed */
+                } else {
+                    auto dev = make_shared<device_linux>(path);
+                    if (dev->is_valid()) {
+                        if (m_connect_handler)
+                            m_connect_handler(dev);
+                        dev->set_index(dev_counter++);
+                        m_devices.emplace_back(dev);
+                        auto b = get_binding_for_device(dev->get_id());
+
+                        if (b) {
+                            dev->set_binding(move(b));
+                        } else {
+                            auto b = make_shared<cfg::binding_linux>(cfg::linux_default_binding);
+                            dev->set_binding(dynamic_pointer_cast<cfg::binding>(b));
+                        }
                     }
                 }
             }
@@ -72,6 +96,17 @@ void hook_linux::query_devices()
             closedir(dir2);
         }
     }
+
+    /* Remove any devices that aren't valid anymore & run disconnect handler */
+    auto it = std::remove_if(m_devices.begin(), m_devices.end(),
+        [this](std::shared_ptr<device>& d) {
+            auto result = !d->is_valid();
+            if (result && this->m_disconnect_handler)
+                m_disconnect_handler(d);
+            return result;
+        });
+
+    m_devices.erase(it, m_devices.end());
     m_mutex.unlock();
 }
 

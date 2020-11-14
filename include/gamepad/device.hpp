@@ -165,6 +165,7 @@ public:
     bool is_valid() const { return m_valid; }
 
     void invalidate() { m_valid = false; }
+    void set_valid() { m_valid = true; }
 
     bool has_binding() const { return m_binding != nullptr; }
 
@@ -189,6 +190,11 @@ public:
     virtual int update()
     { /* NO-OP */
         return update_result::NONE;
+    }
+
+    bool operator==(const device& b) const
+    {
+        return b.get_name() == get_name() && b.get_id() == get_id();
     }
 };
 }

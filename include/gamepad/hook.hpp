@@ -51,10 +51,14 @@ protected:
 
     std::function<void(std::shared_ptr<device>)> m_axis_handler;
     std::function<void(std::shared_ptr<device>)> m_button_handler;
+    std::function<void(std::shared_ptr<device>)> m_connect_handler;
+    std::function<void(std::shared_ptr<device>)> m_disconnect_handler;
 
     std::thread m_hook_thread;
     std::mutex m_mutex;
     volatile bool m_running = false;
+    bool m_plug_and_play = false;
+    uint16_t m_plug_and_play_interval = 1000;
     uint16_t m_thread_sleep = 50;
 
     /* Can be used for platform specific bind options
@@ -86,6 +90,17 @@ public:
     bool running() const { return m_running; }
 
     /**
+     * @brief Enable or disable automatic update of device list
+     * @param state Enable or disable plug and play
+     * @param refresh_rate_ms Refresh interval has to be >= sleep time
+     */
+    void set_plug_and_play(bool state, uint16_t refresh_rate_ms = 1000)
+    {
+        m_plug_and_play = state;
+        m_plug_and_play_interval = refresh_rate_ms >= m_thread_sleep ? refresh_rate_ms : m_thread_sleep;
+    }
+
+    /**
      * @brief Save bindings to a file
      * @param path The target path
      * @return true on success
@@ -112,13 +127,25 @@ public:
      * @brief Event handler function called when buttons are pressed on any device
      * @param handler Function pointer to the handler
      */
-
     void set_button_event_handler(std::function<void(std::shared_ptr<device>)> handler);
+
     /**
      * @brief Event handler function called when axis are moved on any device
      * @param handler Function pointer to the handler
      */
     void set_axis_event_handler(std::function<void(std::shared_ptr<device>)> handler);
+
+    /**
+     * @brief Event handler function called when a device is connected
+     * @param handler Function pointer to the handler
+     */
+    void set_connect_event_handler(std::function<void(std::shared_ptr<device>)> handler);
+
+    /**
+     * @brief Event handler function called when a device is disconnected
+     * @param handler Function pointer to the handler
+     */
+    void set_disconnect_event_handler(std::function<void(std::shared_ptr<device>)> handler);
 
 #ifdef LGP_ENABLE_JSON
     virtual bool load_bindings(const json11::Json& j);

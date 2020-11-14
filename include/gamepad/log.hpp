@@ -23,7 +23,7 @@
 #define LGP_LOG_PREFIX ""
 #endif
 
-#ifdef DEBUG
+#ifndef DEBUG
 #define gdebug(format, ...) gamepad::log(gamepad::LOG_DEBUG, LGP_LOG_PREFIX format, ##__VA_ARGS__)
 #else
 #define gdebug(format, ...) LGP_UNUSED(format)

@@ -28,6 +28,7 @@ namespace gamepad {
 device_linux::device_linux(const std::string path)
     : m_device_path(path)
 {
+    m_fd = -1;
     init();
 }
 
@@ -38,6 +39,9 @@ device_linux::~device_linux()
 
 void device_linux::init()
 {
+    /* If this descriptor is still valid do nothing */
+    if (fcntl(m_fd, F_GETFD) != -1 || errno != EBADF)
+        return;
     deinit();
     m_fd = open(m_device_path.c_str(), O_RDONLY | O_NONBLOCK);
     m_valid = m_fd != -1;
@@ -64,8 +68,13 @@ void device_linux::init()
 
 void device_linux::deinit()
 {
-    close(m_fd);
-    m_fd = 0;
+    if (m_fd < 0)
+        return;
+
+    if (close(m_fd) == -1)
+        gerr("Couldn't close file descriptor for device '%s'", get_id().c_str());
+
+    m_fd = -1;
 }
 
 const std::string& device_linux::get_id() const
@@ -91,16 +100,15 @@ int device_linux::update()
     if (m_event.type == JS_EVENT_AXIS) {
         if (m_native_binding) {
             vc = m_native_binding->m_axis_mappings[m_event.number];
-            float old_value = m_axis[vc];
             auto val = float(m_event.value);
 
-            if (fabs(old_value - val) > m_axis_deadzones[vc]) {
+            if (fabs(val - m_last_axis_event.value) > m_axis_deadzones[vc]) {
                 vv = clamp(val / 0xffff, -1.f, 1.f);
                 m_axis[vc] = vv;
-                axis_event(m_event.number, vc, m_event.value, vv);
                 result = update_result::AXIS;
             }
         }
+        axis_event(m_event.number, vc, m_event.value, vv);
     } else if (m_event.type == JS_EVENT_BUTTON) {
         if (m_native_binding) {
             vc = m_native_binding->m_buttons_mappings[m_event.number];
@@ -109,9 +117,9 @@ int device_linux::update()
             if (old_value != vv) {
                 m_buttons[vc] = m_event.value;
                 result = update_result::BUTTON;
-                button_event(m_event.number, vc, m_event.value, vv);
             }
         }
+        button_event(m_event.number, vc, m_event.value, vv);
     }
 
     return result;

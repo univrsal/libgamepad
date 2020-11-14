@@ -29,6 +29,7 @@ public:
 #endif
 
     void query_devices() override;
+    std::shared_ptr<device> get_device_by_path(const std::string& path);
 };
 }
 #endif

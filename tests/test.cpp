@@ -48,57 +48,48 @@ int main()
 #endif
 
     auto h = gamepad::hook::make();
+    h->set_plug_and_play(true);
     h->set_sleep_time(5);
+
+    auto button_handler = [](std::shared_ptr<gamepad::device> dev) {
+        ginfo("Received button event: Native id: %i, Virtual id: %i val: %i",
+            dev->last_button_event()->native_id, dev->last_button_event()->vc,
+            dev->last_button_event()->value);
+    };
+
+    auto axis_handler = [](std::shared_ptr<gamepad::device> dev) {
+        ginfo("Received axis event: Native id: %i, Virtual id: %i val: %i", dev->last_axis_event()->native_id,
+            dev->last_axis_event()->vc, dev->last_axis_event()->value);
+    };
+
+    auto connect_handler = [h](std::shared_ptr<gamepad::device> dev) {
+        ginfo("%s connected", dev->get_name().c_str());
+        if (dev->has_binding()) {
+#ifdef LGP_ENABLE_JSON
+            ginfo("Found device, running config wizard");
+            json11::Json cfg;
+            h->make_xbox_config(dev, cfg);
+            ginfo("Result config: %s", cfg.dump().c_str());
+#else
+            ginfo("Json isn't enabled for libgamepad, so the config wizard can't be used");
+#endif
+        }
+    };
+
+    auto disconnect_handler = [](std::shared_ptr<gamepad::device> dev) {
+        ginfo("%s disconnected", dev->get_name().c_str());
+    };
+
+    h->set_axis_event_handler(axis_handler);
+    h->set_button_event_handler(button_handler);
+    h->set_connect_event_handler(connect_handler);
+    h->set_disconnect_event_handler(disconnect_handler);
+
     if (!h->start()) {
         gerr("Couldn't start hook");
-        return 0;
+        return 1;
     }
 
-    if (h->get_devices().size() < 1) {
-        bool flag = true;
-        while (flag && run_flag) {
-            h->get_mutex()->lock();
-            if (h->get_devices().size() > 0)
-                flag = false;
-            h->get_mutex()->unlock();
-            std::this_thread::sleep_for(std::chrono::milliseconds(50));
-        }
-
-        if (!run_flag)
-            return 0;
-    }
-
-    auto devs = h->get_devices();
-
-    const auto& dev = devs[0];
-
-    if (dev->has_binding()) {
-        ginfo("First device already has default bindings");
-
-        auto button_handler = [](std::shared_ptr<gamepad::device> dev) {
-            ginfo("Received button event: Native id: %i, Virtual id: %i val: %i",
-                dev->last_button_event()->native_id, dev->last_button_event()->vc,
-                dev->last_button_event()->value);
-        };
-
-        auto axis_handler = [](std::shared_ptr<gamepad::device> dev) {
-            ginfo("Received axis event: Native id: %i, Virtual id: %i val: %i", dev->last_axis_event()->native_id,
-                dev->last_axis_event()->vc, dev->last_axis_event()->value);
-        };
-
-        h->set_axis_event_handler(axis_handler);
-        h->set_button_event_handler(button_handler);
-
-        while (run_flag)
-            std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    } else {
-#ifdef LGP_ENABLE_JSON
-        ginfo("Found device, running config wizard");
-        json11::Json cfg;
-        h->make_xbox_config(dev, cfg);
-        ginfo("Result config: %s", cfg.dump().c_str());
-#else
-        ginfo("Json isn't enabled for libgamepad, so the config wizard can't be used");
-#endif
-    }
+    while (run_flag)
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
 }
