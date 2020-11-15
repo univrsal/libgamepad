@@ -18,7 +18,6 @@
 
 #include "device-linux.hpp"
 #include <algorithm>
-#include <cmath>
 #include <fcntl.h>
 #include <gamepad/binding-linux.hpp>
 #include <gamepad/log.hpp>
