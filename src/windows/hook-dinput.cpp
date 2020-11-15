@@ -48,6 +48,9 @@ BOOL CALLBACK enum_callback(LPCDIDEVICEINSTANCE dev, LPVOID data)
                 auto b = make_shared<cfg::binding_dinput>(cfg::dinput_default_binding);
                 new_device->set_binding(dynamic_pointer_cast<cfg::binding>(b));
             }
+
+            if (h->m_connect_handler)
+                h->m_connect_handler(new_device);
         }
     }
     return DIENUM_CONTINUE;

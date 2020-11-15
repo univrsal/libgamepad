@@ -52,19 +52,19 @@ int main()
     h->set_sleep_time(5);
 
     auto button_handler = [](std::shared_ptr<gamepad::device> dev) {
-        ginfo("Received button event: Native id: %i, Virtual id: %i val: %i",
+        ginfo("Received button event: Native id: %i, Virtual id: %i val: %f",
             dev->last_button_event()->native_id, dev->last_button_event()->vc,
-            dev->last_button_event()->value);
+            dev->last_button_event()->virtual_value);
     };
 
     auto axis_handler = [](std::shared_ptr<gamepad::device> dev) {
-        ginfo("Received axis event: Native id: %i, Virtual id: %i val: %i", dev->last_axis_event()->native_id,
-            dev->last_axis_event()->vc, dev->last_axis_event()->value);
+        ginfo("Received axis event: Native id: %i, Virtual id: %i val: %f", dev->last_axis_event()->native_id,
+            dev->last_axis_event()->vc, dev->last_axis_event()->virtual_value);
     };
 
     auto connect_handler = [h](std::shared_ptr<gamepad::device> dev) {
         ginfo("%s connected", dev->get_name().c_str());
-        if (dev->has_binding()) {
+        if (!dev->has_binding()) {
 #ifdef LGP_ENABLE_JSON
             ginfo("Found device, running config wizard");
             json11::Json cfg;

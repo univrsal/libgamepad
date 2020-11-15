@@ -35,7 +35,7 @@ namespace util {
         std::string result;
         int char_count = 0;
         if ((char_count = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, nullptr, 0, 0, 0) - 1) > 0) {
-            char* buf = new char[(int)char_count + 1];
+            char* buf = new char[int(char_count + 1)];
             if (buf) {
                 WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, buf, char_count, 0, 0);
                 buf[char_count] = '\0';

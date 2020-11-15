@@ -82,11 +82,6 @@ const std::string& device_linux::get_id() const
     return m_device_id;
 }
 
-inline float clamp(float x, float upper, float lower)
-{
-    return fminf(upper, fmaxf(x, lower));
-}
-
 int device_linux::update()
 {
     /* This will only process the last event, since any other

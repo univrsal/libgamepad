@@ -292,13 +292,13 @@ const string& device_dinput::get_id() const
     return m_id;
 }
 
-static std::string device_dinput::make_id(LPCDIDEVICEINSTANCE dev)
+std::string device_dinput::make_id(LPCDIDEVICEINSTANCE dev)
 {
     auto product_name = util::wchar_to_utf8(dev->tszProductName);
-    auto device_id = device_instance->guidInstance;
+    auto device_id = dev->guidInstance;
 
     wchar_t buf[512];
-    auto result = StringFromGUID2(m_device_id, buf, 512);
+    auto result = StringFromGUID2(device_id, buf, 512);
     if (result > 0)
         return util::wchar_to_utf8(buf) + " " + product_name;
     return "";
@@ -469,7 +469,7 @@ int device_dinput::update()
             gerr("Device '%s' is exclusively used by another process", m_name.c_str());
         } else if (poll_result == DIERR_OTHERAPPHASPRIO) {
             gdebug("Device '%s' is occupied by another process, waiting...", m_name.c_str());
-            return;
+            return result;
         } else {
             gerr("Unknown error");
         }
@@ -505,7 +505,7 @@ int device_dinput::update()
          */
         if (pressed != old_pressed) {
             button_event(i, vc, pressed, vv);
-            result |= update_result::button;
+            result |= update_result::BUTTON;
         }
     }
 
@@ -549,7 +549,8 @@ int device_dinput::update()
     };
 
     /* Check POV aka DPad */
-    bool left, old_left, right, old_right, up, old_up, down, old_down;
+    bool left = false, old_left = false, right = false, old_right = false,
+         up = false, old_up = false, down = false, old_down = false;
     check_pov(m_new_state.rgdwPOV[0], up, down, left, right);
     check_pov(m_old_state.rgdwPOV[0], old_up, old_down, old_left, old_right);
 
@@ -569,22 +570,22 @@ int device_dinput::update()
 
     if (up != old_up) {
         button_event(DPAD_UP, up_code, up, up ? 1.0f : 0.0f);
-        result |= update_result::button;
+        result |= update_result::BUTTON;
     }
 
     if (left != old_left) {
         button_event(DPAD_LEFT, left_code, left, left ? 1.0f : 0.0f);
-        result |= update_result::button;
+        result |= update_result::BUTTON;
     }
 
     if (down != old_down) {
         button_event(DPAD_DOWN, down_code, down, down ? 1.0f : 0.0f);
-        result |= update_result::button;
+        result |= update_result::BUTTON;
     }
 
     if (right != old_right) {
         button_event(DPAD_RIGHT, right_code, right, right ? 1.0f : 0.0f);
-        result |= update_result::button;
+        result |= update_result::BUTTON;
     }
 
     /* Check all axis */
@@ -608,7 +609,7 @@ int device_dinput::update()
                         vc = axis::RIGHT_TRIGGER;
                 }
 
-                vv = float((val - (DINPUT_AXIS_MAX / 2)) / (DINPUT_AXIS_MAX / 2));
+                vv = clamp(float(val) / (DINPUT_AXIS_MAX) * (vc == axis::RIGHT_TRIGGER ? -1 : 1), 1.0, 0.0);
                 m_axis[vc] = vv;
             } else {
                 vv = float(val) / DINPUT_AXIS_MAX;

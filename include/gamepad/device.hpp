@@ -28,7 +28,7 @@ namespace gamepad {
 
 /* Virtual button ids */
 namespace button {
-    enum {
+    enum type {
         A = 0xEC00,
         B,
         X,
@@ -50,17 +50,18 @@ namespace button {
 
 /* Virtual axis ids */
 namespace axis {
-    enum { LEFT_STICK_X = button::COUNT,
+    enum type { LEFT_STICK_X = button::COUNT,
         LEFT_STICK_Y,
         LEFT_TRIGGER,
         RIGHT_STICK_X,
         RIGHT_STICK_Y,
         RIGHT_TRIGGER,
-        COUNT };
+        COUNT
+    };
 }
 
 namespace update_result {
-    enum {
+    enum type {
         NONE,
         AXIS = 1 << 0,
         BUTTON = 1 << 1
@@ -122,6 +123,8 @@ protected:
     void button_event(uint16_t native_id, uint16_t vc, int32_t value, float vv);
     void axis_event(uint16_t native_id, uint16_t vc, int32_t value, float vv);
 
+    inline float clamp(float x, float upper, float lower) { return fminf(upper, fmaxf(x, lower)); }
+
 public:
     device()
     {
@@ -133,7 +136,7 @@ public:
         m_axis_deadzones[axis::RIGHT_STICK_Y] = 100;
     }
 
-    ~device() { }
+    ~device() {}
 
     void set_index(int i) { m_index = i; }
     int get_index() const { return m_index; }

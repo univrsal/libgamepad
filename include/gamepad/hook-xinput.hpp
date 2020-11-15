@@ -42,7 +42,7 @@ typedef struct {
 typedef int(__stdcall* xinput_refresh_t)(int, xinput_pad*);
 
 class hook_xinput : public hook {
-    HINSTANCE m_xinput;
+    HINSTANCE m_xinput = nullptr;
     xinput_refresh_t m_xinput_refresh = nullptr;
 
 public:

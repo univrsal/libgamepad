@@ -77,8 +77,6 @@ void hook_linux::query_devices()
                 } else {
                     auto dev = make_shared<device_linux>(path);
                     if (dev->is_valid()) {
-                        if (m_connect_handler)
-                            m_connect_handler(dev);
                         dev->set_index(dev_counter++);
                         m_devices.emplace_back(dev);
                         auto b = get_binding_for_device(dev->get_id());
@@ -89,6 +87,8 @@ void hook_linux::query_devices()
                             auto b = make_shared<cfg::binding_linux>(cfg::linux_default_binding);
                             dev->set_binding(dynamic_pointer_cast<cfg::binding>(b));
                         }
+                        if (m_connect_handler)
+                            m_connect_handler(dev);
                     }
                 }
             }

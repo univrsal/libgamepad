@@ -39,10 +39,10 @@ void hook_xinput::query_devices()
 
     xinput_pad tmp {};
 
-    for (int i = 1; i <= LGP_XINPUT_DEVICES; i++) {
+    for (int i = 0; i < LGP_XINPUT_DEVICES; i++) {
         if (m_xinput_refresh(i, &tmp) == ERROR_SUCCESS) {
             gdebug("Xinput device %i present", i);
-            std::string id = XINPUT_DEVICE_NAME_BASE + to_string(i);
+            std::string id = XINPUT_DEVICE_NAME_BASE + std::to_string(i);
 
             auto existing_device = get_device_by_id(id);
 
@@ -60,6 +60,9 @@ void hook_xinput::query_devices()
                     auto b = std::make_shared<cfg::binding_xinput>(cfg::dinput_default_binding);
                     new_device->set_binding(std::dynamic_pointer_cast<cfg::binding>(b));
                 }
+                new_device->set_valid();
+                if (m_connect_handler)
+                    m_connect_handler(new_device);
             }
         }
     }
