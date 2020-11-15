@@ -418,6 +418,15 @@ void hook::remove_invalid_devices()
         });
 
     m_devices.erase(it, m_devices.end());
+
+    /* Remove cached devices that aren't referenced anywhere except in the cache */
+    for (auto it = m_device_cache.cbegin(); it != m_device_cache.cend();) {
+        if ((*it).second.use_count() < 3) { /* <3 */
+            it = m_device_cache.erase(it);
+        } else {
+            ++it;
+        }
+    }
 }
 
 }

@@ -70,10 +70,16 @@ void hook_linux::query_devices()
             if ((path.find("gamepad") != string::npos || path.find("joystick") != string::npos) && path.find("event") == string::npos) {
                 gdebug("Found potential gamepad at '%s'", path.c_str());
                 auto existing_dev = get_device_by_path(path);
+                auto cached_dev = m_device_cache[path];
 
                 if (existing_dev) {
                     existing_dev->set_valid();
                     existing_dev->init(); /* Refresh file descriptor if needed */
+                } else if (cached_dev) {
+                    cached_dev->set_valid();
+                    m_devices.emplace_back(cached_dev);
+                    if (m_reconnect_handler)
+                        m_reconnect_handler(cached_dev);
                 } else {
                     auto dev = make_shared<device_linux>(path);
                     if (dev->is_valid()) {
@@ -89,6 +95,7 @@ void hook_linux::query_devices()
                         }
                         if (m_connect_handler)
                             m_connect_handler(dev);
+                        m_device_cache[path] = dev;
                     }
                 }
             }

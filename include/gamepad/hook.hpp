@@ -53,6 +53,11 @@ protected:
     std::function<void(std::shared_ptr<device>)> m_button_handler;
     std::function<void(std::shared_ptr<device>)> m_connect_handler;
     std::function<void(std::shared_ptr<device>)> m_disconnect_handler;
+    std::function<void(std::shared_ptr<device>)> m_reconnect_handler;
+
+    /* Map of previously connected devices, to ensure that no new instance
+     * is created on reconnection */
+    std::map<std::string, std::shared_ptr<device>> m_device_cache;
 
     std::thread m_hook_thread;
     std::mutex m_mutex;
@@ -146,6 +151,12 @@ public:
      * @param handler Function pointer to the handler
      */
     void set_disconnect_event_handler(std::function<void(std::shared_ptr<device>)> handler);
+
+    /**
+     * @brief Event handler function called when a device is reconnected
+     * @param handler Function pointer to the handler
+     */
+    void set_resconnect_event_handler(std::function<void(std::shared_ptr<device>)> handler);
 
 #ifdef LGP_ENABLE_JSON
     virtual bool load_bindings(const json11::Json& j);

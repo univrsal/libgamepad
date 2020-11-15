@@ -19,6 +19,7 @@
 #pragma once
 
 #include <array>
+#include <cmath>
 #include <gamepad/binding.hpp>
 #include <map>
 #include <memory>

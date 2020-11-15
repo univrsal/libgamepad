@@ -45,9 +45,15 @@ void hook_xinput::query_devices()
             std::string id = XINPUT_DEVICE_NAME_BASE + std::to_string(i);
 
             auto existing_device = get_device_by_id(id);
+            auto cached_device = m_device_cache[id];
 
             if (existing_device) {
                 existing_device->set_valid();
+            } else if (cached_device) {
+                cached_device->set_valid();
+                m_devices.emplace_back(cached_device);
+                if (m_reconnect_handler)
+                    m_reconnect_handler(cached_device);
             } else {
                 auto new_device = std::make_shared<device_xinput>(i, m_xinput_refresh);
                 new_device->set_index(i);
@@ -61,6 +67,7 @@ void hook_xinput::query_devices()
                     new_device->set_binding(std::dynamic_pointer_cast<cfg::binding>(b));
                 }
                 new_device->set_valid();
+                m_device_cache[id] = new_device;
                 if (m_connect_handler)
                     m_connect_handler(new_device);
             }

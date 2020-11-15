@@ -30,10 +30,16 @@ BOOL CALLBACK enum_callback(LPCDIDEVICEINSTANCE dev, LPVOID data)
 {
     auto h = static_cast<hook_dinput*>(data);
     auto id = device_dinput::make_id(dev);
-    auto existing_device = h->get_device_by_id(id);
+    auto existing_device = h->get_device_by_id(id); /* If it's already connected */
+    auto cached_device = h->m_device_cache[id]; /* If it was connected before */
 
     if (existing_device) {
         existing_device->set_valid();
+    } else if (cached_device) {
+        cached_device->set_valid();
+        h->m_devices.emplace_back(cached_device);
+        if (h->m_reconnect_handler)
+            h->m_reconnect_handler(cached_device);
     } else {
         auto new_device = make_shared<device_dinput>(dev, h->m_dinput, h->m_hook_window);
 
@@ -51,6 +57,7 @@ BOOL CALLBACK enum_callback(LPCDIDEVICEINSTANCE dev, LPVOID data)
 
             if (h->m_connect_handler)
                 h->m_connect_handler(new_device);
+            h->m_device_cache[new_device->get_id()] = new_device;
         }
     }
     return DIENUM_CONTINUE;
