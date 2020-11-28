@@ -302,11 +302,12 @@ bool hook::set_device_binding(const std::string& device_id, const std::string& b
 
 shared_ptr<device> hook::get_device_by_id(const std::string& id)
 {
-    auto result = find_if(m_devices.begin(), m_devices.end(), [&id](shared_ptr<device>& d) { return d->get_id() == id; });
+    auto result = find_if(m_device_cache.begin(), m_device_cache.end(),
+        [&id](pair<const string, shared_ptr<device>>& d) { return d.first == id; });
 
-    if (result == m_devices.end())
+    if (result == m_device_cache.end())
         return nullptr;
-    return *result;
+    return result->second;
 }
 
 std::shared_ptr<cfg::binding> hook::get_binding_by_name(const std::string& name)
