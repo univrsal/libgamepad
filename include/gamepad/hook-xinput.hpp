@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <gamepad/hook.hpp>
+#include "hook.hpp"
 
 #ifdef LGP_WINDOWS
 #define LGP_XINPUT_DEVICES 4

@@ -17,8 +17,8 @@
  **/
 
 #pragma once
-#include <gamepad/config.h>
-#include <gamepad/hook.hpp>
+#include "config.h"
+#include "hook.hpp"
 
 #ifdef LGP_LINUX
 namespace gamepad {

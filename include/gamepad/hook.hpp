@@ -17,10 +17,10 @@
  **/
 
 #pragma once
+#include "binding.hpp"
+#include "config.h"
+#include "device.hpp"
 #include <functional>
-#include <gamepad/binding.hpp>
-#include <gamepad/config.h>
-#include <gamepad/device.hpp>
 #include <memory>
 #include <mutex>
 #include <thread>
@@ -75,7 +75,8 @@ protected:
 #endif
 
 public:
-    ~hook() { stop(); }
+    hook() = default;
+    virtual ~hook() { stop(); }
 
     /**
      * @brief get the hook thread mutex, use this to safely access

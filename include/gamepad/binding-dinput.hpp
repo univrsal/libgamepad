@@ -17,7 +17,7 @@
  **/
 
 #pragma once
-#include <gamepad/binding.hpp>
+#include "binding.hpp"
 
 namespace gamepad {
 class device_dinput;

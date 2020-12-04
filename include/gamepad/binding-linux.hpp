@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include <gamepad/binding.hpp>
-#include <gamepad/config.h>
+#include "binding.hpp"
+#include "config.h"
 
 #if LGP_LINUX
 

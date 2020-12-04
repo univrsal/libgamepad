@@ -18,9 +18,9 @@
 
 #pragma once
 
+#include "binding.hpp"
 #include <array>
 #include <cmath>
-#include <gamepad/binding.hpp>
 #include <map>
 #include <memory>
 #include <string>
@@ -137,7 +137,7 @@ public:
         m_axis_deadzones[axis::RIGHT_STICK_Y] = 100;
     }
 
-    ~device() {}
+    ~device() { }
 
     void set_index(int i) { m_index = i; }
     int get_index() const { return m_index; }
