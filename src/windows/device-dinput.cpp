@@ -609,7 +609,7 @@ int device_dinput::update()
                         vc = axis::RIGHT_TRIGGER;
                 }
 
-                vv = clamp(float(val) / (DINPUT_AXIS_MAX) * (vc == axis::RIGHT_TRIGGER ? -1 : 1), 1.0, 0.0);
+                vv = clamp(float(val) / (DINPUT_AXIS_MAX) * (vc == axis::RIGHT_TRIGGER ? -1 : 1), 0.0, 1.0);
                 m_axis[vc] = vv;
             } else {
                 vv = float(val) / DINPUT_AXIS_MAX;

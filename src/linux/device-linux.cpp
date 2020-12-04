@@ -97,7 +97,7 @@ int device_linux::update()
             auto val = float(m_event.value);
 
             if (fabs(val - m_last_axis_event.value) > m_axis_deadzones[vc]) {
-                vv = clamp(val / 0xffff, -1.f, 1.f);
+                vv = clamp(val / 0xffff + 0.5f, -1.f, 1.f);
                 m_axis[vc] = vv;
                 result = update_result::AXIS;
             }

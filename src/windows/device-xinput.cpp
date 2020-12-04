@@ -80,7 +80,7 @@ int device_xinput::update()
         float vv = 0.0f;                                                         \
         if (m_native_binding) {                                                  \
             vc = m_native_binding->m_axis_mappings[id];                          \
-            vv = clamp(m_current_state.var / (float(m)) * mult, 1, -1);          \
+            vv = clamp(m_current_state.var / (float(m)) * mult, -1, 1);          \
             m_axis[vc] = vv;                                                     \
         }                                                                        \
         if (abs(m_current_state.var - m_old_state.var) > m_axis_deadzones[vc]) { \

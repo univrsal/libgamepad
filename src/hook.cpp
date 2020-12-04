@@ -53,7 +53,7 @@ vector<tuple<string, uint16_t>> hook::axis_prompts = { { "left analog stick hori
     { "right analog vertically", axis::RIGHT_STICK_Y },
     { "right trigger", axis::RIGHT_TRIGGER } };
 
-void default_hook_thread(class hook* h)
+void default_hook_thread(hook* h)
 {
     auto sleep_time = h->get_sleep_time();
 

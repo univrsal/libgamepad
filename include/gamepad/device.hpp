@@ -124,7 +124,7 @@ protected:
     void button_event(uint16_t native_id, uint16_t vc, int32_t value, float vv);
     void axis_event(uint16_t native_id, uint16_t vc, int32_t value, float vv);
 
-    inline float clamp(float x, float upper, float lower) { return fminf(upper, fmaxf(x, lower)); }
+    inline float clamp(float x, float lower, float upper) { return fminf(upper, fmaxf(x, lower)); }
 
 public:
     device()
