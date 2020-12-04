@@ -49,7 +49,7 @@
  */
 
 #pragma once
-
+#include "gamepad/config.h"
 #ifndef LGP_HAVE_JSON // Set when using libgamepad in projects that already have json11
 #ifdef LGP_ENABLE_JSON // Set when using libgamepad with json interface
 

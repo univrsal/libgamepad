@@ -21,6 +21,11 @@ add_library(gamepad OBJECT
 
 set_property(TARGET gamepad PROPERTY POSITION_INDEPENDENT_CODE 1)
 
+set(LGP_ENABLE_JSON OFF)
+if (GAMEPAD_ENABLE_JSON)
+    set(LGP_ENABLE_JSON ON)
+endif()
+
 target_include_directories(gamepad
     PUBLIC
         $<INSTALL_INTERFACE:include>
@@ -31,10 +36,6 @@ target_include_directories(gamepad
 
 if (GAMEPAD_ENABLE_INSTALL)
     include(GNUInstallDirs)
-endif()
-
-if (GAMEPAD_ENABLE_JSON)
-    add_compile_definitions(LGP_ENABLE_JSON)
 endif()
 
 if (UNIX AND NOT APPLE)
@@ -167,3 +168,6 @@ target_include_directories("gamepad" PUBLIC
     "./src")
 
 set_target_properties("gamepad" PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/gamepad/config.h.in
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/gamepad/config.h @ONLY)

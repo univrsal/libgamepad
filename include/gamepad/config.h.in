@@ -18,7 +18,7 @@
 
 #pragma once
 
-#define LGP_ENABLE_JSON
+#cmakedefine LGP_ENABLE_JSON
 #define LGP_UNUSED(a) ((void)a)
 #ifdef WIN32
 #define LGP_WINDOWS 1
