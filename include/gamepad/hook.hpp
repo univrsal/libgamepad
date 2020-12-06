@@ -157,7 +157,7 @@ public:
      * @brief Event handler function called when a device is reconnected
      * @param handler Function pointer to the handler
      */
-    void set_resconnect_event_handler(std::function<void(std::shared_ptr<device>)> handler);
+    void set_reconnect_event_handler(std::function<void(std::shared_ptr<device>)> handler);
 
 #ifdef LGP_ENABLE_JSON
     virtual bool load_bindings(const json11::Json& j);

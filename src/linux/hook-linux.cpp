@@ -77,6 +77,8 @@ void hook_linux::query_devices()
                     existing_dev->init(); /* Refresh file descriptor if needed */
                 } else if (cached_dev) {
                     cached_dev->set_valid();
+                    cached_dev->deinit();
+                    cached_dev->init();
                     m_devices.emplace_back(cached_dev);
                     if (m_reconnect_handler)
                         m_reconnect_handler(cached_dev);

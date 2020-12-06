@@ -69,5 +69,6 @@ public:
     friend BOOL CALLBACK enum_device_objects_callback(LPCDIDEVICEOBJECTINSTANCE obj, LPVOID data);
 
     static std::string make_id(LPCDIDEVICEINSTANCE dev);
+    const std::string& get_cache_id() const override { return make_id(m_device_instance); }
 };
 }

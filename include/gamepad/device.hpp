@@ -154,6 +154,13 @@ public:
      * connected multiple times */
     virtual const std::string& get_id() const { return m_name; }
 
+    /* The cache doesn't use the device id on linux because
+     * the device id isn't available until we have opened the file descriptor
+     * so this function is overriden to return the id that should be used
+     * for caching
+     */
+    virtual const std::string& get_cache_id() const { return get_id(); }
+
     bool is_button_pressed(uint16_t code) { return m_buttons[code]; }
 
     float get_axis(uint16_t axis) { return m_axis[axis]; }

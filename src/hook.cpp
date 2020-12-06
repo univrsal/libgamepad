@@ -114,6 +114,11 @@ void hook::set_disconnect_event_handler(std::function<void(std::shared_ptr<devic
     m_disconnect_handler = handler;
 }
 
+void hook::set_reconnect_event_handler(std::function<void(std::shared_ptr<device>)> handler)
+{
+    m_reconnect_handler = handler;
+}
+
 std::shared_ptr<cfg::binding> hook::make_native_binding(const std::string& json)
 {
     std::string err;
@@ -303,11 +308,21 @@ bool hook::set_device_binding(const std::string& device_id, const std::string& b
 shared_ptr<device> hook::get_device_by_id(const std::string& id)
 {
     auto result = find_if(m_device_cache.begin(), m_device_cache.end(),
-        [&id](pair<const string, shared_ptr<device>>& d) { return d.first == id; });
+        [&id](pair<const string, shared_ptr<device>>& d) { return d.second->get_id() == id; });
 
-    if (result == m_device_cache.end())
-        return nullptr;
-    return result->second;
+    if (result != m_device_cache.end())
+        return result->second;
+
+    /* Device isn't in cache, if it's in the normal device list, cache it and
+     * return it */
+    auto result2 = find_if(m_devices.begin(), m_devices.end(),
+        [&id](shared_ptr<device>& d) { return d->get_id() == id; });
+
+    if (result2 != m_devices.end()) {
+        m_device_cache[(*result2)->get_cache_id()] = *result2;
+        return *result2;
+    }
+    return nullptr;
 }
 
 std::shared_ptr<cfg::binding> hook::get_binding_by_name(const std::string& name)
@@ -420,9 +435,9 @@ void hook::remove_invalid_devices()
 
     m_devices.erase(it, m_devices.end());
 
-    /* Remove cached devices that aren't referenced anywhere except in the cache */
+    /* Invalidate cached devices that aren't referenced anywhere except in the cache */
     for (auto it = m_device_cache.cbegin(); it != m_device_cache.cend();) {
-        if ((*it).second.use_count() < 3) { /* <3 */
+        if ((*it).second.use_count() < 2) {
             it = m_device_cache.erase(it);
         } else {
             ++it;

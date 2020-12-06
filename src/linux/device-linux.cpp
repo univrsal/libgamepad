@@ -83,10 +83,10 @@ const std::string& device_linux::get_id() const
 
 int device_linux::update()
 {
-    /* This will only process the last event, since any other
-     * queued up events aren't useful anymore, I think */
-    while (read(m_fd, &m_event, sizeof(m_event)) > 0)
-        ;
+    /* Process only the next event, this can result in a delay if there are many
+     * events queued up, but it'll prevent buttons from getting stuck, which happens
+     * if the button released event is skipped */
+    read(m_fd, &m_event, sizeof(m_event));
     uint16_t vc = 0;
     float vv = 0.0f;
     int result = update_result::NONE;
