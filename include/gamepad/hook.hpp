@@ -30,11 +30,22 @@ using device_list = std::vector<std::shared_ptr<gamepad::device>>;
 using bindings_list = std::vector<std::shared_ptr<gamepad::cfg::binding>>;
 
 namespace gamepad {
-enum class hook_type {
-    NATIVE_DEFAULT,
-    XINPUT,
-    DIRECT_INPUT,
+/* clang-format off */
+namespace hook_type {
+enum type : uint16_t {
+    NATIVE_DEFAULT = 0,     /* Use default hooking, Xinput on windows, JS on linux  */
+    XINPUT = 1 << 1,        /* Recommended, works out of the box, but
+                             * expects Xbox gamepads                                */
+    DIRECT_INPUT = 1 << 2,  /* Deprecated, but supports almost all gamepads         */
+    JS = 1 << 3,            /* Finds gamepads in /dev/input/js*, works best, but
+                             * can't tell similar gamepads apart, use this if you
+                             * us xboxdrv or want to have the best compatibility.   */
+    BY_ID = 1 << 4          /* Finds gamepads in /dev/input/by-id/ provides better
+                             * devices ids, but causes issues with things like
+                             * xboxdrv or devices that don't show up in the folder  */
 };
+}
+/* clang-format on */
 
 extern void default_hook_thread(class hook* h);
 
@@ -190,7 +201,7 @@ public:
     const device_list& get_devices() const { return m_devices; }
     bool set_device_binding(const std::string& device_id, const std::string& binding_id);
 
-    static std::shared_ptr<hook> make(hook_type type = hook_type::NATIVE_DEFAULT);
+    static std::shared_ptr<hook> make(hook_type::type type = hook_type::NATIVE_DEFAULT);
     static uint64_t ms_ticks();
 };
 }

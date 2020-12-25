@@ -144,7 +144,7 @@ std::shared_ptr<cfg::binding> hook::get_binding_for_device(const std::string& id
     return (*result)->get_binding();
 }
 
-std::shared_ptr<hook> hook::make(hook_type type)
+std::shared_ptr<hook> hook::make(hook_type::type type)
 {
 #if LGP_WINDOWS
     if (type == hook_type::XINPUT || type == hook_type::NATIVE_DEFAULT) {
@@ -152,8 +152,7 @@ std::shared_ptr<hook> hook::make(hook_type type)
     }
     return std::make_shared<hook_dinput>();
 #elif LGP_LINUX
-    LGP_UNUSED(type);
-    return std::make_shared<hook_linux>();
+    return std::make_shared<hook_linux>(type);
 #else
 #error "No native hook found"
     return nullptr;

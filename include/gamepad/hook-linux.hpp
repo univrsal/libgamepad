@@ -23,7 +23,23 @@
 #ifdef LGP_LINUX
 namespace gamepad {
 class hook_linux : public hook {
+
+    /* Check for devices in /dev/input/by-id, which gives us better device ids
+     * to tell similiar gamepads apart, but will cause issues when using xboxdrv
+     * or gamepads that don't show up in /dev/input/by-id
+     */
+    void check_dev_by_id();
+
+    /* Check for devices in /dev/js*, sadly this doesn't give us much to identify the gamepad
+     * so if you have multiple identical gamepads identification will come down to which
+     * /dev/js* path they're connected as, which usually means the order in which they are
+     * connected*/
+    void check_js();
+    const uint16_t m_flags = 0;
+
 public:
+    hook_linux(uint16_t flags);
+
 #ifdef LGP_ENABLE_JSON
     virtual std::shared_ptr<cfg::binding> make_native_binding(const json11::Json& j) override;
 #endif
