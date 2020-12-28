@@ -34,6 +34,13 @@ namespace cfg {
         binding::load(j);
     }
 
+    void binding::copy(const std::shared_ptr<binding> other)
+    {
+        m_axis_mappings = other->m_axis_mappings;
+        m_buttons_mappings = other->m_buttons_mappings;
+        m_binding_name = other->m_binding_name;
+    }
+
     bool binding::load(const Json& j)
     {
         bool result = false;

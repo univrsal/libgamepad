@@ -33,6 +33,16 @@ namespace cfg {
         load(json);
     }
 
+    void binding_dinput::copy(const std::shared_ptr<binding> other)
+    {
+        binding::copy(other);
+        auto cast = dynamic_pointer_cast<binding_dinput>(other);
+        if (cast) {
+            m_left_trigger_polarity = cast->m_left_trigger_polarity;
+            m_right_trigger_polarity = cast->m_right_trigger_polarity;
+        }
+    }
+
     binding_dinput::binding_dinput(const Json& j)
     {
         binding_dinput::load(j);
@@ -76,7 +86,7 @@ namespace cfg {
     void binding_dinput::save(Json& j) const
     {
         /* Do not call super method here since
-	     * we reimplement the entire save process */
+         * we reimplement the entire save process */
 
         std::vector<Json> binds;
 

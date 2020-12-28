@@ -26,10 +26,10 @@
 #include <thread>
 #include <vector>
 
+namespace gamepad {
 using device_list = std::vector<std::shared_ptr<gamepad::device>>;
 using bindings_list = std::vector<std::shared_ptr<gamepad::cfg::binding>>;
 
-namespace gamepad {
 /* clang-format off */
 namespace hook_type {
 enum type : uint16_t {
@@ -199,9 +199,21 @@ public:
     std::shared_ptr<device> get_device_by_id(const std::string& id);
     std::shared_ptr<cfg::binding> get_binding_by_name(const std::string& name);
     const device_list& get_devices() const { return m_devices; }
+    const bindings_list& get_bindings() const { return m_bindings; }
+
+    void add_binding(const std::string& id, std::shared_ptr<cfg::binding> binding)
+    {
+        auto existing_bind = get_binding_by_name(id);
+        if (existing_bind) {
+            existing_bind->copy(binding);
+        } else {
+            m_bindings.emplace_back(binding);
+        }
+    }
+
     bool set_device_binding(const std::string& device_id, const std::string& binding_id);
 
-    static std::shared_ptr<hook> make(hook_type::type type = hook_type::NATIVE_DEFAULT);
+    static std::shared_ptr<hook> make(uint16_t flags = hook_type::NATIVE_DEFAULT);
     static uint64_t ms_ticks();
 };
 }

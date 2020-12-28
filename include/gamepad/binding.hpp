@@ -23,12 +23,13 @@
 #include <string>
 namespace gamepad {
 namespace cfg {
+    using mappings = std::map<uint16_t, uint16_t>;
 
     class binding {
     protected:
         std::string m_binding_name;
-        std::map<uint16_t, uint16_t> m_buttons_mappings;
-        std::map<uint16_t, uint16_t> m_axis_mappings;
+        mappings m_buttons_mappings;
+        mappings m_axis_mappings;
 
     public:
         binding() = default;
@@ -42,8 +43,10 @@ namespace cfg {
 
         virtual bool load(const std::string& json);
         virtual void save(std::string& json);
-
+        virtual void copy(const std::shared_ptr<binding> other);
         const std::string& get_name() const { return m_binding_name; }
+        const mappings& get_button_mappings() const { return m_buttons_mappings; }
+        const mappings& get_axis_mappings() const { return m_axis_mappings; }
     };
 }
 }
