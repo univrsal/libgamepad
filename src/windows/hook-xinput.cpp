@@ -18,6 +18,7 @@
 
 #include "device-xinput.hpp"
 #include <gamepad/binding-xinput.hpp>
+#include <gamepad/hook-dinput.hpp> /* for utf8 conversion */
 #include <gamepad/hook-xinput.hpp>
 #include <gamepad/log.hpp>
 
