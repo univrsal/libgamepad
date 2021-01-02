@@ -78,6 +78,11 @@ void hook_xinput::query_devices()
     m_mutex.unlock();
 }
 
+const json11::Json& hook_xinput::get_default_binding()
+{
+    return cfg::xinput_default_binding;
+}
+
 bool hook_xinput::start()
 {
     if (m_running)

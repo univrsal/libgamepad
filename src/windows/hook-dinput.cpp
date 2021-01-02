@@ -78,6 +78,11 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
+const json11::Json& hook_dinput::get_default_binding()
+{
+    return cfg::dinput_default_binding;
+}
+
 void hook_dinput::query_devices()
 {
     m_mutex.lock();
