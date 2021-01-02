@@ -18,7 +18,6 @@
 
 #include "device-xinput.hpp"
 #include <gamepad/binding-xinput.hpp>
-#include <gamepad/hook-dinput.hpp>
 #include <gamepad/hook-xinput.hpp>
 #include <gamepad/log.hpp>
 
@@ -63,7 +62,7 @@ void hook_xinput::query_devices()
                 if (b) {
                     new_device->set_binding(std::move(b));
                 } else {
-                    auto b = std::make_shared<cfg::binding_xinput>(cfg::dinput_default_binding);
+                    auto b = std::make_shared<cfg::binding_xinput>(cfg::xinput_default_binding);
                     new_device->set_binding(std::dynamic_pointer_cast<cfg::binding>(b));
                 }
                 new_device->set_valid();
