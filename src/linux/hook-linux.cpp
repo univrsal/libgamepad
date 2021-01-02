@@ -190,4 +190,9 @@ shared_ptr<cfg::binding> hook_linux::make_native_binding(const Json& j)
     return make_shared<cfg::binding_linux>(j);
 }
 
+const Json& hook_linux::get_default_binding()
+{
+    return cfg::linux_default_binding;
+}
+
 }

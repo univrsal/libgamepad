@@ -191,9 +191,10 @@ public:
 #ifdef LGP_ENABLE_JSON
     virtual std::shared_ptr<cfg::binding> make_native_binding(const json11::Json& j) = 0;
     virtual void make_xbox_config(const std::shared_ptr<gamepad::device>& dv, json11::Json& out);
+    virtual const json11::Json& get_default_binding() = 0;
 #endif
 
-    virtual std::shared_ptr<cfg::binding> make_native_binding(const std::string& json);
+    virtual std::shared_ptr<cfg::binding> make_native_binding(const std::string& json = "");
 
     std::shared_ptr<cfg::binding> get_binding_for_device(const std::string& id);
     std::shared_ptr<device> get_device_by_id(const std::string& id);

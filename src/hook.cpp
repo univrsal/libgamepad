@@ -121,13 +121,15 @@ void hook::set_reconnect_event_handler(std::function<void(std::shared_ptr<device
 
 std::shared_ptr<cfg::binding> hook::make_native_binding(const std::string& json)
 {
-    std::string err;
-    auto j = Json::parse(json, err);
-    if (err.empty()) {
-        return make_native_binding(j);
+    if (json.empty()) {
+        return make_native_binding(get_default_binding());
+    } else {
+        std::string err;
+        auto j = Json::parse(json, err);
+        if (err.empty())
+            return make_native_binding(j);
+        gerr("Failed to make gamepad binding from json: %s", err.c_str());
     }
-
-    gerr("Failed to make gamepad binding from json: %s", err.c_str());
     return nullptr;
 }
 
