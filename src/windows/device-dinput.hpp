@@ -35,6 +35,8 @@ class device_dinput : public device {
     std::string m_product_name;
     std::string m_instance_name;
     std::string m_id;
+    std::string m_cache_id {};
+
     std::vector<dinput_axis> m_axis_inputs;
     std::array<LONG*, 32> m_axis_new, m_axis_old;
     cfg::binding_dinput* m_native_binding = nullptr;
@@ -69,6 +71,11 @@ public:
     friend BOOL CALLBACK enum_device_objects_callback(LPCDIDEVICEOBJECTINSTANCE obj, LPVOID data);
 
     static std::string make_id(LPCDIDEVICEINSTANCE dev);
-    const std::string& get_cache_id() const override { return make_id(m_device_instance); }
+    const std::string& get_cache_id() const override
+    {
+        if (m_cache_id.empty())
+            m_cache_id = make_id(m_device_instance);
+        return m_cache_id;
+    }
 };
 }

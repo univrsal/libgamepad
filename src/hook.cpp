@@ -147,7 +147,7 @@ std::shared_ptr<cfg::binding> hook::get_binding_for_device(const std::string& id
 std::shared_ptr<hook> hook::make(uint16_t flags)
 {
 #if LGP_WINDOWS
-    if (flags & hook_type::XINPUT || type & hook_type::NATIVE_DEFAULT)
+    if (flags & hook_type::XINPUT || flags & hook_type::NATIVE_DEFAULT)
         return std::make_shared<hook_xinput>();
     return std::make_shared<hook_dinput>();
 #elif LGP_LINUX

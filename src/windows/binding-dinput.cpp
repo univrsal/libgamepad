@@ -36,7 +36,7 @@ namespace cfg {
     void binding_dinput::copy(const std::shared_ptr<binding> other)
     {
         binding::copy(other);
-        auto cast = dynamic_pointer_cast<binding_dinput>(other);
+        auto cast = std::dynamic_pointer_cast<binding_dinput>(other);
         if (cast) {
             m_left_trigger_polarity = cast->m_left_trigger_polarity;
             m_right_trigger_polarity = cast->m_right_trigger_polarity;

@@ -102,6 +102,7 @@ void hook_linux::check_dev_by_id()
             closedir(dir2);
         }
     }
+    closedir(dir);
 }
 
 void hook_linux::check_js()
@@ -162,6 +163,7 @@ void hook_linux::check_js()
             closedir(dir2);
         }
     }
+    closedir(dir);
 }
 
 void hook_linux::query_devices()

@@ -48,12 +48,18 @@ class device_xinput : public device {
     xinput_pad m_current_state, m_old_state;
     xinput_refresh_t m_xinput_refresh;
     uint8_t m_id;
+    std::string m_cache_id {};
 
 public:
     device_xinput(uint8_t id, const xinput_refresh_t& refresh);
 
     int update() override;
     void set_binding(std::shared_ptr<cfg::binding> b) override;
-    const std::string& get_cache_id() const override { return XINPUT_DEVICE_NAME_BASE + std::to_string(m_id); }
+    const std::string& get_cache_id() const override
+    {
+        if (m_cache_id.empty())
+            m_cache_id = XINPUT_DEVICE_NAME_BASE + std::to_string(m_id);
+        return m_cache_id;
+    }
 };
 }
