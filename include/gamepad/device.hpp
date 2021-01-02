@@ -159,7 +159,7 @@ public:
      * so this function is overriden to return the id that should be used
      * for caching
      */
-    virtual const std::string& get_cache_id() const { return get_id(); }
+    virtual const std::string& get_cache_id() { return get_id(); }
 
     bool is_button_pressed(uint16_t code) { return m_buttons[code]; }
 
