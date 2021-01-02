@@ -23,7 +23,7 @@ namespace gamepad {
 class device_xinput;
 namespace cfg {
 #ifdef LGP_ENABLE_JSON
-    extern json11::Json dinput_default_binding;
+    extern json11::Json xinput_default_binding;
 #endif
     class binding_xinput : public binding {
 
