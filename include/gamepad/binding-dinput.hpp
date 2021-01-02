@@ -32,7 +32,7 @@ namespace cfg {
     public:
         binding_dinput() = default;
         binding_dinput(const std::string& json);
-        virtual copy(const std::shared_ptr<binding> other) override;
+        virtual void copy(const std::shared_ptr<binding> other) override;
 #ifdef LGP_ENABLE_JSON
         binding_dinput(const json11::Json& j);
         bool load(const json11::Json& j) override;
