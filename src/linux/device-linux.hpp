@@ -38,7 +38,7 @@ public:
 
     const std::string& get_id() const override;
     const std::string& get_path() const { return m_device_path; }
-    const std::string& get_cache_id() const override { return get_path(); }
+    const std::string& get_cache_id() override { return get_path(); }
     void init() override;
     void deinit() override;
     int update() override;

@@ -55,7 +55,7 @@ public:
 
     int update() override;
     void set_binding(std::shared_ptr<cfg::binding> b) override;
-    const std::string& get_cache_id() const override
+    const std::string& get_cache_id() override
     {
         if (m_cache_id.empty())
             m_cache_id = XINPUT_DEVICE_NAME_BASE + std::to_string(m_id);
