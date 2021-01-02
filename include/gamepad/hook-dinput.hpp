@@ -61,7 +61,7 @@ public:
 
 #ifdef LGP_ENABLE_JSON
     virtual std::shared_ptr<cfg::binding> make_native_binding(const json11::Json& j) override;
-    virtual const json11::Json& get_default_binding() = 0;
+    virtual const json11::Json& get_default_binding() override;
 #endif
     friend BOOL CALLBACK enum_callback(LPCDIDEVICEINSTANCE dev, LPVOID data);
 };
