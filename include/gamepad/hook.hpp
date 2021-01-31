@@ -33,16 +33,16 @@ using bindings_list = std::vector<std::shared_ptr<gamepad::cfg::binding>>;
 /* clang-format off */
 namespace hook_type {
 enum type : uint16_t {
-    NATIVE_DEFAULT = 0,     /* Use default hooking, Xinput on windows, JS on linux  */
-    XINPUT = 1 << 1,        /* Recommended, works out of the box, but
-                             * expects Xbox gamepads                                */
-    DIRECT_INPUT = 1 << 2,  /* Deprecated, but supports almost all gamepads         */
-    JS = 1 << 3,            /* Finds gamepads in /dev/input/js*, works best, but
-                             * can't tell similar gamepads apart, use this if you
-                             * us xboxdrv or want to have the best compatibility.   */
-    BY_ID = 1 << 4          /* Finds gamepads in /dev/input/by-id/ provides better
-                             * devices ids, but causes issues with things like
-                             * xboxdrv or devices that don't show up in the folder  */
+    XINPUT = 1 << 1,                    /* Recommended, works out of the box, but
+                                         * expects Xbox gamepads                                */
+    DIRECT_INPUT = 1 << 2,              /* Deprecated, but supports almost all gamepads         */
+    JS = 1 << 3,                        /* Finds gamepads in /dev/input/js*, works best, but
+                                         * can't tell similar gamepads apart, use this if you
+                                         * us xboxdrv or want to have the best compatibility.   */
+    BY_ID = 1 << 4,                     /* Finds gamepads in /dev/input/by-id/ provides better
+                                         * devices ids, but causes issues with things like
+                                         * xboxdrv or devices that don't show up in the folder  */
+    NATIVE_DEFAULT = (JS | XINPUT),     /* Use default hooking, Xinput on windows, JS on linux  */
 };
 }
 /* clang-format on */
@@ -57,7 +57,7 @@ protected:
     static std::vector<std::tuple<std::string, uint16_t>> axis_prompts;
     /* List of all devices found after querying */
     device_list m_devices;
-    /* List of all bindnigs */
+    /* List of all custom bindings (default bindings are not listed) */
     bindings_list m_bindings;
 
     std::function<void(std::shared_ptr<device>)> m_axis_handler;
@@ -202,9 +202,9 @@ public:
     const device_list& get_devices() const { return m_devices; }
     const bindings_list& get_bindings() const { return m_bindings; }
 
-    void add_binding(const std::string& id, std::shared_ptr<cfg::binding> binding)
+    void add_binding(std::shared_ptr<cfg::binding> binding)
     {
-        auto existing_bind = get_binding_by_name(id);
+        auto existing_bind = get_binding_by_name(binding->get_name());
         if (existing_bind) {
             existing_bind->copy(binding);
         } else {

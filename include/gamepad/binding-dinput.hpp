@@ -30,6 +30,8 @@ namespace cfg {
         friend class gamepad::device_dinput;
 
     public:
+		int &left_trigger_polarity() { return m_left_trigger_polarity; }
+		int &right_trigger_polarity() { return m_right_trigger_polarity; }
         binding_dinput() = default;
         binding_dinput(const std::string& json);
         virtual void copy(const std::shared_ptr<binding> other) override;

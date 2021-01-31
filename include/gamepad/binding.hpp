@@ -45,6 +45,7 @@ namespace cfg {
         virtual void save(std::string& json);
         virtual void copy(const std::shared_ptr<binding> other);
         const std::string& get_name() const { return m_binding_name; }
+		void set_name(const std::string &name) { m_binding_name = name; }
         mappings& get_button_mappings() { return m_buttons_mappings; }
         mappings& get_axis_mappings() { return m_axis_mappings; }
         const mappings& get_button_mappings() const { return m_buttons_mappings; }
