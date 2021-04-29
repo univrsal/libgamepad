@@ -37,6 +37,7 @@ public:
     virtual ~device_linux();
 
     const std::string& get_id() const override;
+    void set_id(const std::string& id) override;
     const std::string& get_path() const { return m_device_path; }
     const std::string& get_cache_id() override { return get_path(); }
     void init() override;

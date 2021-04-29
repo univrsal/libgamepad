@@ -63,6 +63,7 @@ public:
     virtual ~device_dinput();
 
     const std::string& get_id() const override;
+    void set_id(const std::string& id) override;
     void init() override;
     void deinit() override;
     int update() override;

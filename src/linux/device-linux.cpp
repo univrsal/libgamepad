@@ -124,4 +124,9 @@ void device_linux::set_binding(std::shared_ptr<cfg::binding> b)
     device::set_binding(b);
     m_native_binding = dynamic_cast<cfg::binding_linux*>(b.get());
 }
+
+void device_linux::set_id(const std::string& id)
+{
+    m_device_id = id;
+}
 }

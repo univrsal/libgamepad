@@ -292,6 +292,11 @@ const string& device_dinput::get_id() const
     return m_id;
 }
 
+void device_dinput::set_id(const std::string& id)
+{
+    m_id = id;
+}
+
 std::string device_dinput::make_id(LPCDIDEVICEINSTANCE dev)
 {
     auto product_name = util::wchar_to_utf8(dev->tszProductName);

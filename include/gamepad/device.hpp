@@ -144,6 +144,7 @@ public:
 
     void set_axis_deadzone(uint16_t id, int32_t val) { m_axis_deadzones[id] = val; }
 
+    void set_name(const std::string& name) { m_name = name; }
     const std::string& get_name() const { return m_name; }
 
     /* Can be overriden to make
@@ -153,6 +154,7 @@ public:
      * multiple times if the same controller type is
      * connected multiple times */
     virtual const std::string& get_id() const { return m_name; }
+    virtual void set_id(const std::string& id) { set_name(id); }
 
     /* The cache doesn't use the device id on linux because
      * the device id isn't available until we have opened the file descriptor
@@ -181,8 +183,10 @@ public:
     bool has_binding() const { return m_binding != nullptr; }
 
     const input_event* last_button_event() const { return &m_last_button_event; }
+    input_event* last_button_event() { return &m_last_button_event; }
 
     const input_event* last_axis_event() const { return &m_last_axis_event; }
+    input_event* last_axis_event() { return &m_last_axis_event; }
 
     std::shared_ptr<cfg::binding> get_binding() { return m_binding; }
 
