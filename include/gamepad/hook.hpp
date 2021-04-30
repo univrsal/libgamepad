@@ -20,6 +20,7 @@
 #include "binding.hpp"
 #include "config.h"
 #include "device.hpp"
+#include <atomic>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -70,9 +71,11 @@ protected:
      * is created on reconnection */
     std::map<std::string, std::shared_ptr<device>> m_device_cache;
 
+    std::map<std::string, std::string> m_binding_map; /* Map device id to binding name */
+
     std::thread m_hook_thread;
     std::mutex m_mutex;
-    volatile bool m_running = false;
+    std::atomic<bool> m_running;
     bool m_plug_and_play = false;
     uint16_t m_plug_and_play_interval = 1000;
     uint16_t m_thread_sleep = 50;
@@ -87,7 +90,7 @@ protected:
 
 public:
     hook() = default;
-    virtual ~hook() { stop(); }
+    virtual ~hook() { hook::stop(); }
 
     /**
      * @brief get the hook thread mutex, use this to safely access

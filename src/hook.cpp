@@ -141,9 +141,31 @@ uint64_t hook::ms_ticks()
 
 std::shared_ptr<cfg::binding> hook::get_binding_for_device(const std::string& id)
 {
-    auto result = find_if(m_devices.begin(), m_devices.end(), [&id](shared_ptr<device>& b) { return b->get_id() == id; });
+    // Update the binding map, in case a device changed bindings
+    for (auto& dev : m_devices) {
+        // check if the device has a custom binding
+        if (!dev->has_binding())
+            continue;
+        auto bind_name = dev->get_binding()->get_name();
+        if (get_binding_by_name(bind_name)) {
+            auto bind = m_binding_map.find(dev->get_id());
+            if (bind != m_binding_map.end()) {
+                if (bind->second != bind_name)
+                    bind->second = bind_name;
+            }
+        }
+    }
 
-    return (*result)->get_binding();
+    auto bind = m_binding_map.find(id);
+    if (bind != m_binding_map.end()) {
+        auto result = find_if(m_bindings.begin(), m_bindings.end(), [bind](shared_ptr<cfg::binding>& b) {
+            return b->get_name() == bind->second;
+        });
+
+        if (result != m_bindings.end())
+            return *result;
+    }
+    return nullptr;
 }
 
 std::shared_ptr<hook> hook::make(uint16_t flags)
@@ -197,7 +219,7 @@ bool hook::start()
 
     query_devices();
 
-    if (m_devices.size() < 1)
+    if (m_devices.empty())
         ginfo("No Devices detected. Waiting for connection...");
     m_running = true;
     m_hook_thread = thread(default_hook_thread, this);
@@ -206,12 +228,12 @@ bool hook::start()
 
 void hook::stop()
 {
-    close_devices();
-    close_bindings();
     if (m_running) {
         m_running = false;
         m_hook_thread.join();
     }
+    close_devices();
+    close_bindings();
     gdebug("Hook stopped");
 }
 
@@ -272,15 +294,15 @@ bool hook::load_bindings(const std::string& path)
 
 bool hook::load_bindings(const Json& j)
 {
-    Json device_array = j["devices"], binding_array = j["bindings"];
+    Json bindings_map = j["bindings_map"], binding_array = j["bindings"];
 
     for (const auto& bind : binding_array.array_items())
         m_bindings.emplace_back(make_native_binding(bind));
 
-    for (const auto& entry : device_array.array_items()) {
+    for (const auto& entry : bindings_map.array_items()) {
         auto device_id = entry["device_id"];
         auto bind_id = entry["binding_id"];
-
+        m_binding_map[device_id.string_value()] = bind_id.string_value();
         if (!set_device_binding(device_id.string_value(), bind_id.string_value()))
             gwarn("Couldn't set binding.");
     }
@@ -294,10 +316,12 @@ bool hook::set_device_binding(const std::string& device_id, const std::string& b
 
     if (dev) {
         auto bind = get_binding_by_name(binding_id);
-        if (bind)
+        if (bind) {
             dev->set_binding(move(bind));
-        else
+            result = true;
+        } else {
             gwarn("No binding with name '%s'", binding_id.c_str());
+        }
     } else {
         gwarn("No device with id '%s'", device_id.c_str());
     }
