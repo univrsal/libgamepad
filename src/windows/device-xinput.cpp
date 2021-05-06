@@ -84,8 +84,8 @@ int device_xinput::update()
         if (m_native_binding) {                                                  \
             vc = m_native_binding->m_axis_mappings[id];                          \
             vv = clamp(m_current_state.var / (float(m)) * mult, -1, 1);          \
-            if (vc == axis::LEFT_STICK_Y || vc == axis::RIGHT_STICK_Y) \
-                vv *= -1; /* Xinput inverts them for some reason */ \
+            if (vc == axis::LEFT_STICK_Y || vc == axis::RIGHT_STICK_Y)           \
+                vv *= -1; /* Xinput inverts them for some reason */              \
             m_axis[vc] = vv;                                                     \
         }                                                                        \
         if (abs(m_current_state.var - m_old_state.var) > m_axis_deadzones[vc]) { \

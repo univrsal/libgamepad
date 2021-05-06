@@ -45,19 +45,21 @@ namespace button {
         DPAD_RIGHT,
         DPAD_UP,
         DPAD_DOWN,
-        COUNT
+        LAST,
+        COUNT = LAST - A
     };
 }
 
 /* Virtual axis ids */
 namespace axis {
-    enum type { LEFT_STICK_X = button::COUNT,
+    enum type { LEFT_STICK_X = button::LAST,
         LEFT_STICK_Y,
         LEFT_TRIGGER,
         RIGHT_STICK_X,
         RIGHT_STICK_Y,
         RIGHT_TRIGGER,
-        COUNT
+        LAST,
+        COUNT = LAST - LEFT_STICK_X
     };
 }
 
