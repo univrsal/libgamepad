@@ -30,6 +30,8 @@
 namespace gamepad {
 using device_list = std::vector<std::shared_ptr<gamepad::device>>;
 using bindings_list = std::vector<std::shared_ptr<gamepad::cfg::binding>>;
+using binding_map = std::map<std::string, std::string>;
+using event_callback = std::function<void(std::shared_ptr<device>)>;
 
 /* clang-format off */
 namespace hook_type {
@@ -61,17 +63,17 @@ protected:
     /* List of all custom bindings (default bindings are not listed) */
     bindings_list m_bindings;
 
-    std::function<void(std::shared_ptr<device>)> m_axis_handler;
-    std::function<void(std::shared_ptr<device>)> m_button_handler;
-    std::function<void(std::shared_ptr<device>)> m_connect_handler;
-    std::function<void(std::shared_ptr<device>)> m_disconnect_handler;
-    std::function<void(std::shared_ptr<device>)> m_reconnect_handler;
+    event_callback m_axis_handler;
+    event_callback m_button_handler;
+    event_callback m_connect_handler;
+    event_callback m_disconnect_handler;
+    event_callback m_reconnect_handler;
 
     /* Map of previously connected devices, to ensure that no new instance
      * is created on reconnection */
     std::map<std::string, std::shared_ptr<device>> m_device_cache;
 
-    std::map<std::string, std::string> m_binding_map; /* Map device id to binding name */
+    binding_map m_binding_map; /* Map device id to binding name */
 
     std::thread m_hook_thread;
     std::mutex m_mutex;
@@ -147,31 +149,31 @@ public:
      * @brief Event handler function called when buttons are pressed on any device
      * @param handler Function pointer to the handler
      */
-    void set_button_event_handler(std::function<void(std::shared_ptr<device>)> handler);
+    void set_button_event_handler(event_callback handler);
 
     /**
      * @brief Event handler function called when axis are moved on any device
      * @param handler Function pointer to the handler
      */
-    void set_axis_event_handler(std::function<void(std::shared_ptr<device>)> handler);
+    void set_axis_event_handler(event_callback handler);
 
     /**
      * @brief Event handler function called when a device is connected
      * @param handler Function pointer to the handler
      */
-    void set_connect_event_handler(std::function<void(std::shared_ptr<device>)> handler);
+    void set_connect_event_handler(event_callback handler);
 
     /**
      * @brief Event handler function called when a device is disconnected
      * @param handler Function pointer to the handler
      */
-    void set_disconnect_event_handler(std::function<void(std::shared_ptr<device>)> handler);
+    void set_disconnect_event_handler(event_callback handler);
 
     /**
      * @brief Event handler function called when a device is reconnected
      * @param handler Function pointer to the handler
      */
-    void set_reconnect_event_handler(std::function<void(std::shared_ptr<device>)> handler);
+    void set_reconnect_event_handler(event_callback handler);
 
 #ifdef LGP_ENABLE_JSON
     virtual bool load_bindings(const json11::Json& j);
@@ -204,6 +206,10 @@ public:
     std::shared_ptr<cfg::binding> get_binding_by_name(const std::string& name);
     const device_list& get_devices() const { return m_devices; }
     const bindings_list& get_bindings() const { return m_bindings; }
+    bindings_list &get_bindings() { return m_bindings; }
+
+    binding_map& get_binding_map() { return m_binding_map; }
+    const binding_map& get_binding_map() const { return m_binding_map; }
 
     void add_binding(std::shared_ptr<cfg::binding> binding)
     {
