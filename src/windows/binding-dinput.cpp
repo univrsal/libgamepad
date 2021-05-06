@@ -89,16 +89,23 @@ namespace cfg {
          * we reimplement the entire save process */
 
         std::vector<Json> binds;
-
+        // I cannot stress enough how much of an annoyance this whole
+        // left and right trigger share an axis garbage is
+        // I hope that it's at least consistent across gamepads
+        bool saved_trigger = false;
         for (const auto& val : m_axis_mappings) {
             Json obj;
-            if (val.second == axis::LEFT_TRIGGER) {
+            if ((val.second == axis::LEFT_TRIGGER || val.second == axis::RIGHT_TRIGGER) && !saved_trigger) {
                 obj = Json::object { { "is_axis", true },
                     { "from", val.first },
-                    { "to", val.second },
+                    { "to", axis::LEFT_TRIGGER },
                     { "trigger_polarity", m_left_trigger_polarity } };
-            } else if (val.second == axis::RIGHT_TRIGGER) {
-                obj = Json::object { { "is_axis", true }, { "from", val.first }, { "to", val.second }, { "trigger_polarity", m_right_trigger_polarity } };
+                Json obj2 = Json::object { { "is_axis", true },
+                    { "from", val.first },
+                    { "to", axis::RIGHT_TRIGGER },
+                    { "trigger_polarity", m_right_trigger_polarity } };
+                binds.emplace_back(obj2);
+                saved_trigger = true;
             } else {
                 obj = Json::object { { "is_axis", true }, { "from", val.first }, { "to", val.second } };
             }
