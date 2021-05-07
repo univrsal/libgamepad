@@ -274,12 +274,12 @@ device_dinput::device_dinput(LPCDIDEVICEINSTANCE dev, IDirectInput8* dinput, HWN
     , m_hook_window(hook_window)
 {
     device_dinput::init();
-    m_axis_deadzones[axis::RIGHT_TRIGGER] = 50;
-    m_axis_deadzones[axis::LEFT_TRIGGER] = 50;
-    m_axis_deadzones[axis::LEFT_STICK_X] = 50;
-    m_axis_deadzones[axis::LEFT_STICK_Y] = 50;
-    m_axis_deadzones[axis::RIGHT_STICK_X] = 50;
-    m_axis_deadzones[axis::RIGHT_STICK_Y] = 50;
+    m_axis_deadzones[axis::RIGHT_TRIGGER] = 5;
+    m_axis_deadzones[axis::LEFT_TRIGGER] = 5;
+    m_axis_deadzones[axis::LEFT_STICK_X] = 5;
+    m_axis_deadzones[axis::LEFT_STICK_Y] = 5;
+    m_axis_deadzones[axis::RIGHT_STICK_X] = 5;
+    m_axis_deadzones[axis::RIGHT_STICK_Y] = 5;
 }
 
 device_dinput::~device_dinput()
