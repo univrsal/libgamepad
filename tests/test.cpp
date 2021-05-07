@@ -48,8 +48,8 @@ int main()
 #endif
 
     auto h = gamepad::hook::make();
-    h->set_plug_and_play(true);
-    h->set_sleep_time(5);
+    h->set_plug_and_play(true, gamepad::ms(1000));
+    h->set_sleep_time(gamepad::ms(5)); // just std::chrono::milliseconds
 
     auto button_handler = [](std::shared_ptr<gamepad::device> dev) {
         ginfo("Received button event: Native id: %i, Virtual id: %i val: %f",
@@ -91,5 +91,5 @@ int main()
     }
 
     while (run_flag)
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for(gamepad::ms(50));
 }

@@ -29,12 +29,12 @@ int main()
      */
     auto hook = hook::make();
     
-    /* Make the hook check for new devices and remove disconnected ones
+    /* Make the hook add and remove devices and remove disconnected
      * automatically
      */
-    h->set_plug_and_play(true);
+    h->set_plug_and_play(true, gamepad::ms(1000));
     
-    bool run_flag = true;
+    std::atomic<bool> run_flag = true;
     /* Lambdas for event callbacks */
     auto button_handler = [run_flag](std::shared_ptr<gamepad::device> dev) {
         ginfo("Received button event: Native id: %i, Virtual id: %i val: %i",

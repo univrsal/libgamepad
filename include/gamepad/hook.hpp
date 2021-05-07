@@ -32,6 +32,9 @@ using device_list = std::vector<std::shared_ptr<gamepad::device>>;
 using bindings_list = std::vector<std::shared_ptr<gamepad::cfg::binding>>;
 using binding_map = std::map<std::string, std::string>;
 using event_callback = std::function<void(std::shared_ptr<device>)>;
+using ms = std::chrono::milliseconds;
+using ns = std::chrono::nanoseconds;
+using mcs = std::chrono::microseconds;
 
 /* clang-format off */
 namespace hook_type {
@@ -79,8 +82,8 @@ protected:
     std::mutex m_mutex;
     std::atomic<bool> m_running;
     bool m_plug_and_play = false;
-    uint16_t m_plug_and_play_interval = 1000;
-    uint16_t m_thread_sleep = 50;
+    ns m_plug_and_play_interval = ms(1000);
+    ns m_thread_sleep = ms(50);
 
     /* Can be used for platform specific bind options
      * Only used for DirectInput currently, which needs a sepcial hack
@@ -102,9 +105,9 @@ public:
     std::mutex* get_mutex() { return &m_mutex; }
 
     /**
-     * @return Thread sleep time in miliseconds
+     * @return Thread sleep time
      */
-    uint16_t get_sleep_time() const { return m_thread_sleep; }
+    ms get_sleep_time() const { return std::chrono::duration_cast<ms>(m_thread_sleep); }
 
     /**
      * @return true if the hook thread is running
@@ -116,10 +119,11 @@ public:
      * @param state Enable or disable plug and play
      * @param refresh_rate_ms Refresh interval has to be >= sleep time
      */
-    void set_plug_and_play(bool state, uint16_t refresh_rate_ms = 1000)
+    template <class Rep, class Period>
+    void set_plug_and_play(bool state, std::chrono::duration<Rep, Period> refresh_rate)
     {
         m_plug_and_play = state;
-        m_plug_and_play_interval = refresh_rate_ms >= m_thread_sleep ? refresh_rate_ms : m_thread_sleep;
+        m_plug_and_play_interval = refresh_rate >= m_thread_sleep ? refresh_rate : m_thread_sleep;
     }
 
     /**
@@ -178,11 +182,11 @@ public:
 #ifdef LGP_ENABLE_JSON
     virtual bool load_bindings(const json11::Json& j);
 #endif
-
-    void set_sleep_time(uint16_t ms)
+    template <class Rep, class Period>
+    void set_sleep_time(std::chrono::duration<Rep, Period> t)
     {
         m_mutex.lock();
-        m_thread_sleep = ms;
+        m_thread_sleep = t;
         m_mutex.unlock();
     }
 
@@ -206,7 +210,7 @@ public:
     std::shared_ptr<cfg::binding> get_binding_by_name(const std::string& name);
     const device_list& get_devices() const { return m_devices; }
     const bindings_list& get_bindings() const { return m_bindings; }
-    bindings_list &get_bindings() { return m_bindings; }
+    bindings_list& get_bindings() { return m_bindings; }
 
     binding_map& get_binding_map() { return m_binding_map; }
     const binding_map& get_binding_map() const { return m_binding_map; }
@@ -224,6 +228,6 @@ public:
     bool set_device_binding(const std::string& device_id, const std::string& binding_id);
 
     static std::shared_ptr<hook> make(uint16_t flags = hook_type::NATIVE_DEFAULT);
-    static uint64_t ms_ticks();
+    static uint64_t ms_ticks(); // Returns a timestamp
 };
 }

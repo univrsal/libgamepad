@@ -61,12 +61,12 @@ void default_hook_thread(hook* h)
     ginfo("Hook thread started");
     h->get_mutex()->unlock();
 
-    uint32_t plug_n_play_wait = 0;
+    auto plug_n_play_wait = ns(0);
     while (h->running()) {
-        if (h->get_devices().size() > 0) {
+        if (!h->get_devices().empty()) {
             h->get_mutex()->lock();
-            for (auto& dev : h->get_devices()) {
-                auto result = dev->update();
+            for (const auto& dev : h->get_devices()) {
+                const auto result = dev->update();
                 if (result & update_result::AXIS && h->m_axis_handler)
                     h->m_axis_handler(dev);
                 if (result & update_result::BUTTON && h->m_button_handler)
@@ -78,13 +78,13 @@ void default_hook_thread(hook* h)
 
         if (h->m_plug_and_play) {
             if (plug_n_play_wait >= h->m_plug_and_play_interval) {
-                plug_n_play_wait = 0;
+                plug_n_play_wait = ns(0);
                 gdebug("Updating device list");
                 h->query_devices();
             }
             plug_n_play_wait += sleep_time;
         }
-        this_thread::sleep_for(chrono::milliseconds(sleep_time));
+        this_thread::sleep_for(sleep_time);
     }
     ginfo("Hook thread ended");
 }
@@ -373,7 +373,7 @@ void hook::make_xbox_config(const std::shared_ptr<gamepad::device>& dv, Json& ou
     dv->set_axis_deadzone(axis::RIGHT_STICK_Y, 500);
 
     ginfo("Starting config creation wizard");
-    uint16_t sleep_time = get_sleep_time();
+    auto sleep_time = get_sleep_time();
     uint64_t last_key_input = 0;
     bool running = true;
     mutex key_thread_mutex;
@@ -415,7 +415,7 @@ void hook::make_xbox_config(const std::shared_ptr<gamepad::device>& dv, Json& ou
                     break;
                 }
                 key_thread_mutex.unlock();
-                this_thread::sleep_for(chrono::milliseconds(sleep_time));
+                this_thread::sleep_for(sleep_time);
             }
 
             if (!success)
