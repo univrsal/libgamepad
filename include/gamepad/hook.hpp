@@ -107,7 +107,7 @@ public:
     /**
      * @return Thread sleep time
      */
-    ms get_sleep_time() const { return std::chrono::duration_cast<ms>(m_thread_sleep); }
+    ms get_sleep_time() const { return std::chrono::duration_cast<std::chrono::milliseconds>(m_thread_sleep); }
 
     /**
      * @return true if the hook thread is running

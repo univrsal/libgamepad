@@ -55,7 +55,7 @@ vector<tuple<string, uint16_t>> hook::axis_prompts = { { "left analog stick hori
 
 void default_hook_thread(hook* h)
 {
-    auto sleep_time = h->get_sleep_time();
+    auto sleep_time = h->m_thread_sleep;
 
     h->get_mutex()->lock();
     ginfo("Hook thread started");
@@ -72,7 +72,8 @@ void default_hook_thread(hook* h)
                 if (result & update_result::BUTTON && h->m_button_handler)
                     h->m_button_handler(dev);
             }
-            sleep_time = h->get_sleep_time();
+            sleep_time = h->m_thread_sleep;
+
             h->get_mutex()->unlock();
         }
 
