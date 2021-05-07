@@ -454,7 +454,6 @@ int device_dinput::update()
     if (!m_valid)
         return update_result::NONE;
     int result = 0;
-
     m_old_state = m_new_state;
     ZeroMemory(&m_new_state, sizeof(DIJOYSTATE));
 
@@ -486,31 +485,30 @@ int device_dinput::update()
         return result;
     }
 
-    /* Check all buttons */
-    uint16_t last_button = 0x0;
-    for (uint8_t i = 0; i < 128; i++) {
-        if (m_new_state.rgbButtons[i] == m_old_state.rgbButtons[i])
-            continue;
+    // Don't bother checking anything if nothing changed
+    if (!std::equal(m_new_state.rgbButtons, m_new_state.rgbButtons + m_capabilities.dwButtons,
+            m_old_state.rgbButtons)) {
+        for (uint8_t i = 0; i < m_capabilities.dwButtons; i++) {
+            bool pressed = (m_new_state.rgbButtons[i] & 0x80) == 0x80;
+            bool old_pressed = (m_old_state.rgbButtons[i] & 0x80) == 0x80;
+            uint16_t vc = 0;
+            float vv = 0.0f;
+            if (m_native_binding) {
+                vc = m_native_binding->m_buttons_mappings[i];
+                vv = pressed ? 1.0f : 0.0f;
+                m_buttons[vc] = pressed;
+            }
 
-        bool pressed = (m_new_state.rgbButtons[i] & 0x80) == 0x80;
-        bool old_pressed = (m_old_state.rgbButtons[i] & 0x80) == 0x80;
-        uint16_t vc = 0;
-        float vv = 0.0f;
-        if (m_native_binding) {
-            vc = m_native_binding->m_buttons_mappings[i];
-            vv = pressed ? 1.0f : 0.0f;
-            m_buttons[vc] = pressed;
-        }
-
-        /* This button changed over to pressed
-         * Since button presses aren't sent in individually this means
-         * that if multiple buttons have been pressed since the last update
-         * only the one with the highest ID will be reported, but since
-         * this is only used for creating binds it's not an issue.
-         */
-        if (pressed != old_pressed) {
-            button_event(i, vc, pressed, vv);
-            result |= update_result::BUTTON;
+            /* This button changed over to pressed
+             * Since button presses aren't sent in individually this means
+             * that if multiple buttons have been pressed since the last update
+             * only the one with the highest ID will be reported, but since
+             * this is only used for creating binds it's not an issue.
+             */
+            if (pressed != old_pressed) {
+                button_event(i, vc, pressed, vv);
+                result |= update_result::BUTTON;
+            }
         }
     }
 
