@@ -23,7 +23,7 @@
 #define LGP_LOG_PREFIX ""
 #endif
 
-#ifndef DEBUG
+#if DEBUG
 #define gdebug(format, ...) gamepad::log(gamepad::LOG_DEBUG, LGP_LOG_PREFIX format, ##__VA_ARGS__)
 #else
 #define gdebug(format, ...) LGP_UNUSED(format)
@@ -53,9 +53,6 @@ void get_logger(log_handler* handler, void** param);
 
 PRINTFATTR(2, 3)
 void log(int log_level, const char* format, ...);
-
-PRINTFATTR(1, 2)
-void wcrash(const char* format, ...);
 
 #undef PRINTFATTR
 }

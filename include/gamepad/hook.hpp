@@ -94,7 +94,7 @@ protected:
 #endif
 
 public:
-    hook() = default;
+    hook();
     virtual ~hook() { hook::stop(); }
 
     /**
