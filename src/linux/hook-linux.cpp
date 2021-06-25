@@ -61,8 +61,7 @@ void hook_linux::check_dev_by_id()
         if (!dir2) {
             auto path = DEV_FOLDER + std::string("/") + std::string(ent->d_name);
             auto path_cpy = path;
-            transform(path_cpy.begin(), path_cpy.end(), path_cpy.begin(),
-                [](unsigned char c) { return tolower(c); });
+            transform(path_cpy.begin(), path_cpy.end(), path_cpy.begin(), [](unsigned char c) { return tolower(c); });
 
             if ((path.find("gamepad") != string::npos || path.find("joystick") != string::npos) && path.find("event") == string::npos) {
                 gdebug("Found potential gamepad at '%s'", path.c_str());
@@ -122,8 +121,7 @@ void hook_linux::check_js()
         if (!dir2) {
             auto path = DEV_FOLDER + std::string("/") + std::string(ent->d_name);
             auto path_cpy = path;
-            transform(path_cpy.begin(), path_cpy.end(), path_cpy.begin(),
-                [](unsigned char c) { return tolower(c); });
+            transform(path_cpy.begin(), path_cpy.end(), path_cpy.begin(), [](unsigned char c) { return tolower(c); });
 
             if (path.find("js") != std::string::npos) {
                 gdebug("Found potential gamepad at '%s'", path.c_str());
@@ -134,6 +132,7 @@ void hook_linux::check_js()
                     existing_dev->set_valid();
                     existing_dev->init(); /* Refresh file descriptor if needed */
                 } else if (cached_dev) {
+                    gdebug("Using cached device instance");
                     cached_dev->set_valid();
                     cached_dev->deinit();
                     cached_dev->init();
@@ -156,6 +155,8 @@ void hook_linux::check_js()
                         if (m_connect_handler)
                             m_connect_handler(dev);
                         m_device_cache[path] = dev;
+                    } else {
+                        gdebug("'%s' is not a valid gamepad", path.c_str());
                     }
                 }
             }

@@ -29,8 +29,7 @@ static int log_output_level = gamepad::LOG_INFO;
 
 namespace gamepad {
 
-static void def_log_handler(int log_level, const char* format, va_list args,
-    void* parram)
+static void def_log_handler(int log_level, const char* format, va_list args, void*)
 {
     char out[4096];
     vsnprintf(out, sizeof(out), format, args);

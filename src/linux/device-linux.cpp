@@ -28,20 +28,25 @@ device_linux::device_linux(const std::string path)
     : m_device_path(path)
 {
     m_fd = -1;
-    init();
+    device_linux::init();
 }
 
 device_linux::~device_linux()
 {
-    deinit();
+    device_linux::deinit();
 }
 
 void device_linux::init()
 {
     /* If this descriptor is still valid do nothing */
-    if (fcntl(m_fd, F_GETFD) != -1 || errno != EBADF)
+    if (fcntl(m_fd, F_GETFD) != -1 || errno != EBADF) {
+        gdebug("Descriptor is still valid");
+        if (errno == EBADF)
+            gerr("errno is EBADF");
         return;
-    deinit();
+    }
+
+    device_linux::deinit();
     m_fd = open(m_device_path.c_str(), O_RDONLY | O_NONBLOCK);
     m_valid = m_fd != -1;
 
@@ -60,8 +65,9 @@ void device_linux::init()
             std::string fd_name = m_device_path.substr(begin_idx + 1);
             m_device_id = "(" + fd_name + ") " + m_name;
         }
-        gdebug("Initialized gamepad from '%s' with id '%s'",
-            m_device_path.c_str(), m_device_id.c_str());
+        gdebug("Initialized gamepad from '%s' with id '%s'", m_device_path.c_str(), m_device_id.c_str());
+    } else {
+        gerr("Invalid file descriptor from '%s'", m_device_path.c_str());
     }
 }
 
@@ -71,7 +77,7 @@ void device_linux::deinit()
         return;
 
     if (close(m_fd) == -1)
-        gerr("Couldn't close file descriptor for device '%s'", get_id().c_str());
+        gerr("Couldn't close file descriptor for device '%s'", device_linux::get_id().c_str());
 
     m_fd = -1;
 }

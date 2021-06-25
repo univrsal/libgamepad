@@ -102,6 +102,7 @@ jobs:
         run: |
           cmake -S ${{github.workspace}} -B ${{github.workspace}}/build/${{matrix.target}} \
             -G "Unix Makefiles" \
+            -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_/_FILE=${{github.workspace}}/cmake/${{matrix.target}}.cmake \
             -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/dist/${{matrix.target}} \
             -DCMAKE_VERBOSE_MAKEFILE=true -DENABLE_TESTS=ON -DENABLE_STATIC=ON -DENABLE_SHARED=ON
@@ -149,6 +150,7 @@ jobs:
       - name: Compile
         run: |
           cmake -S ${{github.workspace}} -B ${{github.workspace}}\build\${{matrix.target}} `
+          -DCMAKE_BUILD_TYPE=Debug \
           -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}\cmake\${{matrix.target}}.cmake `
           -DCMAKE_INSTALL_PREFIX=${{github.workspace}}\dist\${{matrix.target}} `
           -DCMAKE_VERBOSE_MAKEFILE=true -DENABLE_TESTS=ON -DENABLE_STATIC=ON -DENABLE_SHARED=ON

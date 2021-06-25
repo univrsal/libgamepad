@@ -95,6 +95,11 @@ void hook::on_bind(Json::object&, uint16_t, uint16_t, int16_t, bool)
     /* NO-OP */
 }
 
+hook::hook()
+{
+    m_running = false;
+}
+
 void hook::set_button_event_handler(std::function<void(std::shared_ptr<device>)> handler)
 {
     m_button_handler = handler;
@@ -159,9 +164,8 @@ std::shared_ptr<cfg::binding> hook::get_binding_for_device(const std::string& id
 
     auto bind = m_binding_map.find(id);
     if (bind != m_binding_map.end()) {
-        auto result = find_if(m_bindings.begin(), m_bindings.end(), [bind](shared_ptr<cfg::binding>& b) {
-            return b->get_name() == bind->second;
-        });
+        auto result = find_if(m_bindings.begin(), m_bindings.end(),
+            [bind](shared_ptr<cfg::binding>& b) { return b->get_name() == bind->second; });
 
         if (result != m_bindings.end())
             return *result;
@@ -340,8 +344,7 @@ shared_ptr<device> hook::get_device_by_id(const std::string& id)
 
     /* Device isn't in cache, if it's in the normal device list, cache it and
      * return it */
-    auto result2 = find_if(m_devices.begin(), m_devices.end(),
-        [&id](shared_ptr<device>& d) { return d->get_id() == id; });
+    auto result2 = find_if(m_devices.begin(), m_devices.end(), [&id](shared_ptr<device>& d) { return d->get_id() == id; });
 
     if (result2 != m_devices.end()) {
         m_device_cache[(*result2)->get_cache_id()] = *result2;
@@ -450,13 +453,12 @@ void hook::make_xbox_config(const std::shared_ptr<gamepad::device>& dv, Json& ou
 
 void hook::remove_invalid_devices()
 {
-    auto it = std::remove_if(m_devices.begin(), m_devices.end(),
-        [this](std::shared_ptr<device>& d) {
-            auto result = !d->is_valid();
-            if (result && this->m_disconnect_handler)
-                m_disconnect_handler(d);
-            return result;
-        });
+    auto it = std::remove_if(m_devices.begin(), m_devices.end(), [this](std::shared_ptr<device>& d) {
+        auto result = !d->is_valid();
+        if (result && this->m_disconnect_handler)
+            m_disconnect_handler(d);
+        return result;
+    });
 
     m_devices.erase(it, m_devices.end());
 
