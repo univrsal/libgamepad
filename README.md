@@ -29,7 +29,7 @@ int main()
      */
     auto hook = hook::make();
     
-    /* Make the hook add and remove devices and remove disconnected
+    /* Make the hook add and remove devices on (dis)connection
      * automatically
      */
     h->set_plug_and_play(true, gamepad::ms(1000));
