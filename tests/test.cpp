@@ -52,14 +52,14 @@ int main()
     h->set_sleep_time(gamepad::ms(5)); // just std::chrono::milliseconds
 
     auto button_handler = [](std::shared_ptr<gamepad::device> dev) {
-        ginfo("Received button event: Native id: %i, Virtual id: %i val: %f",
+        ginfo("Received button event: Native id: %i, Virtual id: 0x%X (%i) val: %f",
             dev->last_button_event()->native_id, dev->last_button_event()->vc,
-            dev->last_button_event()->virtual_value);
+            dev->last_button_event()->vc, dev->last_button_event()->virtual_value);
     };
 
     auto axis_handler = [](std::shared_ptr<gamepad::device> dev) {
-        ginfo("Received axis event: Native id: %i, Virtual id: %i val: %f", dev->last_axis_event()->native_id,
-            dev->last_axis_event()->vc, dev->last_axis_event()->virtual_value);
+        ginfo("Received axis event: Native id: %i, Virtual id: 0x%X (%i) val: %f", dev->last_axis_event()->native_id,
+            dev->last_axis_event()->vc, dev->last_axis_event()->vc, dev->last_axis_event()->virtual_value);
     };
 
     auto connect_handler = [h](std::shared_ptr<gamepad::device> dev) {
