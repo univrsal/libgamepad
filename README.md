@@ -24,13 +24,13 @@ int main()
 {
     /* Create a hook instance, this is a shared pointer so you can
      * reference it wherever you want.
-     * You can also specify wether to use DirectInput or Xinput,
+     * You can also specify whether to use DirectInput or Xinput,
      * by default it will use XInput.
      */
     auto hook = hook::make();
     
-    /* Make the hook add and remove devices on (dis)connection
-     * automatically
+    /* Make the hook check for connected and disconnected devices
+     * automatically ever second
      */
     h->set_plug_and_play(true, gamepad::ms(1000));
     
