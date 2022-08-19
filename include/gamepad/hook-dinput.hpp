@@ -28,7 +28,7 @@
 
 namespace gamepad {
 namespace util {
-    static std::string wchar_to_utf8(const std::wstring& wstr)
+    inline std::string wchar_to_utf8(const std::wstring& wstr)
     {
         if (wstr.empty())
             return "";
