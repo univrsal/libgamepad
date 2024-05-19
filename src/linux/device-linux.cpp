@@ -100,9 +100,10 @@ int device_linux::update()
     if (m_event.type == JS_EVENT_AXIS) {
         if (m_native_binding) {
             vc = m_native_binding->m_axis_mappings[m_event.number];
-            auto val = float(m_event.value);
+            auto val = float(m_event.value), last_val = m_axis[vc];
+            float deadzone = m_axis_deadzones[vc] / float(0xffff);
 
-            if (fabs(val - m_last_axis_event.value) > m_axis_deadzones[vc]) {
+            if (fabs(val - last_val) > deadzone) {
                 vv = clamp(val / 0xffff + 0.5f, -1.f, 1.f);
                 m_axis[vc] = vv;
                 result = update_result::AXIS;
