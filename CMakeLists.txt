@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.12)
 
 option(GAMEPAD_ENABLE_TESTS "Compile test binary (default: ON)" ON)
 option(GAMEPAD_ENABLE_STATIC "Static library (default: OFF)" ON)
