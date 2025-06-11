@@ -20,6 +20,8 @@ A simple demo program is located under [tests/test.cpp](./tests/test.cpp), or co
 #include <cstdio>
 #include <libgamepad.hpp>
 
+using namespace gamepad;
+
 int main()
 {
     /* Create a hook instance, this is a shared pointer so you can
@@ -27,7 +29,7 @@ int main()
      * You can also specify whether to use DirectInput or Xinput,
      * by default it will use XInput.
      */
-    auto hook = hook::make();
+    auto h = hook::make();
     
     /* Make the hook check for connected and disconnected devices
      * automatically ever second
@@ -36,7 +38,7 @@ int main()
     
     std::atomic<bool> run_flag = true;
     /* Lambdas for event callbacks */
-    auto button_handler = [run_flag](std::shared_ptr<gamepad::device> dev) {
+    auto button_handler = [&](std::shared_ptr<gamepad::device> dev) {
         ginfo("Received button event: Native id: %i, Virtual id: %i val: %i",
             dev->last_button_event()->native_id, dev->last_button_event()->vc,
             dev->last_button_event()->value);
@@ -59,7 +61,7 @@ int main()
      * The hook thread will wait if there are none connected, but will not block
      * this thread. The hook will only look for devices if plug and play is on.
      */
-    if (!hook->start()) {
+    if (!h->start()) {
         printf("Failed to start hook\n");
         return -1;
     }
