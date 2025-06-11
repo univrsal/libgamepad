@@ -440,13 +440,13 @@ static inline bool in_range(long x, long lower, long upper)
 
 namespace {
     /* JsonParser
- *
- * Object that tracks all state of an in-progress parse.
- */
+     *
+     * Object that tracks all state of an in-progress parse.
+     */
     struct JsonParser final {
 
         /* State
-     */
+         */
         const string& str;
         size_t i;
         string& err;
@@ -454,9 +454,9 @@ namespace {
         const JsonParse strategy;
 
         /* fail(msg, err_ret = Json())
-     *
-     * Mark this parse as failed.
-     */
+         *
+         * Mark this parse as failed.
+         */
         Json fail(string&& msg)
         {
             return fail(move(msg), Json());
@@ -472,9 +472,9 @@ namespace {
         }
 
         /* consume_whitespace()
-     *
-     * Advance until the current character is non-whitespace.
-     */
+         *
+         * Advance until the current character is non-whitespace.
+         */
         void consume_whitespace()
         {
             while (str[i] == ' ' || str[i] == '\r' || str[i] == '\n' || str[i] == '\t')
@@ -482,9 +482,9 @@ namespace {
         }
 
         /* consume_comment()
-     *
-     * Advance comments (c-style inline and multiline).
-     */
+         *
+         * Advance comments (c-style inline and multiline).
+         */
         bool consume_comment()
         {
             bool comment_found = false;
@@ -519,9 +519,9 @@ namespace {
         }
 
         /* consume_garbage()
-     *
-     * Advance until the current character is non-whitespace and non-comment.
-     */
+         *
+         * Advance until the current character is non-whitespace and non-comment.
+         */
         void consume_garbage()
         {
             consume_whitespace();
@@ -537,10 +537,10 @@ namespace {
         }
 
         /* get_next_token()
-     *
-     * Return the next non-whitespace character. If the end of the input is reached,
-     * flag an error and return 0.
-     */
+         *
+         * Return the next non-whitespace character. If the end of the input is reached,
+         * flag an error and return 0.
+         */
         char get_next_token()
         {
             consume_garbage();
@@ -553,9 +553,9 @@ namespace {
         }
 
         /* encode_utf8(pt, out)
-     *
-     * Encode pt as UTF-8 and add it to out.
-     */
+         *
+         * Encode pt as UTF-8 and add it to out.
+         */
         void encode_utf8(long pt, string& out)
         {
             if (pt < 0)
@@ -579,9 +579,9 @@ namespace {
         }
 
         /* parse_string()
-     *
-     * Parse a string, starting at the current position.
-     */
+         *
+         * Parse a string, starting at the current position.
+         */
         string parse_string()
         {
             string out;
@@ -675,9 +675,9 @@ namespace {
         }
 
         /* parse_number()
-     *
-     * Parse a double.
-     */
+         *
+         * Parse a double.
+         */
         Json parse_number()
         {
             size_t start_pos = i;
@@ -731,10 +731,10 @@ namespace {
         }
 
         /* expect(str, res)
-     *
-     * Expect that 'str' starts at the character that was just read. If it does, advance
-     * the input and return res. If not, flag an error.
-     */
+         *
+         * Expect that 'str' starts at the character that was just read. If it does, advance
+         * the input and return res. If not, flag an error.
+         */
         Json expect(const string& expected, Json res)
         {
             assert(i != 0);
@@ -748,9 +748,9 @@ namespace {
         }
 
         /* parse_json()
-     *
-     * Parse a JSON object.
-     */
+         *
+         * Parse a JSON object.
+         */
         Json parse_json(int depth)
         {
             if (depth > max_depth) {
@@ -838,7 +838,7 @@ namespace {
             return fail("expected value, got " + esc(ch));
         }
     };
-} //namespace {
+} // namespace {
 
 Json Json::parse(const string& in, string& err, JsonParse strategy)
 {
