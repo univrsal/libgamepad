@@ -10,6 +10,9 @@ project(libgamepad VERSION 1.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 
+# Set C++ standard to 11
+set(CMAKE_CXX_STANDARD 11)
+
 add_library(gamepad OBJECT
     ./src/hook.cpp
     ./src/log.cpp
