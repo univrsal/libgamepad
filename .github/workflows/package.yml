@@ -112,7 +112,7 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: nightly-build
+          name: nightly-build-${{matrix.target}}
           path: ${{github.workspace}}/dist/**/*
 
 
@@ -159,5 +159,5 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: nightly-build
+          name: nightly-build-${{matrix.target}}
           path: ${{github.workspace}}/dist/**/*
