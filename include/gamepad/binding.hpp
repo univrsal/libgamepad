@@ -18,9 +18,11 @@
 
 #pragma once
 
+#include <cstdint>
 #include <json/json11.hpp>
 #include <map>
 #include <string>
+
 namespace gamepad {
 namespace cfg {
     using mappings = std::map<uint16_t, uint16_t>;
