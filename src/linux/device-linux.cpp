@@ -92,7 +92,9 @@ int device_linux::update()
     /* Process only the next event, this can result in a delay if there are many
      * events queued up, but it'll prevent buttons from getting stuck, which happens
      * if the button released event is skipped */
-    read(m_fd, &m_event, sizeof(m_event));
+    if (read(m_fd, &m_event, sizeof(m_event)) != sizeof(m_event))
+        return update_result::NONE;
+
     uint16_t vc = 0;
     float vv = 0.0f;
     int result = update_result::NONE;
